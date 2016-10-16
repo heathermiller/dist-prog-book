@@ -1,0 +1,20 @@
+---
+---
+
+.post-title {
+  font-family: 'Fira Sans';
+  font-weight: 200;
+  font-size: 3.2em;
+  line-height: 1em;
+  /*line-height: 1.6em;*/
+}
+
+.post-title, .post-title:after {
+  position: relative;
+  left: 10px;
+  line-height: 1.6em;
+  background: #ffdb00;
+  -webkit-box-shadow: -10px 0px 0px #ffdb00, 10px 0px 0px #ffdb00;
+  box-shadow: -10px 0px 0px #ffdb00, 10px 0px 0px #ffdb00;
+  box-decoration-break: clone;
+}
