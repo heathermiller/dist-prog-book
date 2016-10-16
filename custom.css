@@ -1,20 +1,47 @@
 ---
 ---
 
+html { font-size: 14px; }
+
+h2, h3 {
+  font-family: 'Fira Sans';
+  font-weight: 200;
+  font-style: normal;
+}
+
 .post-title {
   font-family: 'Fira Sans';
   font-weight: 200;
-  font-size: 3.2em;
-  line-height: 1em;
+  /*font-size: 3.2em;*/
+  /*line-height: 1em;*/
   /*line-height: 1.6em;*/
 }
 
 .post-title, .post-title:after {
   position: relative;
-  left: 10px;
+  /*left: 10px;*/
   line-height: 1.6em;
   background: #ffdb00;
   -webkit-box-shadow: -10px 0px 0px #ffdb00, 10px 0px 0px #ffdb00;
   box-shadow: -10px 0px 0px #ffdb00, 10px 0px 0px #ffdb00;
   box-decoration-break: clone;
+}
+
+.author {
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  color: #b3b3b3;
+}
+
+.book-title {
+  font-family: 'Alegreya Sans', sans-serif;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.dist-comp {
+  font-family: 'Alegreya Sans', sans-serif;
+  text-transform: uppercase;
+  font-weight: 900;
+  font-style: normal;
 }
