@@ -2,19 +2,21 @@
 <html lang="en">
 
   {% include head.html %}
+<body>
+  <div class="topbar"></div>
+  <div class="body-wrap">
+    <div class="container">
+      <!-- {% include header.html %} -->
 
-  <body>
-
-    <!-- {% include header.html %} -->
-
-    <div class="page-content">
-      <div class="wrapper">
-        {{ content }}
+      <div class="page-content">
+        <div class="wrapper">
+          {{ content }}
+        </div>
       </div>
+
+      {% include footer.html %}
     </div>
-
-    {% include footer.html %}
-
-  </body>
+  </div>
+</body>
 
 </html>

@@ -30,10 +30,10 @@
 /* Tufte CSS styles */
 html { font-size: 15px; }
 
-body { width: 87.5%;
+.body-wrap { width: 87.5%;
+       padding-left: 12.5%;
        margin-left: auto;
        margin-right: auto;
-       padding-left: 12.5%;
        font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Georgia, serif;
        /*background-color: #fffff8;*/
        background-color: #ffffff;
@@ -230,7 +230,7 @@ label.sidenote-number { display: inline; }
 
 label.margin-toggle:not(.sidenote-number) { display: none; }
 
-@media (max-width: 760px) { body { width: 84%;
+@media (max-width: 760px) { .body-wrap { width: 84%;
                                    padding-left: 8%;
                                    padding-right: 8%; }
                             p, footer { width: 100%; }

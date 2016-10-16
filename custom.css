@@ -1,7 +1,18 @@
 ---
 ---
 
-html { font-size: 14px; }
+/*html { font-size: 14px; }*/
+
+
+body {
+  margin: auto;
+}
+
+.topbar {
+  background: #F3F3F3;
+  height: 70px;
+  width: 100%;
+}
 
 h2, h3 {
   font-family: 'Fira Sans';
@@ -21,10 +32,10 @@ h2, h3 {
   position: relative;
   /*left: 10px;*/
   line-height: 1.6em;
-  background: #ffdb00;
+  /*background: #ffdb00;
   -webkit-box-shadow: -10px 0px 0px #ffdb00, 10px 0px 0px #ffdb00;
   box-shadow: -10px 0px 0px #ffdb00, 10px 0px 0px #ffdb00;
-  box-decoration-break: clone;
+  box-decoration-break: clone;*/
 }
 
 .author {
@@ -45,3 +56,28 @@ h2, h3 {
   font-weight: 900;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'Consolas';
+  src: url('{{ site.baseurl }}/resources/glyphs/Consolas.eot?#iefix') format('embedded-opentype'),  url('{{ site.baseurl }}/resources/glyphs/Consolas.woff') format('woff'), url('{{ site.baseurl }}/resources/glyphs/Consolas.ttf')  format('truetype'), url('{{ site.baseurl }}/resources/glyphs/Consolas.svg#Consolas') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Consolas';
+  src: url('{{ site.baseurl }}/resources/glyphs/Consolas-Italic.eot?#iefix') format('embedded-opentype'),  url('{{ site.baseurl }}/resources/glyphs/Consolas-Italic.woff') format('woff'), url('{{ site.baseurl }}/resources/glyphs/Consolas-Italic.ttf')  format('truetype'), url('{{ site.baseurl }}/resources/glyphs/Consolas-Italic.svg#Consolas-Italic') format('svg');
+  font-weight: normal;
+  font-style: italic;
+}
+
+code {
+  color: #8C9899;
+  /*background: #F4F4F4;*/
+  /*border-radius: 3px;*/
+  /*padding: 2px;*/
+  /*border: 1px solid #DDDDDD;*/
+  /*margin: 0 3px 0 3px;*/
+  /*padding: 0 2px 0 2px;*/
+}
+
