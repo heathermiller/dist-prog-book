@@ -41,6 +41,16 @@ html { font-size: 15px; }
        max-width: 1400px;
        counter-reset: sidenote-counter; }
 
+.logo-wrap { position: relative;
+       width: 87.5%;
+       padding-left: 12.5%;
+       margin-left: auto;
+       margin-right: auto;
+       font-family: et-book, Palatino, "Palatino Linotype", "Palatino LT STD", "Book Antiqua", Georgia, serif;
+       color: #111;
+       max-width: 1400px;
+       counter-reset: sidenote-counter; }
+
 h1 { font-weight: 400;
      margin-top: 4rem;
      margin-bottom: 1.5rem;
@@ -231,6 +241,9 @@ label.sidenote-number { display: inline; }
 label.margin-toggle:not(.sidenote-number) { display: none; }
 
 @media (max-width: 760px) { .body-wrap { width: 84%;
+                                   padding-left: 8%;
+                                   padding-right: 8%; }
+                            .logo-wrap { width: 84%;
                                    padding-left: 8%;
                                    padding-right: 8%; }
                             p, footer { width: 100%; }

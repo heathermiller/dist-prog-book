@@ -9,6 +9,7 @@ body {
 }
 
 .topbar {
+  position: relative;
   background: #F3F3F3;
   height: 70px;
   width: 100%;
@@ -45,9 +46,19 @@ h2, h3 {
 }
 
 .book-title {
+  position: absolute;
+  top: 20px;
+  padding-left: 30px;
+}
+
+.prog-mod {
   font-family: 'Alegreya Sans', sans-serif;
   font-weight: 700;
   font-style: italic;
+  font-size: 22px;
+  margin-bottom: -8px;
+  margin-left: -10px;
+  color: #595959;
 }
 
 .dist-comp {
@@ -55,6 +66,7 @@ h2, h3 {
   text-transform: uppercase;
   font-weight: 900;
   font-style: normal;
+  font-size: 24px;
 }
 
 @font-face {
@@ -80,4 +92,11 @@ code {
   /*margin: 0 3px 0 3px;*/
   /*padding: 0 2px 0 2px;*/
 }
+
+.logo {
+  margin-left: -16px;
+  margin-top: 16px;
+}
+
+
 
