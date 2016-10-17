@@ -1,0 +1,18 @@
+
+# opt-in to Travis new infrastructure
+sudo: false
+
+language: ruby
+
+# for faster builds
+cache: bundler
+env: BUNDLE_PATH=bundle-vendor/bundle
+
+# we must override install, or Travis's default Gemfile support
+# will kick in and use `vendor`, ignoring our BUNDLE_PATH
+# declaration in `.bundle/config`
+install:
+- bundle install
+
+script:
+- bundle exec jekyll build
