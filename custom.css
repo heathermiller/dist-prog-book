@@ -100,5 +100,50 @@ code {
   margin-top: 16px;
 }
 
+blockquote {
+    /*font-family: Georgia, serif;*/
+    font-size: 18px;
+    font-style: italic;
+    /*width: 500px;*/
+    margin: 0.25em 0;
+    padding: 0.35em 40px;
+    /*line-height: 1.45;*/
+    position: relative;
+    /*color: #383838;*/
+}
 
+blockquote:before {
+    display: block;
+    padding-left: 10px;
+    content: "\201C";
+    font-size: 80px;
+    position: absolute;
+    left: -20px;
+    top: -20px;
+    color: #7a7a7a;
+}
+
+blockquote cite {
+    color: #999999;
+    font-size: 14px;
+    display: block;
+    /*margin-top: 5px;*/
+}
+
+blockquote cite:before {
+    content: "\2014 \2009";
+}
+
+blockquote footer:before {
+    content: "\2014 \2009";
+}
+
+blockquote footer {
+  margin-top: -12px;
+  font-size: 12px;
+  font-style: normal;
+  font-family: 'Montserrat', sans-serif;
+  text-transform: uppercase;
+  color: #b3b3b3;
+}
 
