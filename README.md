@@ -28,7 +28,7 @@ Note: when PRs are merged, the site is built and redeployed automatically.
 
 Chapters are located in the `chapter` folder of the root directory.
 
-### Dependencies
+## Dependencies
 
 This site uses a Jekyll, a Ruby framework. You'll need Ruby and Bundler
 installed.
@@ -64,6 +64,7 @@ you can do, I've prepared an example article.
 - [Live example article](http://dist-prog-book.com/example.html)
 - [Corresponding example page markdown](https://raw.githubusercontent.com/heathermiller/dist-prog-book/master/example.md)
 
-
+If you would like to add bibtex entries to the bibliography for your chapter,
+check the `_bibliography` directory for a `.bib` file named after your chapter.
 
 
