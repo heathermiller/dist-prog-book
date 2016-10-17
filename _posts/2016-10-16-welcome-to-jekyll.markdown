@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Welcome to Jekyll!"
+title:  "Remote Procedure Call"
 date:   2016-10-16 11:46:07 -0400
 categories: jekyll update
 by: "Aviral Goel and Heather Miller"

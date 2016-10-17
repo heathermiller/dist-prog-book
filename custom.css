@@ -16,12 +16,14 @@ body {
 }
 
 h2, h3 {
+  font-family: 'Alegreya Sans', sans-serif;
   font-family: 'Fira Sans';
   font-weight: 200;
   font-style: normal;
 }
 
 .post-title {
+  font-family: 'Alegreya Sans', sans-serif;
   font-family: 'Fira Sans';
   font-weight: 200;
   /*font-size: 3.2em;*/
