@@ -58,7 +58,8 @@ make sure to navigate there explicitly, e.g.,
 Articles are in Markdown with straightforward YAML frontmatter.
 
 You can include code, math (Latex syntax), figures, blockquotes, side notes,
-etc. To see everything you can do, I've prepared an example article.
+etc. You can also use regular bibtex to make a bibliography. To see everything
+you can do, I've prepared an example article.
 
 - [Live example article](http://dist-prog-book.com/example.html)
 - [Corresponding example page markdown](https://raw.githubusercontent.com/heathermiller/dist-prog-book/master/example.md)
