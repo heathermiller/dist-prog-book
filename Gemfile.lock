@@ -1,7 +1,18 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    bibtex-ruby (4.4.2)
+      latex-decode (~> 0.0)
+    citeproc (1.0.4)
+      namae (~> 0.8)
+    citeproc-ruby (1.1.5)
+      citeproc (>= 1.0.4, < 2.0)
+      csl (~> 1.4)
     colorator (0.1)
+    csl (1.4.5)
+      namae (~> 0.7)
+    csl-styles (1.0.1.7)
+      csl (~> 1.0)
     ffi (1.9.14)
     jekyll (3.1.2)
       colorator (~> 0.1)
@@ -14,26 +25,36 @@ GEM
       safe_yaml (~> 1.0)
     jekyll-sass-converter (1.4.0)
       sass (~> 3.4)
+    jekyll-scholar (5.8.5)
+      bibtex-ruby (~> 4.0, >= 4.0.13)
+      citeproc-ruby (~> 1.0)
+      csl-styles (~> 1.0)
+      jekyll (~> 3.0)
     jekyll-watch (1.5.0)
       listen (~> 3.0, < 3.1)
     kramdown (1.12.0)
+    latex-decode (0.2.2)
+      unicode (~> 0.4)
     liquid (3.0.6)
     listen (3.0.8)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
     mercenary (0.3.6)
+    namae (0.11.0)
     rb-fsevent (0.9.7)
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
     rouge (1.11.1)
     safe_yaml (1.0.4)
     sass (3.4.22)
+    unicode (0.4.4.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   jekyll (= 3.1.2)
+  jekyll-scholar
 
 BUNDLED WITH
    1.13.5

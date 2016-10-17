@@ -19,3 +19,16 @@ github_username:  jekyll
 
 # Build settings
 markdown: kramdown
+gems: ['jekyll/scholar']
+scholar:
+  style: apa
+  locale: en
+
+  sort_by: none
+  order: ascending
+
+  group_by: none
+  group_order: ascending
+
+  source: .
+  bibliography: example.bib

@@ -86,7 +86,7 @@ h2, h3 {
 }
 
 code {
-  color: #8C9899;
+  color: #7599a9;
   /*background: #F4F4F4;*/
   /*border-radius: 3px;*/
   /*padding: 2px;*/
@@ -147,3 +147,10 @@ blockquote footer {
   color: #b3b3b3;
 }
 
+.bibliography {
+width: 55%;
+}
+
+@media (max-width: 760px) {
+                            .bibliography  { width: 90%; }
+                          }
