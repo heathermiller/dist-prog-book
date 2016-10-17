@@ -3,6 +3,8 @@
 sudo: false
 
 language: ruby
+rvm:
+  - 2.0.0-p648
 
 # for faster builds
 cache: bundler
