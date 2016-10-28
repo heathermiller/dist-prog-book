@@ -2,6 +2,7 @@
 
 - Future, promise, delay, or deferred. 
 - Definition
+- States of promises
 
 # Historical Background
 
