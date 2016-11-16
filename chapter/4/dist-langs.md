@@ -4,19 +4,12 @@ title:  "Distributed Programming Languages"
 by: "A Systems Person"
 ---
 
-Distributed programming is hard because of:
-
-* Network partitions
-* Node failures
-* Efficiency / Communication
-* Data distribution / locality
-
 ### Two major major, orthogonal approaches to distributed languages:
 
 #### Actor / Object model
 
 * Erlang
-* Cloud Haskell
+* Cloud Haskell (I know, right? Why?)
 
 #### Dataflow model
 
