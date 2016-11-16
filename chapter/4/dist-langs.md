@@ -32,18 +32,15 @@ Some languages that use this model are:
 
 #### Erlang vs C: A Tar and Feathering
 
-[citation erlang paper]
+{% cite Armstrong2010 --file dist-langs %}
 
-Erlang has only one clear benefit over C, which is dynamic code upgrading.
-However, there are ways of making C behave in a similar fashion with minimal downtime.
-Shuffler [citation] is a system for continuous randomization of code.
-Using techniques discussed in the paper, one could dynamically replace sections of a binary.
-Another, slightly hack-ish workaround would be to receive the upgrade, serialize the current state, and finally run the new binary based on the serialized state.
-A third way of circumventing this problem would be to encapsulate any code in a shared library, and have logic in the program to unmap the old code, replace the library, and remap.
-This approach is analogous to Erlang's approach.
+Erlang offers nothing that is unavailable in C.
 
-Other than dynamic code swapping and poor error detection, Erlang does not offer anything that is not offered by a traditional OS.
-Isolation, concurrency, and message passing can all be accomplished with unix-style system calls.
+For example, dynamic code swapping is one of Erlang's major selling points.
+However, code swapping can easily be achieved in C with dynamic linking.
+This approach is analogous to the example offered in the Erlang paper.
+
+Other selling points, such as isolation, concurrency, and message passing can all be accomplished with unix-style system calls.
 Why is this language not considered redundant?
 
 ## References
