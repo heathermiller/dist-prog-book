@@ -43,6 +43,12 @@ This approach is analogous to the example offered in the Erlang paper.
 Other selling points, such as isolation, concurrency, and message passing can all be accomplished with unix-style system calls.
 Why is this language not considered redundant?
 
+#### MapReduce: A New Hope
+
+Unlike Erlang, MapReduce and DSL's that implement the paradigm are "all the rage."
+Unlike Erlang, MapReduce has experienced adoption because it offers true abstraction of the problems of distributed computing.
+Erlang only provided a way of detecting a process failure; it did not consider machine or network failures.
+
 ## References
 
 {% bibliography --file dist-langs %}
