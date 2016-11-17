@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "Large Scale Parallel Data Processing"
-by: "Joe Schmoe and Mary Jane"
+by: "JingJing and Abhilash"
 ---
 
 Though highly efficient and one of the first major programming models for distributed batch processing, it too has a few limitations.<br />
@@ -32,5 +32,7 @@ Apache Giraph is an open source implementation of Pregel in which new features l
 
 
 ## References
+"Bulk synchronous model" http://www.cse.unt.edu/~tarau/teaching/parpro/papers/Bulk%20synchronous%20parallel.pdf.
+"Pregel: A System for Large-Scale Graph Processing." 
+"One trillion edges: graph processing at Facebook-scale"
 
-{% bibliography --file big-data %}
