@@ -34,5 +34,5 @@ Apache Giraph is an open source implementation of Pregel in which new features l
 ## References
 "Bulk synchronous model" http://www.cse.unt.edu/~tarau/teaching/parpro/papers/Bulk%20synchronous%20parallel.pdf.
 "Pregel: A System for Large-Scale Graph Processing." <br />
-"One trillion edges: graph processing at Facebook-scale"
+"One Trillion Edges: Graph Processing at Facebook-Scale." Accessed November 17, 2016. http://www.vldb.org/pvldb/vol8/p1804-ching.pdf.
 
