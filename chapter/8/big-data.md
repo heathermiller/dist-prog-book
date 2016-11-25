@@ -14,7 +14,7 @@ This chapter is organized in <label for="note1" class="margin-toggle sidenote-nu
   - FlumeJava {% cite chambers2010flumejava --file big-data %}
   - ...
 - **Graph paralleling**:
-  - Pregel 
+  - Pregel
   - ...
 
 For each programming model, we will discuss the motivation, basic model, execution model, fault-tolerance and performance.
@@ -131,7 +131,3 @@ Apache Giraph is an open source implementation of Pregel in which new features l
 
 ## References
 {% bibliography --file big-data %}
-
-"Bulk synchronous model" http://www.cse.unt.edu/~tarau/teaching/parpro/papers/Bulk%20synchronous%20parallel.pdf.
-"Pregel: A System for Large-Scale Graph Processing." <br />
-"One Trillion Edges: Graph Processing at Facebook-Scale." Accessed November 17, 2016. http://www.vldb.org/pvldb/vol8/p1804-ching.pdf.
