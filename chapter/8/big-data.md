@@ -194,6 +194,7 @@ In BSP model
  - Barrier synchronization synchs all the processors at the end of every superstep.
  - A notable feature of the model is the complete control on data through communication between every processor at every superstep. 
  - Though similar to map reduce model, BSP preserves data in memory across supersteps and helps in reasoning iterative graph algorithms.
+ 
 **Pregel**
 Pregel is an implementation of classic BSP model by Google (PageRank) to analyze large graphs exclusively. It was followed by open source implementations - Apache’s Giraph and Hama; which were BSP models built on top of Hadoop.
  
