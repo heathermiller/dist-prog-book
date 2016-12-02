@@ -128,7 +128,7 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 **Dremel** :
 
 
-## Where Relational meets Procedural : 
+## SparkSQL - Where Relational meets Procedural : 
 Relational interface to big data is good, however, it doesn’t cater to users who want to perform
 
 - ETL to and from various semi or unstructured data sources.
