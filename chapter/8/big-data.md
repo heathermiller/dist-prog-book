@@ -84,17 +84,17 @@ Overall, the performance is very good for conceptually unrelated computations.
 
 Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 
-** Haloop ** : HaLoop: Efficient Iterative Data Processing on Large Clusters.
+**Haloop** : HaLoop: Efficient Iterative Data Processing on Large Clusters.
 
-** iMapReduce **: iMapReduce: A Distributed Computing Framework for Iterative Computation
+**iMapReduce**: iMapReduce: A Distributed Computing Framework for Iterative Computation
 
-** Twister ** :  Twister: a runtime for iterative MapReduce.
+**Twister** :  Twister: a runtime for iterative MapReduce.
 
 ## Map Reduce inspired large scale data processing systems :
 
-** Dryad/DryadLinq ** : 
+**Dryad/DryadLinq** : 
 
-** Spark (big one) ** : content is ready, need to format a bit and paste
+**Spark (big one)** : content is ready, need to format a bit and paste
 
 ## Declarative interfaces for the Map Reduce framework:
 Map reduce provides only two high level primitives - map and reduce; that the programmers have to worry about. Map reduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework still suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like joins (which could be highly complex depending on the data) are extremely hard to implement and reason about for a programmer. Sometimes the code could be become repetitive  when the programmer wants to implement most common operations like projection, filtering etc.
