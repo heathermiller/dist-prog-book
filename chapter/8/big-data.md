@@ -90,7 +90,7 @@ iMapReduce: iMapReduce: A Distributed Computing Framework for Iterative Computat
 
 Twister :  Twister: a runtime for iterative MapReduce.
 
-## Map Reduce inspired other large scale data processing systems :
+## Map Reduce inspired large scale data processing systems :
 
 Dryad/DryadLinq : 
 
@@ -130,10 +130,14 @@ Dremel :
 
 ## Where Relational meets Procedural : 
 Relational interface to big data is good, however, it doesn’t cater to users who want to perform
-1> ETL to and from various semi or unstructured data sources.
-2> advanced analytics like machine learning or graph processing.
+
+- ETL to and from various semi or unstructured data sources.
+- advanced analytics like machine learning or graph processing.
+
 These user actions require best of both the worlds - relational queries and procedural algorithms. Spark SQL bridges this gap by letting users to seamlessly intermix both relational and procedural API.
+
 Hence, the major contributions of Spark SQL are the Dataframe API and the Catalyst. Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
+
 ***Programming API***
 Spark SQL runs on the top of Spark providing SQL interfaces. A user can interact with this interface though JDBC/ODBC, command line or Dataframe API.
 A Dataframe API lets users to intermix both relational and procedural code with ease. Dataframe is a collection of schema based rows of data and named columns on which relational operations can be performed with optimized execution. Unlike a RDD, Dataframe allows developers to define structure for the data and can be related to tables in a relational database or R/Python’s Dataframe. Dataframe can be constructed from tables of external sources or existing native RDD’s. Dataframe is lazy and each object in it represents a logical plan which is not executed until an output operation like save or count is performed.
@@ -151,6 +155,7 @@ MORE EXPLANATION NEEDED...
 
 
 ## Optimizers are the way to go :
+
 It is tough to understand the internals of a framework like Spark for any developer who has just started to program a Spark application. Also, with the advent of relational code, it becomes still more challenging when one has to program keeping in mind the rules for an efficient query - rightly ordered joins, early filtering of data or usage of available indexes. Even if the programmer is aware of such rules, it is still prone to human errors which can potentially lead to longer runtime applications. Query optimizers for map reduce frameworks can greatly improve performance of the queries developers write and also significantly reduce the development time. A good query optimizer should be able to optimize such user queries, extensible for user to provide information about the data and even dynamically include developer defined specific rules. 
 Catalyst is one such framework which leverages the Scala’s functional language features like pattern matching and runtime meta programming to allow developers to concisely specify complex relational optimizations. Most of the power of Spark SQL comes due to this optimizer.
 
