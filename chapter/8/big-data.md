@@ -84,17 +84,17 @@ Overall, the performance is very good for conceptually unrelated computations.
 
 Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 
-Haloop : HaLoop: Efficient Iterative Data Processing on Large Clusters.
+** Haloop ** : HaLoop: Efficient Iterative Data Processing on Large Clusters.
 
-iMapReduce: iMapReduce: A Distributed Computing Framework for Iterative Computation
+** iMapReduce **: iMapReduce: A Distributed Computing Framework for Iterative Computation
 
-Twister :  Twister: a runtime for iterative MapReduce.
+** Twister ** :  Twister: a runtime for iterative MapReduce.
 
 ## Map Reduce inspired large scale data processing systems :
 
-Dryad/DryadLinq : 
+** Dryad/DryadLinq ** : 
 
-Spark (big one) : content is ready, need to format a bit and paste
+** Spark (big one) ** : content is ready, need to format a bit and paste
 
 ## Declarative interfaces for the Map Reduce framework:
 Map reduce provides only two high level primitives - map and reduce; that the programmers have to worry about. Map reduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework still suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like joins (which could be highly complex depending on the data) are extremely hard to implement and reason about for a programmer. Sometimes the code could be become repetitive  when the programmer wants to implement most common operations like projection, filtering etc.
@@ -139,6 +139,7 @@ These user actions require best of both the worlds - relational queries and proc
 Hence, the major contributions of Spark SQL are the Dataframe API and the Catalyst. Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
 
 ***Programming API***
+
 Spark SQL runs on the top of Spark providing SQL interfaces. A user can interact with this interface though JDBC/ODBC, command line or Dataframe API.
 A Dataframe API lets users to intermix both relational and procedural code with ease. Dataframe is a collection of schema based rows of data and named columns on which relational operations can be performed with optimized execution. Unlike a RDD, Dataframe allows developers to define structure for the data and can be related to tables in a relational database or R/Python’s Dataframe. Dataframe can be constructed from tables of external sources or existing native RDD’s. Dataframe is lazy and each object in it represents a logical plan which is not executed until an output operation like save or count is performed.
 Spark SQL supports all the major SQL data types including complex data types like arrays, maps and unions.
