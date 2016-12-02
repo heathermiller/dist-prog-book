@@ -23,8 +23,6 @@ For each programming model, we will discuss the motivation, basic model, executi
 Ideas: get a table of what to include in the context
 Idea: instead of data/graph, maybe add one more layer (unstructured vs. structured)
 
-# Data paralleling
-
 ## MapReduce (2004)
 MapReduce {% cite dean2008mapreduce  --file big-data %} is a programming model that allows programmers to express the simple computations for terabytes data on thousands of commodity machines.
 
@@ -104,10 +102,10 @@ Non-programmers like data scientists would highly prefer SQL like interface over
 
 Introduce Sazwal (its now no more used but one of the first ideas) : Parallel analysis with Sawzall. Scientific Programming, 13(4):277–298, 2005
 
-## FlumeJava (2010)
+** FlumeJava (2010) **
 Many real-world computations involves a pipeline of MapReduces, and this motivates additional management to chain together those separate MapReduce stages in an efficient way. FlumeJava {% cite chambers2010flumejava --file big-data %} can help build those pipelines and keep computations modular. At core, FlumeJava are a couple of classes that represent immutable parallel collections. It defers evaluation and optimization by internally constructing an execution plan dataflow graph.
 
-**Core Abstraction**  
+***Core Abstraction***
 
 - `PCollection<T>`, a immutable bag of elements of type `T`
 - `recordOf(...)`, specifies the encoding of the instance
@@ -116,10 +114,10 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 - `groupByKey()`, same as shuffle step of MapReduce `JJ: clear this in MapReduce`
 - `combineValues()`, semantically a special case of `parallelDo()`, a combination of a MapReduce combiner and a MapReduce reducer, which is more efficient than doing all the combining in the reducer.
 
-**Deferred Evaluation**  
+***Deferred Evaluation*** 
 `(JJ: placehoder) join, deferred/materialized; execution plan; figure 1 initial execution plan`
 
-**Optimizer**  
+***Optimizer***  
 `(JJ: placehoder) parallelDo Fusion; MSCR;  overall goal to produce the fewest, most efficient MSCR operations in the final optimized plan`
 
 
@@ -135,16 +133,17 @@ Relational interface to big data is good, however, it doesn’t cater to users w
 1> ETL to and from various semi or unstructured data sources.
 2> advanced analytics like machine learning or graph processing.
 These user actions require best of both the worlds - relational queries and procedural algorithms. Spark SQL bridges this gap by letting users to seamlessly intermix both relational and procedural API.
-Hence, the major contributions of Spark SQL are the Dataframe API and the Catalyst.
-Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
-Programming API : 
+Hence, the major contributions of Spark SQL are the Dataframe API and the Catalyst. Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
+***Programming API***
 Spark SQL runs on the top of Spark providing SQL interfaces. A user can interact with this interface though JDBC/ODBC, command line or Dataframe API.
 A Dataframe API lets users to intermix both relational and procedural code with ease. Dataframe is a collection of schema based rows of data and named columns on which relational operations can be performed with optimized execution. Unlike a RDD, Dataframe allows developers to define structure for the data and can be related to tables in a relational database or R/Python’s Dataframe. Dataframe can be constructed from tables of external sources or existing native RDD’s. Dataframe is lazy and each object in it represents a logical plan which is not executed until an output operation like save or count is performed.
 Spark SQL supports all the major SQL data types including complex data types like arrays, maps and unions.
 Some of the Dataframe operations include projection (select), filter(where), join and aggregations(groupBy).
 Illustrated below is an example of relational operations on employees data frame to compute the number of female employees in each department.
-employees
-.join(dept, employees("deptId") === dept("id")) .where(employees("gender") === "female") .groupBy(dept("id"), dept("name")) .agg(count("name"))
+
+```
+employees.join(dept, employees("deptId") === dept("id")) .where(employees("gender") === "female") .groupBy(dept("id"), dept("name")) .agg(count("name"))
+```
 Several of these operators like  === for equality test, > for greater than, a rithmetic ones (+, -, etc) and aggregators transforms to a abstract syntax tree of the expression which can be passed to Catalyst for optimization.
 A cache() operation on the data frame helps Spark SQL store the data in memory so it can be used in iterative algorithms and for interactive queries. In case of Spark SQL, memory footprint is considerably less as it applies columnar compression schemes like dictionary encoding / run-length encoding. 
 MORE EXPLANATION NEEDED...
