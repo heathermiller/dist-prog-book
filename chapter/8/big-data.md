@@ -80,7 +80,7 @@ In the paper, the authors measure the performance of MapReduce on two computatio
 Overall, the performance is very good for conceptually unrelated computations.
 
 
-## Iterative processing in Map Reduce:
+## Iterative processing in Map Reduce
 
 Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 
@@ -90,13 +90,13 @@ Many a analytics workloads like K-means, logistic regression, graph processing a
 
 **Twister** :  Twister: a runtime for iterative MapReduce.
 
-## Map Reduce inspired large scale data processing systems :
+## Map Reduce inspired large scale data processing systems
 
 **Dryad/DryadLinq** : 
 
 **Spark (big one)** : content is ready, need to format a bit and paste
 
-## Declarative interfaces for the Map Reduce framework:
+## Declarative interfaces for the Map Reduce framework
 Map reduce provides only two high level primitives - map and reduce; that the programmers have to worry about. Map reduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework still suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like joins (which could be highly complex depending on the data) are extremely hard to implement and reason about for a programmer. Sometimes the code could be become repetitive  when the programmer wants to implement most common operations like projection, filtering etc.
 Non-programmers like data scientists would highly prefer SQL like interface over a cumbersome and rigid framework. Such a high level declarative language can easily express their task while leaving all of the execution optimization details to the backend engine. Also, these kind of abstractions provide ample opportunities for query optimizations.
 
@@ -121,11 +121,11 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 `(JJ: placehoder) parallelDo Fusion; MSCR;  overall goal to produce the fewest, most efficient MSCR operations in the final optimized plan`
 
 
-Pig Latin : Pig latin: a not-so-foreign language for data processing. In SIGMOD, pages 1099–1110, 2008.
+**Pig Latin** : Pig latin: a not-so-foreign language for data processing. In SIGMOD, pages 1099–1110, 2008.
 
-Hive : 
+**Hive** : 
 
-Dremel :
+**Dremel** :
 
 
 ## Where Relational meets Procedural : 
@@ -155,7 +155,7 @@ MORE EXPLANATION NEEDED...
 
 
 
-## Optimizers are the way to go :
+## Optimizers are the way to go 
 
 It is tough to understand the internals of a framework like Spark for any developer who has just started to program a Spark application. Also, with the advent of relational code, it becomes still more challenging when one has to program keeping in mind the rules for an efficient query - rightly ordered joins, early filtering of data or usage of available indexes. Even if the programmer is aware of such rules, it is still prone to human errors which can potentially lead to longer runtime applications. Query optimizers for map reduce frameworks can greatly improve performance of the queries developers write and also significantly reduce the development time. A good query optimizer should be able to optimize such user queries, extensible for user to provide information about the data and even dynamically include developer defined specific rules. 
 Catalyst is one such framework which leverages the Scala’s functional language features like pattern matching and runtime meta programming to allow developers to concisely specify complex relational optimizations. Most of the power of Spark SQL comes due to this optimizer.
@@ -175,9 +175,15 @@ In Spark SQL, transformation happens in four phases :
 
 - Code Generation : The final phase generates the Java byte code that should run on each machine.Catalyst transforms the Tree which is an expression in SQL to an AST for Scala code to evaluate, compile and run the generated code. A special scala feature namely quasiquotes aid in the construction of abstract syntax tree(AST).
 
+STILL WORKING ON THIS..
 
 
+## Future and Discussion 
 
+- Current leader in distributed processing - Spark, Google's cloud dataflow
+- Current challenges and upcoming improvements ??
+
+## Conclusion
 
 
 ## References
