@@ -13,9 +13,9 @@ This chapter is organized in by
 
 - Programming Models
   - Data parallelism (most popular, standard map/reduce/functional pipelining)
-    - Limitations, iteration difficult due to the execution model of MapReduce/Hadoop
-    - Graphs
-    - Querying
+      - Limitations, iteration difficult due to the execution model of MapReduce/Hadoop
+  - Graphs
+  - Querying
 - Execution Models
   - MapReduce (intermediate writes to disk)
     - Limitations, iteration, performance
@@ -78,7 +78,6 @@ The output from distributed computation should be same as one from non-faulting 
 
 There are some practices in this paper that make the model work very well in Google, one of them is **backup tasks**: when a MapReduce operation is close to completion, the master schedules backup executions of the remaining in-progress tasks ("straggler"). The task is marked as completed whenever either the primary or the backup execution completes.
 
-`JJ: what about other refinement: `
 
 **Performance**  
 In the paper, the authors measure the performance of MapReduce on two computations running on a large cluster of machines. One computation *grep* through approximately 1TB of data. The other computation *sort* approximately 1TB of data. Both computations take in the order of a hundred seconds. In addition, the backup tasks do help largely reduce execution time. In the experiment where 200 out of 1746 tasks were intentionally killed, the scheduler was able to recover quickly and finish the whole computation for just a 5% increased time.  
