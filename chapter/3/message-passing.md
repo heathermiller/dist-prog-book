@@ -36,6 +36,8 @@ This paper looks at a lot of systems and languages that are implementing solutio
 
 ## Akka
 
+Akka is an actively developed project built out of the work on [Scala Actors](#scala-actors) in Scala to provide the actor model of programming as a framework to Java and Scala. It makes an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors.
+
 # Process-based Actor
 
 The process-based actor model is essentially an actor modelled as a process that runs from start to completion. These actors use a `receive` primitive to specify messages that an actor can receive during a given state. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values. Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor.
@@ -81,8 +83,6 @@ Active object actors draw a distinction between two different types of objects: 
 
 ## Orleans
 
-
-
 # Why the actor model?
 
 The actor programming model offers benefits to programmers of distributed systems by allowing for easier programmer reasoning about behavior, providing a lightweight concurrency primitive that naturally scales across many machines, and enabling looser coupling among components of a system allowing for change without service disruption. Actors enable a programmer to easier reason about their behavior because they are at a fundamental level isolated from other actors.  When programming an actor, the programmer only has to worry about the behavior of that actor and the messages it can send and receive. This alleviates the need for the programmer to reason about an entire system. Instead the programmer has a fixed set of concerns, meaning they can ensure behavioral correctness in isolation, rather than having to worry about an interaction they hadn’t anticipated occurring. Actors provide a single means of communication (message-passing), meaning that a lot of concerns a programmer has around concurrent modification of data are alleviated. Data is restricted to the data within a single actor and the messages it has been passed, rather than all of the accessible data in the whole system.
@@ -93,9 +93,27 @@ Finally, because actors are loosely coupled, only depending on a set of input an
 
 # Modern usage in production
 
-It is important when reviewing models of programming distributed systems not to look just to academia, but to see which of these systems are actually used in industry to build things. This can give us insight into which features of actor systems are actually useful, and the trends that exist throughout these systems.  
+It is important when reviewing models of programming distributed systems not to look just to academia, but to see which of these systems are actually used in industry to build things. This can give us insight into which features of actor systems are actually useful, and the trends that exist throughout these systems.
 
-## Module vs. Runtime approaches to tooling
+_On the Integration of the Actor Model into Mainstream Technologies_ by Philipp Haller provides some insight into the requirements of an industrial-strength actor implementation on a mainstream platform. These requirements were drawn out of an initial effort with [Scala Actors](#scala-actors) to bring the actor model to mainstream software engineering, as well as lessons learned from the deployment and advancement of production actors in [Akka](#akka).
+
+* _Library-based implementation_: It is not obvious which concurrency abstraction wins in real world cases, and different concurrency models might be used to solve different problems, so implementing a concurrency model as a library enables flexibility in usage.
+* _High-level domain-specific language_: A domain-specific language or something comparable is a requirement to compete with languages that specialize in concurrency, otherwise your abstractions are lacking in idioms and expressiveness.
+* _Event-driven implementation_: Actors need to be lightweight, meaning they cannot be mapped to an entire VM thread or process. For most platforms this means an event-driven model.
+* _High performance_: Most industrial applications that use actors are highly performance sensitive, and high performance enables more graceful scalability.
+* _Flexible remote actors_: Many applications can benefit from remote actors, which can communicate transparently over the network. Flexibility in deployment mechanisms is also very important.
+
+These attributes give us a good basis for analyzing whether an actor system can be successful in production. These are attributes that are necessary, but not sufficient for an actor system to be useful in production.
+
+## Actors as a framework
+
+One trend that seems common among the actor systems we see in production is extensive environments and tooling. I would argue that Akka, Erlang, and Orleans are the primary actor systems that see real production use, and I think the reason for this is that they essentially act as frameworks where many of the common problems of actors are taken care of for you. This allows the programmer to focus on the problems within their domain, rather than the common problems of monitoring, deployment, and composition.
+
+Akka and Erlang provide modules that you can piece together to build various pieces of functionality into your system. Akka provides a huge number of modules and extensions to configure and monitor a distributed system built using actors. They provide a number of utilities to meet common use-case and deployment scenarios, and these are thoroughly listed and documented. Additionally they provide support for Akka Extensions, which are a mechanism for adding your own features to Akka. These are powerful enough that some core features of Akka like Typed Actors or Serialization are implemented as Akka Extensions. Erlang provides the Open Telecom Platform (OTP), which is a framework comprised of a set of modules and standards designed to help build applications. OTP takes the generic patterns and components of Erlang, and provides them as libraries that enable code reuse and best practices when developing new systems.
+
+### Module vs. Runtime approaches to tooling
+
+Both Akka and Erlang take a module-based approach to tooling around their actor systems. The Orleans framework goes in another direction, instead providing an TODO: finish this thought
 
 
 # References
