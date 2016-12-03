@@ -7,23 +7,28 @@ by: "Jingjing and Abhilash"
 `JJ: Placeholder for introduction` The booming Internet has generated big data...
 
 
-This chapter is organized in <label for="note1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="note1" class="margin-toggle"/><span class="sidenote">JJ: need to fill in more stuff</span>
-
-- **Data paralleling**:
-  - MapReduce {% cite dean2008mapreduce  --file big-data %}
-  - FlumeJava {% cite chambers2010flumejava --file big-data %}
-  - ...
-- **Graph paralleling**:
-  - Pregel
-  - ...
-
-For each programming model, we will discuss the motivation, basic model, execution model, fault-tolerance and performance.
 
 
-Ideas: get a table of what to include in the context
-Idea: instead of data/graph, maybe add one more layer (unstructured vs. structured)
+This chapter is organized in by
 
-## MapReduce (2004)
+- Programming Models
+  - Data parallelism (most popular, standard map/reduce/functional pipelining)
+    - Limitations, iteration difficult due to the execution model of MapReduce/Hadoop
+    - Graphs
+    - Querying
+- Execution Models
+  - MapReduce (intermediate writes to disk)
+    - Limitations, iteration, performance
+  - Spark (all in memory)
+    - Limitations ?
+- Performance
+- Things people are building on top of MapReduce/Spark
+  - FlumeJava? ...Etc
+  - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
+
+
+## Programming Model
+### MapReduce  
 MapReduce {% cite dean2008mapreduce  --file big-data %} is a programming model that allows programmers to express the simple computations for terabytes data on thousands of commodity machines.
 
 **Basic & Examples**  
@@ -92,9 +97,9 @@ Many a analytics workloads like K-means, logistic regression, graph processing a
 
 ## Map Reduce inspired large scale data processing systems
 
-**Dryad/DryadLinq** : 
+**Dryad/DryadLinq** :
 
-**Spark (big one)** : 
+**Spark (big one)** :
 
 ## Declarative interfaces for the Map Reduce framework
 Map reduce provides only two high level primitives - map and reduce; that the programmers have to worry about. Map reduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework still suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like joins (which could be highly complex depending on the data) are extremely hard to implement and reason about for a programmer. Sometimes the code could be become repetitive  when the programmer wants to implement most common operations like projection, filtering etc.
@@ -115,7 +120,7 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 - `groupByKey()`, same as shuffle step of MapReduce `JJ: clear this in MapReduce`
 - `combineValues()`, semantically a special case of `parallelDo()`, a combination of a MapReduce combiner and a MapReduce reducer, which is more efficient than doing all the combining in the reducer.
 
-***Deferred Evaluation*** 
+***Deferred Evaluation***
 `(JJ: placehoder) join, deferred/materialized; execution plan; figure 1 initial execution plan`
 
 ***Optimizer***  
@@ -124,12 +129,12 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 
 **Pig Latin** : Pig latin: a not-so-foreign language for data processing. In SIGMOD, pages 1099–1110, 2008.
 
-**Hive** : 
+**Hive** :
 
 **Dremel** :
 
 
-## SparkSQL - Where Relational meets Procedural : 
+## SparkSQL - Where Relational meets Procedural :
 Relational interface to big data is good, however, it doesn’t cater to users who want to perform
 
 - ETL to and from various semi or unstructured data sources.
@@ -151,17 +156,17 @@ Illustrated below is an example of relational operations on employees data frame
 employees.join(dept, employees("deptId") === dept("id")) .where(employees("gender") === "female") .groupBy(dept("id"), dept("name")) .agg(count("name"))
 ```
 Several of these operators like  === for equality test, > for greater than, a rithmetic ones (+, -, etc) and aggregators transforms to a abstract syntax tree of the expression which can be passed to Catalyst for optimization.
-A cache() operation on the data frame helps Spark SQL store the data in memory so it can be used in iterative algorithms and for interactive queries. In case of Spark SQL, memory footprint is considerably less as it applies columnar compression schemes like dictionary encoding / run-length encoding. 
+A cache() operation on the data frame helps Spark SQL store the data in memory so it can be used in iterative algorithms and for interactive queries. In case of Spark SQL, memory footprint is considerably less as it applies columnar compression schemes like dictionary encoding / run-length encoding.
 MORE EXPLANATION NEEDED...
 
 
 
 ## Optimizers are the way to go (still thinking of a better heading..)
 
-It is tough to understand the internals of a framework like Spark for any developer who has just started to program a Spark application. Also, with the advent of relational code, it becomes still more challenging when one has to program keeping in mind the rules for an efficient query - rightly ordered joins, early filtering of data or usage of available indexes. Even if the programmer is aware of such rules, it is still prone to human errors which can potentially lead to longer runtime applications. Query optimizers for map reduce frameworks can greatly improve performance of the queries developers write and also significantly reduce the development time. A good query optimizer should be able to optimize such user queries, extensible for user to provide information about the data and even dynamically include developer defined specific rules. 
+It is tough to understand the internals of a framework like Spark for any developer who has just started to program a Spark application. Also, with the advent of relational code, it becomes still more challenging when one has to program keeping in mind the rules for an efficient query - rightly ordered joins, early filtering of data or usage of available indexes. Even if the programmer is aware of such rules, it is still prone to human errors which can potentially lead to longer runtime applications. Query optimizers for map reduce frameworks can greatly improve performance of the queries developers write and also significantly reduce the development time. A good query optimizer should be able to optimize such user queries, extensible for user to provide information about the data and even dynamically include developer defined specific rules.
 Catalyst is one such framework which leverages the Scala’s functional language features like pattern matching and runtime meta programming to allow developers to concisely specify complex relational optimizations. Most of the power of Spark SQL comes due to this optimizer.
 
-Catalyst includes both rule-based and cost-based optimization. It is extensible to include new optimization techniques and features to Spark SQL and also let developers provide data source specific rules. 
+Catalyst includes both rule-based and cost-based optimization. It is extensible to include new optimization techniques and features to Spark SQL and also let developers provide data source specific rules.
 
 
 Catalyst executes the rules on its data type Tree - a composition of node objects where each node has a node type (subclasses of TreeNode class in Scala) and zero or more children. Node objects are immutable and can be manipulated. The transform method of a Tree applies pattern matching to match a subset of all possible input trees on which the optimization rules needs to be applied.
@@ -178,33 +183,33 @@ In Spark SQL, transformation happens in four phases :
 
 STILL WORKING ON THIS..
 
-## Large Scale Graph processing 
+## Large Scale Graph processing
 
-Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system. 
+Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
 
-Also graph algorithms require exchange of messages between vertices. In case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms. 
+Also graph algorithms require exchange of messages between vertices. In case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms.
 
 **Bulk synchronous parallel model**
 
 This model was introduced in 1980 to represent the hardware design features of parallel computers. It gained popularity as an alternative for map reduce since it addressed the above mentioned issues with map reduce to an extent.<br />
-In BSP model 
-  
- - Computation consists of several steps called as supersets. 
+In BSP model
+
+ - Computation consists of several steps called as supersets.
  - The processors involved have their own local memory and every processor is connected to other via a point-to-point communication.
- - At every superstep, a processor receives input at the beginning, performs computation and outputs at the end. 
+ - At every superstep, a processor receives input at the beginning, performs computation and outputs at the end.
  - Barrier synchronization synchs all the processors at the end of every superstep.
- - A notable feature of the model is the complete control on data through communication between every processor at every superstep. 
+ - A notable feature of the model is the complete control on data through communication between every processor at every superstep.
  - Though similar to map reduce model, BSP preserves data in memory across supersteps and helps in reasoning iterative graph algorithms.
- 
+
 **Pregel**
 Pregel is an implementation of classic BSP model by Google (PageRank) to analyze large graphs exclusively. It was followed by open source implementations - Apache’s Giraph and Hama; which were BSP models built on top of Hadoop.
- 
+
 Pregel is highly scalable, fault-tolerant and can successfully represent larger complex graphs. Google claims the API becomes easy once a developer adopts “think like a vertex” mode.
 Pregel’s computation system is iterative and every iteration is called as superstep. The system takes a directed graph as input with properties assigned to both vertices and graph. At each superstep, all vertices executes in parallel, a user-defined function which represents the behavior of the vertex. The function has access to message sent to its vertex from the previous superstep S-1 and can update the state of the vertex, its edges, the graph and even send messages to other vertices which would receive in the next superstep S+1. The synchronization happens only between two supersteps.  Every vertex is either active or inactive at any superstep. The iteration stops when all the vertices are inactive. A vertex can deactivate itself by voting for it and gets active if it receives a message. This asynchronous message passing feature eliminates the shared memory, remote reads and latency of Map reduce model.
 
-Pregel’s API provides 
+Pregel’s API provides
 
-- compute() method for the user to implement the logic to change the state of the graph/vertex at every superstep. It guarantees message delivery through an iterator at every superstep. 
+- compute() method for the user to implement the logic to change the state of the graph/vertex at every superstep. It guarantees message delivery through an iterator at every superstep.
 - User defined handler for handling issues like missing destination vertex etc.
 - Combiners reduce the amount of messages passed from multiple vertices to the same destination vertex.
 - Aggregators capture the global state of the graph. A reduce operation combines the value given by every vertex to the aggregator. The combined/aggregated value is passed onto to all the vertices in the next superstep.
@@ -217,7 +222,7 @@ Apache Giraph is an open source implementation of Pregel in which new features l
 
 **Introduce GraphX and why it fares better than BSP model. Explain GraphX**
 
-## Future and Discussion 
+## Future and Discussion
 
 - Current leader in distributed processing - Spark, Google's cloud dataflow
 - Current challenges and upcoming improvements ?? - Apache thunder and any others?
