@@ -51,7 +51,22 @@ The input keys and values are drawn from a different domain than the output keys
 `TODO: FIX text and reference` Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 
 ### Large-scale Parallelism on Graphs
-Spark
+Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
+
+Also graph algorithms require exchange of messages between vertices. In case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms.
+
+**Bulk synchronous parallel model**
+
+This model was introduced in 1980 to represent the hardware design features of parallel computers. It gained popularity as an alternative for map reduce since it addressed the above mentioned issues with map reduce to an extent.<br />
+In BSP model
+
+ - Computation consists of several steps called as supersets.
+ - The processors involved have their own local memory and every processor is connected to other via a point-to-point communication.
+ - At every superstep, a processor receives input at the beginning, performs computation and outputs at the end.
+ - Barrier synchronization synchs all the processors at the end of every superstep.
+ - A notable feature of the model is the complete control on data through communication between every processor at every superstep.
+ - Though similar to map reduce model, BSP preserves data in memory across supersteps and helps in reasoning iterative graph algorithms.
+
 
 ### Querying
 
@@ -60,7 +75,7 @@ Spark
 In **MapReduce**, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve this. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages. And in the model, MapReduce assumes the master doesn't fail, or if it fails, the whole MapReduce function fails.
 
 - Spark (all in memory)
-  - Limitations ?
+Apache Spark is a fast, in-memory data processing engine with elegant and expressive development interface to allow developers to efficiently execute streaming, machine learning or SQL workloads that require fast iterative access to datasets. Spark takes advantage of the distributed in-memory storage (RDD) and Scala’s collection API as well as functional style for high performance processing. 
 
 This is very different in **Spark**, in-memory stuff...
 
