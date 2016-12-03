@@ -23,6 +23,8 @@ This chapter is organized in by
     - Limitations ?
   - Pig/HiveQL/SparkSQL
     - Limitations ?
+  - Pregel 
+    - Limitations ?
 - Performance
 - Things people are building on top of MapReduce/Spark
   - FlumeJava? ...Etc
