@@ -74,7 +74,7 @@ In BSP model
 ## Execution Models
 In **MapReduce**, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve this. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages. And in the model, MapReduce assumes the master doesn't fail, or if it fails, the whole MapReduce function fails.
 
-- Spark (all in memory)
+**Spark**
 Apache Spark is a fast, in-memory data processing engine with elegant and expressive development interface to allow developers to efficiently execute streaming, machine learning or SQL workloads that require fast iterative access to datasets. Spark takes advantage of the distributed in-memory storage (RDD) and Scala’s collection API as well as functional style for high performance processing. 
 
 This is very different in **Spark**, in-memory stuff...
