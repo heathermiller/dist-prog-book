@@ -21,6 +21,8 @@ This chapter is organized in by
     - Limitations, iteration, performance
   - Spark (all in memory)
     - Limitations ?
+  - Pig/HiveQL/SparkSQL
+    - Limitations ?
 - Performance
 - Things people are building on top of MapReduce/Spark
   - FlumeJava? ...Etc
