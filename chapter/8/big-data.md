@@ -6,15 +6,12 @@ by: "Jingjing and Abhilash"
 ## Introduction
 `JJ: Placeholder for introduction` The booming Internet has generated big data...
 
-
-
-
 This chapter is organized in by
 
 - Programming Models
   - Data parallelism (most popular, standard map/reduce/functional pipelining)
       - Limitations, iteration difficult due to the execution model of MapReduce/Hadoop
-  - Graphs
+  - Large-scale Parallelism on Graphs
   - Querying
 - Execution Models
   - MapReduce (intermediate writes to disk)
@@ -23,7 +20,7 @@ This chapter is organized in by
     - Limitations ?
   - Pig/HiveQL/SparkSQL
     - Limitations ?
-  - Pregel 
+  - Pregel
     - Limitations ?
 - Performance
 - Things people are building on top of MapReduce/Spark
@@ -32,65 +29,56 @@ This chapter is organized in by
 
 
 ## Programming Model
-### MapReduce  
-MapReduce {% cite dean2008mapreduce  --file big-data %} is a programming model that allows programmers to express the simple computations for terabytes data on thousands of commodity machines.
-
-**Basic & Examples**  
-This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value.
-
-Concretely, considering the problem of counting the number of occurrence of each word in a large collection of documents: each time, a `map` function that emits a word plus its count 1; a `reduce` function sums together all counts emitted for the same word
-
-```
-map(String key, String value):
-  // key: document name
-  // value: document contents
-  for each word w in value:
-    EmitIntermediate(w, "1");
-
-reduce(String key, Iterator values):
-  // key: a word
-  // values: a list of counts
-  int result = 0;
-  for each v in values:
-    result += ParseInt(v);
-  Emit(AsString(result));
-```
-
-Conceptually, the map and reduction functions have associated **types**:
+### Data parallelism
+The motivation for MapReduce {% cite dean2008mapreduce  --file big-data %} is that we want to use hundreds/thousands of machines to do data processing in parallel, but we don’t want to deal with low-level management. MapReduce can help this by abstracting computing logic into simple map and reduce functions and let the computation model handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates. The solution in the MapReduce paper is simple and powerful in terms of separating programming model and the executing model. This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value. Conceptually, the map and reduction functions have associated **types**:
 ```
 map (k1,v1) -> → list(k2,v2)
 reduce (k2,list(v2)) -> list(v2)
 ```
-The input keys and values are drawn from a different domain than the output keys and values. The intermediate keys and values are from the same domain as the output keys and values. The implementation given by the authors essentially pass strings and it is users' responsibility to convert between strings and appropriate types.
+The input keys and values are drawn from a different domain than the output keys and values. The intermediate keys and values are from the same domain as the output keys and values.
 
-More formalized descriptions about the `map` and `reduce` function can be found in the original paper {% cite dean2008mapreduce  --file big-data %}.
-
-**Execution**   
-At high level, when the user program calls *MapReduce* function, the input files are split into *M* pieces and it runs *map* function on corresponding splits; then intermediate key space are partitioned into *R* pieces using a partitioning function; After the reduce functions all successfully complete, the output is available in *R* files. The sequences of actions {% cite dean2008mapreduce  --file big-data %} are shown in the figure below. We can see from label (4) and (5) that the intermediate key/value pairs are written/read into disks, this is a key to fault-tolerance in MapReduce model and also a bottleneck for more complex computation algorithms.  
+**Execution** At high level, when the user program calls *MapReduce* function, the input files are split into *M* pieces and it runs *map* function on corresponding splits; then intermediate key space are partitioned into *R* pieces using a partitioning function; After the reduce functions all successfully complete, the output is available in *R* files. The sequences of actions are shown in the figure below. We can see from label (4) and (5) that the intermediate key/value pairs are written/read into disks, this is a key to fault-tolerance in MapReduce model and also a bottleneck for more complex computation algorithms.  
 
 <figure class="main-container">
   <img src="{{ site.baseurl }}/resources/img/mapreduce-execution.png" alt="MapReduce Execution Overview" />
 </figure>
 
+**Limtations**
+- The iterative algorithm is hard to implement in MapReduce;
+- Real-world application often requires pipeline of MapReduce and the management is painful.
 
-**Fault Tolerance**  
-In this model, there are two parts that could fail: the master and the worker.  
-- Worker failure: The master pings every worker periodically and if no response in a certain amount of time, master marks the worker as failed and re-assign it to an idle worker.
-- Master Failure: If the master fail, MapReduce function fails. The model itself assumes that master won't fail and they have separate mechanics to backup the master, which is out of the scope of our discussion.  
+-> FlumeJava?
 
-The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve this. The basic idea is to create private temporary files and rename them only when the task has finished.
+`TODO: FIX text and reference` Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 
-There are some practices in this paper that make the model work very well in Google, one of them is **backup tasks**: when a MapReduce operation is close to completion, the master schedules backup executions of the remaining in-progress tasks ("straggler"). The task is marked as completed whenever either the primary or the backup execution completes.
+### Large-scale Parallelism on Graphs
+Spark
 
 
-**Performance**  
+## Execution Models
+In **MapReduce**, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve this. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages. And in the model, MapReduce assumes the master doesn't fail, or if it fails, the whole MapReduce function fails.
+
+This is very different in **Spark**, in-memory stuff...
+
+
+## Performance
+`TODO: re-organize` There are some practices in this paper that make the model work very well in Google, one of them is **backup tasks**: when a MapReduce operation is close to completion, the master schedules backup executions of the remaining in-progress tasks ("straggler"). The task is marked as completed whenever either the primary or the backup execution completes.
 In the paper, the authors measure the performance of MapReduce on two computations running on a large cluster of machines. One computation *grep* through approximately 1TB of data. The other computation *sort* approximately 1TB of data. Both computations take in the order of a hundred seconds. In addition, the backup tasks do help largely reduce execution time. In the experiment where 200 out of 1746 tasks were intentionally killed, the scheduler was able to recover quickly and finish the whole computation for just a 5% increased time.  
 Overall, the performance is very good for conceptually unrelated computations.
+
+
+## References
+{% bibliography --file big-data %}
+
+## Trash
 
 
 ## Iterative processing in Map Reduce
 
 Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
+
+
+
 
 **Haloop** : HaLoop: Efficient Iterative Data Processing on Large Clusters.
 
@@ -230,8 +218,21 @@ Apache Giraph is an open source implementation of Pregel in which new features l
 - Current leader in distributed processing - Spark, Google's cloud dataflow
 - Current challenges and upcoming improvements ?? - Apache thunder and any others?
 
-## Conclusion
 
+Concretely, considering the problem of counting the number of occurrence of each word in a large collection of documents: each time, a `map` function that emits a word plus its count 1; a `reduce` function sums together all counts emitted for the same word
 
-## References
-{% bibliography --file big-data %}
+```
+map(String key, String value):
+  // key: document name
+  // value: document contents
+  for each word w in value:
+    EmitIntermediate(w, "1");
+
+reduce(String key, Iterator values):
+  // key: a word
+  // values: a list of counts
+  int result = 0;
+  for each v in values:
+    result += ParseInt(v);
+  Emit(AsString(result));
+```
