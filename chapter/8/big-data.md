@@ -27,7 +27,6 @@ This chapter is organized in by
   - FlumeJava? ...Etc
   - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
 
-
 ## Programming Model
 ### Data parallelism
 The motivation for MapReduce {% cite dean2008mapreduce  --file big-data %} is that we want to use hundreds/thousands of machines to do data processing in parallel, but we don’t want to deal with low-level management. MapReduce can help this by abstracting computing logic into simple map and reduce functions and let the computation model handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates. The solution in the MapReduce paper is simple and powerful in terms of separating programming model and the executing model. This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value. Conceptually, the map and reduction functions have associated **types**:
@@ -54,11 +53,21 @@ The input keys and values are drawn from a different domain than the output keys
 ### Large-scale Parallelism on Graphs
 Spark
 
+### Querying
+
 
 ## Execution Models
 In **MapReduce**, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve this. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages. And in the model, MapReduce assumes the master doesn't fail, or if it fails, the whole MapReduce function fails.
 
+- Spark (all in memory)
+  - Limitations ?
+
 This is very different in **Spark**, in-memory stuff...
+
+- Pig/HiveQL/SparkSQL
+  - Limitations ?
+- Pregel
+  - Limitations ?
 
 
 ## Performance
@@ -66,6 +75,10 @@ This is very different in **Spark**, in-memory stuff...
 In the paper, the authors measure the performance of MapReduce on two computations running on a large cluster of machines. One computation *grep* through approximately 1TB of data. The other computation *sort* approximately 1TB of data. Both computations take in the order of a hundred seconds. In addition, the backup tasks do help largely reduce execution time. In the experiment where 200 out of 1746 tasks were intentionally killed, the scheduler was able to recover quickly and finish the whole computation for just a 5% increased time.  
 Overall, the performance is very good for conceptually unrelated computations.
 
+
+## Things people are building on top of MapReduce/Spark
+  - FlumeJava? ...Etc
+  - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
 
 ## References
 {% bibliography --file big-data %}
