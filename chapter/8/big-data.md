@@ -105,20 +105,21 @@ The properties that power RDD with the above mentioned features :
 
 
 Spark API provide two kinds of operations on a RDD:
-Transformations - lazy operations that return another RDD.
-`map (f : T => U) : RDD[T] ⇒ RDD[U]` : Return a MappedRDD[U] by applying function f to each element
-`flatMap( f : T ⇒ Seq[U]) : RDD[T] ⇒ RDD[U]` : Return a new FlatMappedRDD[U] by first applying a function to all elements and then flattening the results.
-`filter(f:T⇒Bool) : RDD[T] ⇒ RDD[T]` : Return a FilteredRDD[T] having elemnts that f return true
-`groupByKey()` : Being called on (K,V) Rdd, return a new RDD[([K], Iterable[V])]
-`reduceByKey(f: (V, V) => V)` : Being called on (K, V) Rdd, return a new RDD[(K, V)] by aggregating values using eg: reduceByKey(_+_)
-`join((RDD[(K, V)], RDD[(K, W)]) ⇒ RDD[(K, (V, W))]` :Being called on (K,V) Rdd, return a new RDD[(K, (V, W))] by joining them by key K.
+
+- Transformations - lazy operations that return another RDD.
+  - `map (f : T => U) : RDD[T] ⇒ RDD[U]` : Return a MappedRDD[U] by applying function f to each element
+  - `flatMap( f : T ⇒ Seq[U]) : RDD[T] ⇒ RDD[U]` : Return a new FlatMappedRDD[U] by first applying a function to all elements     and then flattening the results.
+  - `filter(f:T⇒Bool) : RDD[T] ⇒ RDD[T]` : Return a FilteredRDD[T] having elemnts that f return true
+  - `groupByKey()` : Being called on (K,V) Rdd, return a new RDD[([K], Iterable[V])]
+  - `reduceByKey(f: (V, V) => V)` : Being called on (K, V) Rdd, return a new RDD[(K, V)] by aggregating values using eg: reduceByKey(_+_)
+  - `join((RDD[(K, V)], RDD[(K, W)]) ⇒ RDD[(K, (V, W))]` :Being called on (K,V) Rdd, return a new RDD[(K, (V, W))] by joining them by key K.
 
 
-Actions - operations that trigger computation on a RDD and return values.
+- Actions - operations that trigger computation on a RDD and return values.
 
-`reduce(f:(T,T)⇒T) : RDD[T] ⇒ T` : return T by reducing the elements using specified commutative and associative binary operator
-`collect()` : Return an Array[T] containing all elements
-`count()` : Return the number of elements
+  - `reduce(f:(T,T)⇒T) : RDD[T] ⇒ T` : return T by reducing the elements using specified commutative and associative binary operator
+  - `collect()` : Return an Array[T] containing all elements
+  - `count()` : Return the number of elements
 
 
 Why RDD over Distributed Shared memory (DSM) ?
