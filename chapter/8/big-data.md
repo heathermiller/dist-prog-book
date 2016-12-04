@@ -3,11 +3,7 @@ layout: page
 title:  "Large Scale Parallel Data Processing"
 by: "Jingjing and Abhilash"
 ---
-## Introduction
-`JJ: Placeholder for introduction` The booming Internet has generated big data...
-
-This chapter is organized in
-
+## Outline
 - Programming Models
   - Data parallelism (most popular, standard map/reduce/functional pipelining)
     - PM of MapReduce: What is the motivation for MapReduce? How does the abstraction capture problem in a easy way? What are the map and reduce functions? What are limitations of this model? In real world applications, we want to do pipelining and it comes with lots of management issues, thus we introduce FlumeJava.
@@ -35,7 +31,7 @@ This chapter is organized in
 - Things people are building on top of MapReduce/Spark
   - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
 
-## Programming Model
+## Programming Models
 ### Data parallelism
 The motivation for MapReduce {% cite dean2008mapreduce  --file big-data %} is that we want to use hundreds/thousands of machines to do data processing in parallel, but we don’t want to deal with low-level management. MapReduce can help this by abstracting computing logic into simple map and reduce functions and let the computation model handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates. The solution in the MapReduce paper is simple and powerful in terms of separating programming model and the executing model. This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value. Conceptually, the map and reduction functions have associated **types**:
 ```
