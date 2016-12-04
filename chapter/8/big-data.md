@@ -6,13 +6,21 @@ by: "Jingjing and Abhilash"
 ## Introduction
 `JJ: Placeholder for introduction` The booming Internet has generated big data...
 
-This chapter is organized in by
+This chapter is organized in
 
 - Programming Models
   - Data parallelism (most popular, standard map/reduce/functional pipelining)
-      - Limitations, iteration difficult due to the execution model of MapReduce/Hadoop
+    - PM of MapReduce: basic, limitation, pipelining > FlumeJava
+    - PM of Dryad: can support DAG computation, limitations: low-level, `Q: Should this go to execution model?`
+    - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics
   - Large-scale Parallelism on Graphs
-  - Querying: DryadLINQ, Pig, Hive, possible Spark SQL
+    - PM of Pregel/GraphX
+  - Querying: more declarative `Q: put here or in the execution model?`
+    - DryadLINQ, SQL-like, use Dryad as execution engine;
+    - Pig, on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?
+    - Hive, SQL-like, on top of Hadoop, what is the performance gain/lost.
+    - Dremel, query natively w/o translating into MP jobs
+    - Spark SQL, on top of Spark
 
 - Execution Models
   - MapReduce (intermediate writes to disk)
@@ -23,7 +31,7 @@ This chapter is organized in by
     - Limitations ?
 - Performance
 - Things people are building on top of MapReduce/Spark
-  - FlumeJava? ...Etc
+  - // FlumeJava? ...Etc
   - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
 
 ## Programming Model
