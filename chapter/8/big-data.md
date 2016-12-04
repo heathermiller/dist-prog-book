@@ -9,8 +9,7 @@ by: "Jingjing and Abhilash"
     - PM of MapReduce: What is the motivation for MapReduce? How does the abstraction capture problem in a easy way? What are the map and reduce functions? What are limitations of this model? In real world applications, we want to do pipelining and it comes with lots of management issues, thus we introduce FlumeJava.
     - PM of Dryad: What if we think individual computation tasks as vertices? We essentially construct a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine to construct the execution plan and take care of scheduling. Like MP, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ as a querying language.   
     `Q: Should this go to execution model?`
-    - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics; what is Spark? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD?
-    why is RDD better than DSM? What are the transformations and actions available in Spark ?
+    - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics; what is Spark? how is it different from map reduce? what is pipelining? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD? why is RDD better than DSM? What are the transformations and actions available in Spark ?
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
   - Querying: more declarative `Q: put here or in the execution model?`
@@ -23,7 +22,7 @@ by: "Jingjing and Abhilash"
 
 - Execution Models
   - MapReduce (intermediate writes to disk): What is the sequence of actions when a MapReduce functions are called? How is write-to-disk good/bad (fault-tolerant/slow)? How does the data are transmitted across clusters efficiently (store locally)? To shorten the total time for MP operations, it uses backup tasks. When MP jobs are pipelined, what optimizations can be performed by FlumeJava? In spite of optimizations and pipelining, what is the inherent limitation (not support iterative algorithm?)
-  - Spark (all in memory): Explain with PageRank example why Spark is better than map reduce. what are the limitations of Spark ?
+  - Spark (all in memory): introduce spark architecture, different layers, what happens when a spark job is executed? what is the role of a driver/master/worker, how does a scheduler schedule the tasks and what performance measures are considered while scheduling? how does a scheduler manage node failures and missing partitions? how are the user defined transformations passed to the workers? how are the RDDs stored and memory management measures on workers? do we need checkpointing at all given RDDs leverage lineage for recovery? if so why ?
   - Pregel
     Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
 - Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad and SparkSQL? There are no direct comparison for all those models, so we may want to compare separately:
