@@ -6,17 +6,17 @@ by: "Jingjing and Abhilash"
 ## Outline
 - Programming Models
   - Data parallelism (most popular, standard map/reduce/functional pipelining)
-    - PM of MapReduce: What is the motivation for MapReduce? How does the abstraction capture problem in a easy way? What are the map and reduce functions? What are limitations of this model? In real world applications, we want to do pipelining and it comes with lots of management issues, thus we introduce FlumeJava.
-    - PM of Dryad: What if we think individual computation tasks as vertices? We essentially construct a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine to construct the execution plan and take care of scheduling. Like MP, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ as a querying language.   
+    - MapReduce: What is the motivation for MapReduce? How does the abstraction capture problem in a easy way? What are the map and reduce functions? What are limitations of this model? In real world applications, we want to do pipelining and it comes with lots of management issues, thus we introduce FlumeJava.
+    - Dryad: What if we think individual computation tasks as vertices? We essentially construct a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine to construct the execution plan and take care of scheduling. Like MP, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ as a querying language.   
     `Q: Should this go to execution model?`
-    - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics; what is Spark? how is it different from map reduce? what is pipelining? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD? why is RDD better than DSM? What are the transformations and actions available in Spark ?
+    - Spark: what is Spark? how is it different from map reduce? (RDD/lineage: can support iterative algorithm, interactive analytics;) what is pipelining? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD? why is RDD better than DSM? What are the transformations and actions available in Spark ?
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
-  - Querying: more declarative `Q: put here or in the execution model?`
+  - Querying: more declarative
     - DryadLINQ: SQL-like, uses Dryad as execution engine;   
     `Suggestion: Merge this with Dryad above?`
     - Pig: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
-    `Q: Hive, SQL-like, on top of Hadoop, what is the performance gain/lost.`
+    `Q: Do we need to include Hive?`
     - Dremel, query natively w/o translating into MP jobs
     - Spark SQL - how is it different from other above models? How does it leverage Spark execution engine and enhanced RDDs like data frames? what are its goals? whats a Dataframe API and how is it different from a RDD?
 
@@ -29,10 +29,11 @@ by: "Jingjing and Abhilash"
   - Hadoop vs. Spark
   - Spark vs. SparkSQL
 
-- Things people are building on top of MapReduce/Spark
-  - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
-    - GFS/HDFS for MapReduce: Machines are unreliable, so how do we maintain a certain degree of redundancy? ...
-    - Mesos for Spark. New frameworks keep emerging and users have to use multiple different frameworks in the same clusters, so how should they share access to the large datasets instead of costly replicate across clusters? Mesos introduce
+- Big Data Ecosystem   
+  Everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
+  - GFS/HDFS for MapReduce/Hadoop: Machines are unreliable, how do they provide fault-tolerance? How does GFS deal with single point of failure (shadow masters)? How does the master manage partition, transmission of data chunks? Which
+  - Resource Management: Mesos. New frameworks keep emerging and users have to use multiple different frameworks(MP, Spark etc.) in the same clusters, so how should they share access to the large datasets instead of costly replicate across clusters?
+  - Introducing streaming: what happens when data cannot be complete? How does different programming model adapt? windowing `todo: more`
 
 ## Programming Models
 ### Data parallelism
