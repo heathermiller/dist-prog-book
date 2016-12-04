@@ -13,19 +13,20 @@ by: "Jingjing and Abhilash"
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
     - GraphX programming model (working on this)
-  - Querying: more declarative
+  - Querying: more declarative, built on top MP models.
+    - Sawzall {%cite pike2005interpreting --file big-data %}
+    - Pig {% cite olston2008pig --file big-data %}: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
+    - Hive {%cite thusoo2009hive --file big-data %}
     - DryadLINQ: SQL-like, uses Dryad as execution engine;   
     `Suggestion: Merge this with Dryad above?`
-    - Pig: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
-    `Q: Do we need to include Hive?`
     - Dremel, query natively w/o translating into MP jobs
-    - Spark SQL - Limitations of Relational alone models? how SparkSQL model overcomes it? goals of SparkSQL? how it leverages the Spark programming model? what is a DataFrame and how is it different from a RDD? what are the operations a DataFrame provides? how is in-memory caching different from Spark?
+    - Spark SQL {%cite --file big-data %} - Limitations of Relational alone models? how SparkSQL model overcomes it? goals of SparkSQL? how it leverages the Spark programming model? what is a DataFrame and how is it different from a RDD? what are the operations a DataFrame provides? how is in-memory caching different from Spark?
 
 
 - Execution Models
   - MapReduce (intermediate writes to disk): What is the sequence of actions when a MapReduce functions are called? How is write-to-disk good/bad (fault-tolerant/slow)? How does the data are transmitted across clusters efficiently (store locally)? To shorten the total time for MP operations, it uses backup tasks. When MP jobs are pipelined, what optimizations can be performed by FlumeJava? In spite of optimizations and pipelining, what is the inherent limitation (not support iterative algorithm?)
   - Spark (all in memory): introduce spark architecture, different layers, what happens when a spark job is executed? what is the role of a driver/master/worker, how does a scheduler schedule the tasks and what performance measures are considered while scheduling? how does a scheduler manage node failures and missing partitions? how are the user defined transformations passed to the workers? how are the RDDs stored and memory management measures on workers? do we need checkpointing at all given RDDs leverage lineage for recovery? if so why ?
-  - Graphs : 
+  - Graphs :
     - Pregel :Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
     - GraphX : Working on this.
  - SparkSQL Catalyst & Spark execution model : Discuss Parser, LogicalPlan, Optimizer, PhysicalPlan, Execution Plan. Why catalyst? how catalyst helps in SparkSQL , data flow from sql-core-> catalyst->spark-core
@@ -42,7 +43,7 @@ by: "Jingjing and Abhilash"
 
 ## Programming Models
 ### Data parallelism
-The motivation for MapReduce {% cite dean2008mapreduce  --file big-data %} is that we want to use hundreds/thousands of machines to do data processing in parallel, but we don’t want to deal with low-level management. MapReduce can help this by abstracting computing logic into simple map and reduce functions and let the computation model handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates. The solution in the MapReduce paper is simple and powerful in terms of separating programming model and the executing model. This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value. Conceptually, the map and reduction functions have associated **types**:
+The motivation for MapReduce {% cite dean2008mapreduce  --file big-data %} is that we want to use hundreds/thousands of machines to do data processing in parallel, but we don’t want to deal with low-level management for distribution and parallelization. MapReduce can help this by abstracting computing logic into simple map and reduce functions and let the computation model handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates. The solution in the MapReduce paper is simple and powerful in terms of separating programming model and the executing model. This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value. Conceptually, the map and reduction functions have associated **types**:
 ```
 map (k1,v1) -> → list(k2,v2)
 reduce (k2,list(v2)) -> list(v2)
@@ -195,11 +196,11 @@ Many a analytics workloads like K-means, logistic regression, graph processing a
 
 
 
-**Haloop** : HaLoop: Efficient Iterative Data Processing on Large Clusters.
+**Haloop** : {% cite bu2010haloop --file big-data %}
 
-**iMapReduce**: iMapReduce: A Distributed Computing Framework for Iterative Computation
+**iMapReduce**: {% cite zhang2012imapreduce --file big-data %}
 
-**Twister** :  Twister: a runtime for iterative MapReduce.
+**Twister** :  {% cite ekanayake2010twister --file big-data %}
 
 ## Map Reduce inspired large scale data processing systems
 
