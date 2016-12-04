@@ -10,29 +10,29 @@ This chapter is organized in
 
 - Programming Models
   - Data parallelism (most popular, standard map/reduce/functional pipelining)
-    - PM of MapReduce: basic, limitation, pipelining > FlumeJava
-    - PM of Dryad: can support DAG computation, limitations: low-level, `Q: Should this go to execution model?`
-    - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics
+    - PM of MapReduce: What is the motivation for MapReduce? How does the abstraction capture problem in a easy way? What are the map and reduce functions? What are limitations of this model? In real world applications, we want to do pipelining and it comes with lots of management issues, thus we introduce FlumeJava.
+    - PM of Dryad: What if we think individual computation tasks as vertices? We essentially construct a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine to construct the execution plan and take care of scheduling. Like MP, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ as a querying language.   
+    `Q: Should this go to execution model?`
+    - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics; what is Spark? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD?
+    why is RDD better than DSM? What are the transformations and actions available in Spark ?
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
   - Querying: more declarative `Q: put here or in the execution model?`
-    - DryadLINQ, SQL-like, use Dryad as execution engine;
-    - Pig, on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?
-    - Hive, SQL-like, on top of Hadoop, what is the performance gain/lost.
+    - DryadLINQ: SQL-like, uses Dryad as execution engine;
+    `Suggestion: Merge this with Dryad above?`
+    - Pig: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
+    `Q: Hive, SQL-like, on top of Hadoop, what is the performance gain/lost.`
     - Dremel, query natively w/o translating into MP jobs
     - Spark SQL - how is it different from other above models? How does it leverage Spark execution engine and enhanced RDDs like data frames? what are its goals? whats a Dataframe API and how is it different from a RDD?
 
 - Execution Models
   - MapReduce (intermediate writes to disk)
-    - Limitations, iteration, performance
-  - Spark (all in memory)
-      what is Spark? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD?
-      why is RDD better than DSM? What are the transformations and actions available in Spark ? Explain with PageRank example why Spark is better than map reduce. what are the limitations of Spark ? 
+    - Limitations, iteration, optimizations done by MP and FlumeJava
+  - Spark (all in memory): Explain with PageRank example why Spark is better than map reduce. what are the limitations of Spark ?
   - Pregel
     Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
-- Performance
+- Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad and SparkSQL? There are no direct comparison for all those models, but we could explain the scale of differences.
 - Things people are building on top of MapReduce/Spark
-  - // FlumeJava? ...Etc
   - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
 
 ## Programming Model
@@ -68,14 +68,14 @@ Map Reduce doesn’t scale easily and is highly inefficient for iterative / grap
 Also graph algorithms require exchange of messages between vertices. In case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms. One model that is commonly employed for implementing distributed graph processing is the Bulk Synchronous Parallel model.
 
 This model was introduced in 1980 to represent the hardware design features of parallel computers. It gained popularity as an alternative for map reduce since it addressed the above mentioned issues with map reduce<br />
-BSP model is a message passing synchronous model where - 
+BSP model is a message passing synchronous model where -
 
  - Computation consists of several steps called as supersets.
  - The processors involved have their own local memory and every processor is connected to other via a point-to-point communication.
  - At every superstep, a processor receives input at the beginning, performs computation and outputs at the end.
  - A processor at superstep S can send message to another processor at superstep S+1 and can as well receive message from superstep S-1.
  - Barrier synchronization synchs all the processors at the end of every superstep.
- 
+
 A notable feature of the model is the complete control on data through communication between every processor at every superstep. Though similar to map reduce model, BSP preserves data in memory across supersteps and helps in reasoning iterative graph algorithms.
 
 ### Querying
@@ -93,7 +93,7 @@ Distributed in-memory storage - Resilient Distributed Data sets :
 RDD is a partitioned, read only collection of objects which can be created from data in stable storage or by transforming other RDD. It can be distributed across multiple nodes in a cluster and is fault tolerant(Resilient). If a node fails, a RDD can always be recovered using its lineage graph (information on how it was derived from dataset). A RDD is stored in memory (as much as it can fit and rest is spilled to disk) and is immutable - It can only be transformed to a new RDD. These are the lazy transformations which are applied only if any action is performed on the RDD. Hence, RDD need not be materialized at all times. Lazy feature exists even in DyradLINQ.
 
 The properties that power RDD with the above mentioned features :
-- A list of dependencies on other RDD’s. 
+- A list of dependencies on other RDD’s.
 - An array of partitions that a dataset is divided into.
 - A compute function to do a computation on partitions.
 - Optionally, a Partitioner for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
