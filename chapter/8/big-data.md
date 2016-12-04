@@ -42,13 +42,14 @@ The input keys and values are drawn from a different domain than the output keys
   <img src="{{ site.baseurl }}/resources/img/mapreduce-execution.png" alt="MapReduce Execution Overview" />
 </figure>
 
-**Limtations**
-- The iterative algorithm is hard to implement in MapReduce;
-- Real-world application often requires pipeline of MapReduce and the management is painful.
+**Limitations & Extensions**  
+***Real-world applications often require a pipeline of MapReduce jobs and the management becomes an issue.***  
+**FlumeJava** was introduced to make it easy to develop, test, and run efficient data-parallel pipelines. FlumeJava represents each dataset as an object and transformation is invoked by using methods on these objects. It constructs an efficient internal execution plan from a pipeline of MapReduce jobs using deferred evaluation and optimizers such as fusions. The debugging ability allows programmers to run on the local machine first and then deploy to large clusters.
 
--> FlumeJava?
+`Where should this section go?` **Dryad/DrydaLINQ** Dryad is a more general and flexible execution engine that execute subroutines at a specified graph vertices. Developers can specify an arbitrary directed acyclic graph to combine computational "vertices" with communication channels (file, TCP pipe, shared-memory FIFO) and  build a dataflow graph. Compared with MapReduce, Dryad can specify an arbitrary DAG that have multiple number of inputs/outputs and support multiple stages. Also it can have more channels and boost the performance when using TCP pipes and shared-memory. But like writing a pipeline of MapReduce jobs, Dryad is a low-level programming model and hard for users to program, thus a more declarative model - DryadLINQ was created to fill in the gap. It exploits LINQ, a query language in .NET and automatically translates the data-parallel part into execution plan and passed to the Dryad execution engine.
 
-`TODO: FIX text and reference` Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
+***The iterative algorithm is hard to implement in MapReduce***   
+  `TODO: FIX text and reference` Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop, Twister and iMapReduce adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 
 ### Large-scale Parallelism on Graphs
 Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
@@ -72,12 +73,10 @@ In BSP model
 
 
 ## Execution Models
-In **MapReduce**, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve this. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages. And in the model, MapReduce assumes the master doesn't fail, or if it fails, the whole MapReduce function fails.
+**MapReduce**, as mentioned in the programming model section, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve it. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages.
 
 **Spark**
 Apache Spark is a fast, in-memory data processing engine with elegant and expressive development interface to allow developers to efficiently execute streaming, machine learning or SQL workloads that require fast iterative access to datasets. Spark takes advantage of the distributed in-memory storage (RDD) and Scala’s collection API as well as functional style for high performance processing. 
-
-This is very different in **Spark**, in-memory stuff...
 
 - Pig/HiveQL/SparkSQL
   - Limitations ?
@@ -97,6 +96,16 @@ Overall, the performance is very good for conceptually unrelated computations.
 
 ## References
 {% bibliography --file big-data %}
+
+
+
+
+
+
+
+
+
+
 
 ## Trash
 
