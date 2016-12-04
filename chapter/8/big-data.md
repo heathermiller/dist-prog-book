@@ -85,17 +85,18 @@ A notable feature of the model is the complete control on data through communica
 **MapReduce**, as mentioned in the programming model section, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve it. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages.
 
 **Spark**
+
 Spark is a fast, in-memory data processing engine with an elegant and expressive development interface which enables developers to efficiently execute machine learning, SQL or streaming workloads that require fast iterative access to datasets. Spark takes advantage of the distributed in-memory storage (RDD), Scala’s collection API as well as functional style for high performance processing. 
 
 Distributed in-memory storage - Resilient Distributed Data sets :
 RDD is a partitioned, read only collection of objects which can be created from data in stable storage or by transforming other RDD. It can be distributed across multiple nodes in a cluster and is fault tolerant(Resilient). If a node fails, a RDD can always be recovered using its lineage graph (information on how it was derived from dataset). A RDD is stored in memory (as much as it can fit and rest is spilled to disk) and is immutable - It can only be transformed to a new RDD. These are the lazy transformations which are applied only if any action is performed on the RDD. Hence, RDD need not be materialized at all times. Lazy feature exists even in DyradLINQ.
 
 The properties that power RDD with the above mentioned features :
-	•	A list of dependencies on other RDD’s. 
-	•	An array of partitions that a dataset is divided into.
-	•	A compute function to do a computation on partitions.
-	•	Optionally, a Partitioner for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
-	•	Optional preferred locations (aka locality info), (e.g. block locations for an HDFS file)
+- A list of dependencies on other RDD’s. 
+- An array of partitions that a dataset is divided into.
+- A compute function to do a computation on partitions.
+- Optionally, a Partitioner for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
+- Optional preferred locations (aka locality info), (e.g. block locations for an HDFS file)
 
 Spark API provide two kinds of operations on a RDD:
 Transformations - lazy operations that return another RDD.
