@@ -18,13 +18,16 @@ by: "Jingjing and Abhilash"
     - Pig: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
     `Q: Do we need to include Hive?`
     - Dremel, query natively w/o translating into MP jobs
-    - Spark SQL - how is it different from other above models? How does it leverage Spark execution engine and enhanced RDDs like data frames? what are its goals? whats a Dataframe API and how is it different from a RDD?
+    - Spark SQL - Limitations of Relational alone models? how SparkSQL model overcomes it? goals of SparkSQL? how it leverages the Spark programming model? what is a DataFrame and how is it different from a RDD? what are the operations a DataFrame provides? how is in-memory caching different from Spark?
+
 
 - Execution Models
   - MapReduce (intermediate writes to disk): What is the sequence of actions when a MapReduce functions are called? How is write-to-disk good/bad (fault-tolerant/slow)? How does the data are transmitted across clusters efficiently (store locally)? To shorten the total time for MP operations, it uses backup tasks. When MP jobs are pipelined, what optimizations can be performed by FlumeJava? In spite of optimizations and pipelining, what is the inherent limitation (not support iterative algorithm?)
   - Spark (all in memory): introduce spark architecture, different layers, what happens when a spark job is executed? what is the role of a driver/master/worker, how does a scheduler schedule the tasks and what performance measures are considered while scheduling? how does a scheduler manage node failures and missing partitions? how are the user defined transformations passed to the workers? how are the RDDs stored and memory management measures on workers? do we need checkpointing at all given RDDs leverage lineage for recovery? if so why ?
   - Pregel
     Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
+ - SparkSQL Catalyst & Spark execution model : Discuss Parser, LogicalPlan, Optimizer, PhysicalPlan, Execution Plan. Why catalyst? how catalyst helps in SparkSQL , data flow from sql-core-> catalyst->spark-core
+ 
 - Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad and SparkSQL? There are no direct comparison for all those models, so we may want to compare separately:
   - Hadoop vs. Spark
   - Spark vs. SparkSQL
