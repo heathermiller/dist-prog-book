@@ -27,7 +27,7 @@ This chapter is organized in
     - Limitations, iteration, performance
   - Spark (all in memory)
       what is Spark? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD?
-      why is RDD better than DSM? What are the transformations and actions available in Spark ? what are the limitations of Spark ?
+      why is RDD better than DSM? What are the transformations and actions available in Spark ? Explain with PageRank example why Spark is better than map reduce. what are the limitations of Spark ? 
   - Pregel
     Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
 - Performance
