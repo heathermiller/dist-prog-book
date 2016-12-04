@@ -97,7 +97,9 @@ The properties that power RDD with the above mentioned features :
 - A compute function to do a computation on partitions.
 - Optionally, a Partitioner for key-value RDDs (e.g. to say that the RDD is hash-partitioned)
 - Optional preferred locations (aka locality info), (e.g. block locations for an HDFS file)
-
+<figure class="main-container">
+  <img src="./spark_pipeline.png" alt="MapReduce Execution Overview" />
+</figure>
 Spark API provide two kinds of operations on a RDD:
 Transformations - lazy operations that return another RDD.
 `map (f : T => U) : RDD[T] ⇒ RDD[U]` : Return a MappedRDD[U] by applying function f to each element
