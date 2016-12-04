@@ -13,8 +13,8 @@ by: "Jingjing and Abhilash"
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
     - GraphX programming model (working on this)
-  - Querying: more declarative, built on top MP models.
-    - Sawzall {%cite pike2005interpreting --file big-data %}
+  - Querying: we need more declarative interfaces, built on top MP models.
+    - Sawzall {%cite pike2005interpreting --file big-data %}: first one propose
     - Pig {% cite olston2008pig --file big-data %}: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
     - Hive {%cite thusoo2009hive --file big-data %}
     - DryadLINQ: SQL-like, uses Dryad as execution engine;   
@@ -44,10 +44,12 @@ by: "Jingjing and Abhilash"
 ## Programming Models
 ### Data parallelism
 The motivation for MapReduce {% cite dean2008mapreduce  --file big-data %} is that we want to use hundreds/thousands of machines to do data processing in parallel, but we don’t want to deal with low-level management for distribution and parallelization. MapReduce can help this by abstracting computing logic into simple map and reduce functions and let the computation model handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates. The solution in the MapReduce paper is simple and powerful in terms of separating programming model and the executing model. This model applies to computations that are usually parallelizable: A `map` function can operate on each logical "record", this generates a set of intermediate key/value pairs, and then a `reduce` function applies on all values that share the same key and generate one or zero output value. Conceptually, the map and reduction functions have associated **types**:
-```
-map (k1,v1) -> → list(k2,v2)
-reduce (k2,list(v2)) -> list(v2)
-```
+
+\\[map (k1,v1) \rightarrow  list(k2,v2)\\]
+
+\\[reduce (k2,list(v2)) \rightarrow list(v2)\\]
+
+
 The input keys and values are drawn from a different domain than the output keys and values. The intermediate keys and values are from the same domain as the output keys and values.
 
 **Execution** At high level, when the user program calls *MapReduce* function, the input files are split into *M* pieces and it runs *map* function on corresponding splits; then intermediate key space are partitioned into *R* pieces using a partitioning function; After the reduce functions all successfully complete, the output is available in *R* files. The sequences of actions are shown in the figure below. We can see from label (4) and (5) that the intermediate key/value pairs are written/read into disks, this is a key to fault-tolerance in MapReduce model and also a bottleneck for more complex computation algorithms.  
