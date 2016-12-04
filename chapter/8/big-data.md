@@ -14,7 +14,7 @@ by: "Jingjing and Abhilash"
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
   - Querying: more declarative `Q: put here or in the execution model?`
-    - DryadLINQ: SQL-like, uses Dryad as execution engine;
+    - DryadLINQ: SQL-like, uses Dryad as execution engine;   
     `Suggestion: Merge this with Dryad above?`
     - Pig: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
     `Q: Hive, SQL-like, on top of Hadoop, what is the performance gain/lost.`
@@ -22,14 +22,18 @@ by: "Jingjing and Abhilash"
     - Spark SQL - how is it different from other above models? How does it leverage Spark execution engine and enhanced RDDs like data frames? what are its goals? whats a Dataframe API and how is it different from a RDD?
 
 - Execution Models
-  - MapReduce (intermediate writes to disk)
-    - Limitations, iteration, optimizations done by MP and FlumeJava
+  - MapReduce (intermediate writes to disk): What is the sequence of actions when a MapReduce functions are called? How is write-to-disk good/bad (fault-tolerant/slow)? How does the data are transmitted across clusters efficiently (store locally)? To shorten the total time for MP operations, it uses backup tasks. When MP jobs are pipelined, what optimizations can be performed by FlumeJava? In spite of optimizations and pipelining, what is the inherent limitation (not support iterative algorithm?)
   - Spark (all in memory): Explain with PageRank example why Spark is better than map reduce. what are the limitations of Spark ?
   - Pregel
     Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
-- Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad and SparkSQL? There are no direct comparison for all those models, but we could explain the scale of differences.
+- Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad and SparkSQL? There are no direct comparison for all those models, so we may want to compare separately:
+  - Hadoop vs. Spark
+  - Spark vs. SparkSQL
+
 - Things people are building on top of MapReduce/Spark
   - Ecosystem, everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
+    - GFS/HDFS for MapReduce: Machines are unreliable, so how do we maintain a certain degree of redundancy? ...
+    - Mesos for Spark. New frameworks keep emerging and users have to use multiple different frameworks in the same clusters, so how should they share access to the large datasets instead of costly replicate across clusters? Mesos introduce
 
 ## Programming Models
 ### Data parallelism
