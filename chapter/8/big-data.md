@@ -14,13 +14,13 @@ This chapter is organized in
     - PM of Dryad: can support DAG computation, limitations: low-level, `Q: Should this go to execution model?`
     - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics
   - Large-scale Parallelism on Graphs
-    - PM of Pregel/GraphX
+    - PM of Pregel
   - Querying: more declarative `Q: put here or in the execution model?`
     - DryadLINQ, SQL-like, use Dryad as execution engine;
     - Pig, on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?
     - Hive, SQL-like, on top of Hadoop, what is the performance gain/lost.
     - Dremel, query natively w/o translating into MP jobs
-    - Spark SQL, on top of Spark
+    - Spark SQL - how is it different from other above models? How does it leverage Spark execution engine and enhanced RDDs like data frames? what are its goals? whats a Dataframe API and how is it different from a RDD?
 
 - Execution Models
   - MapReduce (intermediate writes to disk)
