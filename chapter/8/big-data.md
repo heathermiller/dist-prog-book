@@ -14,7 +14,7 @@ This chapter is organized in
     - PM of Dryad: can support DAG computation, limitations: low-level, `Q: Should this go to execution model?`
     - PM of Spark, RDD/lineage: can support iterative algorithm, interactive analytics
   - Large-scale Parallelism on Graphs
-    - PM of Pregel
+    - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
   - Querying: more declarative `Q: put here or in the execution model?`
     - DryadLINQ, SQL-like, use Dryad as execution engine;
     - Pig, on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?
@@ -26,9 +26,10 @@ This chapter is organized in
   - MapReduce (intermediate writes to disk)
     - Limitations, iteration, performance
   - Spark (all in memory)
-    - Limitations ?
+      what is Spark? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD?
+      why is RDD better than DSM? What are the transformations and actions available in Spark ? what are the limitations of Spark ?
   - Pregel
-    - Limitations ?
+    Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
 - Performance
 - Things people are building on top of MapReduce/Spark
   - // FlumeJava? ...Etc
