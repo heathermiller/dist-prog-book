@@ -28,9 +28,9 @@ by: "Jingjing and Abhilash"
     Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
  - SparkSQL Catalyst & Spark execution model : Discuss Parser, LogicalPlan, Optimizer, PhysicalPlan, Execution Plan. Why catalyst? how catalyst helps in SparkSQL , data flow from sql-core-> catalyst->spark-core
  
-- Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad and SparkSQL? There are no direct comparison for all those models, so we may want to compare separately:
+- Evaluation: Given same algorithm, what is the performance differences between Hadoop, Spark, Dryad? There are no direct comparison for all those models, so we may want to compare separately:
   - Hadoop vs. Spark
-  - Spark vs. SparkSQL
+  - Spark vs. SparkSQL from SparkSQL paper
 
 - Big Data Ecosystem   
   Everything interoperates with GFS or HDFS, or makes use of stuff like protocol buffers so systems like Pregel and MapReduce and even MillWheel...
