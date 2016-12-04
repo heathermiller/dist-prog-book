@@ -125,6 +125,7 @@ Other benefits include the scheduling of tasks based on data locality to improve
   - Limitations ?
 
 **Pregel**
+
 Pregel is an implementation of classic BSP model by Google (PageRank) to analyze large graphs exclusively. It was followed by open source implementations - Apache’s Giraph and Hama; which were BSP models built on top of Hadoop.
 
 Pregel is highly scalable, fault-tolerant and can successfully represent larger complex graphs. Google claims the API becomes easy once a developer adopts “think like a vertex” mode.
