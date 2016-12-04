@@ -13,9 +13,12 @@ The important question to ask about these sources is “Why message passing?” 
 
 # Original Proposal of the Actor Model
 
+
+
 # Classic Actor Model
 
 The classic actor model came about with the formalization of an actor as a unit of computation that implements the following primitives:
+
 * `create`: create an actor from a behavior description and a set of parameters, including other existing actors
 * `send`: send a message to another actor
 * `become`: have an actor replace their behavior with a new one
@@ -24,7 +27,7 @@ The classic actor model came about with the formalization of an actor as a unit 
 
 If you squint a little, this actor definition sounds similar to Alan Kay’s original definition of Object Oriented programming. This definition describes a system where objects have a behavior, their own memory, and communicate by sending and receiving messages that may contain other objects or simply trigger actions.
 
-This
+TODO: This
 
 ## Concurrent Object-Oriented Programming (1990)
 
@@ -34,13 +37,21 @@ This paper looks at a lot of systems and languages that are implementing solutio
 
 ## Rosette
 
+
+
 ## Akka
 
-Akka is an actively developed project built out of the work on [Scala Actors](#scala-actors) in Scala to provide the actor model of programming as a framework to Java and Scala. It makes an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors.
+Akka is an actively developed project built out of the work on [Scala Actors](#scala-actors) in Scala to provide the actor model of programming as a framework to Java and Scala. It makes an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors. There are a few notable changes from Scala Actors that make Akka worth mentioning, especially as it is being actively developed while Scala Actors is not.
 
-# Process-based Actor
+Akka provides a programming interface with both Java and Scala bindings for actors which looks similar to Scala Actors, but has different semantics in how it processes messages. Akka's `receive` operation defines a global message handler which doesn't block on the receipt of no matching messages, and is instead only triggered when a matching message can be processed. It also will not leave a message in an actor's mailbox if there is no matching patter to handle the message. The message will simply be discarded an an event will be published to the system. Akka's interface also provides stronger encapsulation to avoid exposing direct references to actors. To some degree this fixes problems in Scala Actors where public methods could be called on actors, breaking many of the guarantees programmers expect from message-passing. This system is not perfect, but in most cases it limits the programmer to simply sending messages to an actor using a limited interface.
 
-The process-based actor model is essentially an actor modelled as a process that runs from start to completion. These actors use a `receive` primitive to specify messages that an actor can receive during a given state. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values. Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor.
+The Akka runtime also provides advantages over Scala Actors. The runtime uses a single continuation closure for many or all messages an actor processes, and provides methods to change this global continuation. This can be implemented more efficiently on the JVM, as opposed to Scala Actors' continuation model which uses control-flow exceptions which cause additional overhead. Additionally, nonblocking message insert and task schedule operations are used for extra performance.
+
+Akka is the production-ready result of the classic actor model lineage. It is actively developed and actually used to build scalable systems.
+
+# Process-based Actors
+
+The process-based actor model is essentially an actor modeled as a process that runs from start to completion. These actors use a `receive` primitive to specify messages that an actor can receive during a given state. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values. Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor.
 
 ## Erlang
 
@@ -59,6 +70,8 @@ These primitives can be used to construct complex hierarchies of supervision tha
 
 ## Cloud Haskell
 
+Cloud Haskell is an extension/DSL of Haskell which essentially implements an enhanced version of the computational message-passing model of Erlang in Haskell. It enhances Erlang's model with advantages from Haskell's model of functional programming in the form of purity, types, and monads. Cloud Haskell enables the use of pure functions for remote computation, which means that these functions are idempotent and can be restarted or run elsewhere in the case of failure without worrying about side-effects or undo mechanisms. One of the largest improvements over Erlang is the introduction of typed channels for sending messages. These provide guarantees to the programmer about the types of messages their actors can handle, which is something Erlang lacks. Cloud Haskell processes can use multiple typed channels to pass messages between actors, rather than Erlang's single untyped channel. Monadic types types make it possible for programmers to use an effective style, where they can ensure that pure and effective code are not mixed. Additionally, Cloud Haskell has shared memory within an actor process, which is useful for certain applications, but forbidden by the type system from being shared across actors. Finally, Cloud Haskell allows for the serialization of function closures, which means that higher-order functions can be distributed across actors. These improvements over Erlang make Cloud Haskell a notable project in the space of process-based actors.
+
 ## Scala Actors
 
 Scala Actors brings lightweight Erlang-style message-passing concurrency to the JVM and integrates it with the heavyweight thread/process concurrency models. This is stated well in the original paper about Scala Actors as "an impedance mismatch between message-passing concurrency and virtual machines such as the JVM." The authors say that VMs usually map threads to heavyweight processes, but that a lightweight process abstraction reduces programmer burden and leads to more natural abstractions. The authors say that “The user experience gained so far indicates that the library makes concurrent programming in a JVM-based system much more accessible than previous techniques.”
@@ -75,15 +88,37 @@ The communicating event-loop model was introduced in the E language, and is simi
 
 The E language implements a model that is closer to imperative object-oriented programming. Within a single actor-like node of computation called a "vat" many objects are contained.
 
+TODO: write more here
+
 ## AmbientTalk
 
 # Active Objects
 
 Active object actors draw a distinction between two different types of objects: active and passive objects. Every active object has a single entry point defining a fixed set of messages that are understood. Passive objects are the objects that are actually sent between actors, and are copied around to guarantee isolation.
 
+The active object model as initially described in the ABCL/1 language defines objects with a state and three modes:
+
+* `dormant`: Initial state of no computation, simply waiting for a message to activate the behavior of the actor.
+* `active`: A state in which computation is performed that is triggered when a message is received that satisfies the patterns and constraints that the actor has defined it can process.
+* `waiting`: A state of blocked execution, where the actor is active, but waiting until a certain type or pattern of message arrives to continue computation.
+
 ## ABCL/1 Language
 
+The ABCL/1 language implements the active object model described above, representing a system as a collection of objects, and the interactions between those objects as concurrent messages being passed around. One interesting aspect of ABCL/1 is the idea of explicitly different modes of message passing. Other actor models generally have a notion of priority around the values, types, or patterns of messages they process, but ABCL/1 implements tow different modes of message passing with different semantics. They have standard queued messages in the `ordinary` mode, but more interestingly they have `express` priority messages. When an object receives an express message it halts any other processing of ordinary messages it is performing, and processes the `express` message immediately. This enables an actor to accept high-priority messages while in `active` mode, and also enables monitoring and interrupting actors.
+
+The language also offers different models of synchronization around message-passing between actors. Three different message-passing models are given that enable different use cases:
+
+* `past`: Requests another actor to perform a task, while simultaneously proceeding with computation without waiting for the task to be completed.
+* `now`: Waits for a message to be received, and to receive a response. This acts as a basic synchronization barrier across actors.
+* `future`: Acts like a typical future, continuing computation until a remote result is needed, and then blocking until that result is received.
+
+It is interesting to note that all of these modes can be expressed by the `past` style of message-passing, as long as the type of the message and which actor to reply to with results are known.
+
+TODO: there should be something here to wrap up ABCL/1, and its impact?
+
 ## Orleans
+
+
 
 # Why the actor model?
 
@@ -115,9 +150,13 @@ Akka and Erlang provide modules that you can piece together to build various pie
 
 ### Module vs. Runtime approaches to tooling
 
-Both Akka and Erlang take a module-based approach to tooling around their actor systems. The Orleans framework goes in another direction, instead providing an TODO: finish this thought
+Both Akka and Erlang take a module-based approach to tooling around their actor systems. The Orleans framework goes in another direction, instead providing an
+
+TODO: finish this thought
 
 
 # References
+
+TODO: fill these out
 
 {% bibliography --file message-passing %}
