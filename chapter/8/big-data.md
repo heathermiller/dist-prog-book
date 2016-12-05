@@ -13,7 +13,8 @@ by: "Jingjing and Abhilash"
     - Spark: what is Spark? how is it different from map reduce? (RDD/lineage: can support iterative algorithm, interactive analytics;) what is pipelining? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD? why is RDD better than DSM? What are the transformations and actions available in Spark ?
   - Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
-    - GraphX programming model (working on this)
+    - GraphX programming model - discuss disadvantages graph-parallel model to data parallel model for large scale graph processing? how graphX combines the advantages of both the models? representation of a graph in GraphX?  discuss the model, vertex cut partitioning and its importance? graph operations ?
+    
   - Querying: we need more declarative interfaces, built on top MP models.
     - Sawzall {%cite pike2005interpreting --file big-data %}: first one propose
     - Pig {% cite olston2008pig --file big-data %}: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
@@ -140,6 +141,12 @@ RDDs are immutable and can only be created through coarse grained transformation
 RDDs are immutable and hence a straggler(slow node) can be replaced with backup copy as in Map reduce. This is hard to implement in DSM as two copies point to the same location and can interfere in each other’s update.
 Other benefits include the scheduling of tasks based on data locality to improve performance and the ability of the RDDs to degrade gracefully incase of memory shortage. Partitions that do not fit in RAM gets spilled to the disk (performance will then be equal to that of any data parallel system).
 
+***Challenges in Spark***
+
+- `Functional API semantics` : The GroupByKey operator is costly in terms of performance. In that it returns a distributed collection of (key, list of value) pairs to a single machine and then an aggregation on individual keys is performed on the same machine resulting in computation overhead. Spark does provide reduceByKey operator which does a partial aggregation on invidual worker nodes before returning the distributed collection. However, developers who are not aware of such a functionality can unintentionally choose groupByKey.
+
+- `Debugging and profiling` : There is no availability of debugging tools and developers find it hard to realize if a computation is happening more on a single machine or if the data-structure they used were inefficient.
+
 
 ### Large-scale Parallelism on Graphs
 Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
@@ -199,7 +206,6 @@ Winding up - we can compare SQL vs Dataframe vs Dataset as below :
 
 ## Execution Models
 **MapReduce**, as mentioned in the programming model section, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve it. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages.
-
 
 
 
@@ -347,55 +353,7 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 
 
 
-MORE EXPLANATION NEEDED...
 
 
 
-## Optimizers are the way to go (still thinking of a better heading..)
 
-It is tough to understand the internals of a framework like Spark for any developer who has just started to program a Spark application. Also, with the advent of relational code, it becomes still more challenging when one has to program keeping in mind the rules for an efficient query - rightly ordered joins, early filtering of data or usage of available indexes. Even if the programmer is aware of such rules, it is still prone to human errors which can potentially lead to longer runtime applications. Query optimizers for map reduce frameworks can greatly improve performance of the queries developers write and also significantly reduce the development time. A good query optimizer should be able to optimize such user queries, extensible for user to provide information about the data and even dynamically include developer defined specific rules.
-Catalyst is one such framework which leverages the Scala’s functional language features like pattern matching and runtime meta programming to allow developers to concisely specify complex relational optimizations. Most of the power of Spark SQL comes due to this optimizer.
-
-Catalyst includes both rule-based and cost-based optimization. It is extensible to include new optimization techniques and features to Spark SQL and also let developers provide data source specific rules.
-
-
-Catalyst executes the rules on its data type Tree - a composition of node objects where each node has a node type (subclasses of TreeNode class in Scala) and zero or more children. Node objects are immutable and can be manipulated. The transform method of a Tree applies pattern matching to match a subset of all possible input trees on which the optimization rules needs to be applied.
-
-In Spark SQL, transformation happens in four phases :
-
-- Analyzing a logical plan to resolve references  : In the analysis phase a relation either from the abstract syntax  tree (AST) returned by the SQL parser or from a DataFrame is analyzed to create a logical plan out of it, which is still unresolved (the columns referred may not exist or may be of wrong datatype). The logical plan is resolved using using the Catalyst’s Catalog object(tracks the table from all data sources) by mapping the named attributes to the input provided, looking up the relations by name from catalog, by propagating and coercing types through expressions.
-
-- Logical plan optimization : In this phase, several of the rules like constant folding, predicate push down, projection pruning, null propagation, boolean expression simplification are applied on the logical plan.
-
-- Physical planning : In this phase, Spark generates multiples physical plans out of the input logical plan and chooses the plan based on a cost model. The physical planner also performs rule-based physical optimizations, such as pipelining projections or filters into one Spark map operation. In addition, it can push operations from the logical plan into data sources that support predicate or projection pushdown.
-
-- Code Generation : The final phase generates the Java byte code that should run on each machine.Catalyst transforms the Tree which is an expression in SQL to an AST for Scala code to evaluate, compile and run the generated code. A special scala feature namely quasiquotes aid in the construction of abstract syntax tree(AST).
-
-STILL WORKING ON THIS..
-
-## Large Scale Graph processing
-
-Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
-
-Also graph algorithms require exchange of messages between vertices. In case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms.
-
-**Bulk synchronous parallel model**
-
-This model was introduced in 1980 to represent the hardware design features of parallel computers. It gained popularity as an alternative for map reduce since it addressed the above mentioned issues with map reduce to an extent.<br />
-In BSP model
-
- - Computation consists of several steps called as supersets.
- - The processors involved have their own local memory and every processor is connected to other via a point-to-point communication.
- - At every superstep, a processor receives input at the beginning, performs computation and outputs at the end.
- - Barrier synchronization synchs all the processors at the end of every superstep.
- - A notable feature of the model is the complete control on data through communication between every processor at every superstep.
- - Though similar to map reduce model, BSP preserves data in memory across supersteps and helps in reasoning iterative graph algorithms.
-
-
-
-**Introduce GraphX and why it fares better than BSP model. Explain GraphX**
-
-## Future and Discussion
-
-- Current leader in distributed processing - Spark, Google's cloud dataflow
-- Current challenges and upcoming improvements ?? - Apache thunder and any others?
