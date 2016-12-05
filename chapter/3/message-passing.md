@@ -13,21 +13,33 @@ The important question to ask about these sources is “Why message passing?” 
 
 # Original Proposal of the Actor Model
 
+The actor model was originally proposed in _A Universal Modular ACTOR Formalism for Artificial Intelligence_ in 1973 as a method of computation for artificial intelligence research. The original goal of the model was to model parallel communication while safely exploiting distributed concurrency across workstations. The paper makes few presumptions about implementation details, instead defining the high-level message passing communication model.
 
+They define actors as units of computation. These units can send messages to one another, and have a mailbox which contains messages they have received. These messages are of the form `(request: <message-to-target>; reply-to: <reference-to-messenger>)`.
+
+Actors attempt to process messages from their mailboxes by matching their `request` field sequentially against patterns or rules which can be specific values or logical statements. When a pattern is matched, computation occurs and the result of that computation is implicitly returned to the reference in the message's `reply-to` field. This is a continuation, where the continuation is another message to an actor. These messages are one-way and make no claims about whether a message will ever be received in response. This model is limited, but the early ideas of taking advantage of distribution of processing power to enable greater parallel computation are there.
+
+One interesting thing to note is that this original paper talks about actors in the context of hardware. They mention actors as almost another machine architecture. This paper describes the concepts of an "actor machine" and a "hardware actor" as the context for the actor model, which is totally different from the way we think about modern actors as abstracting away a lot of the hardware details we don't want to deal with. This concept reminds me of something like a Lisp machine, but built to specially utilize the actor model of computation for artificial intelligence.
 
 # Classic Actor Model
 
-The classic actor model came about with the formalization of an actor as a unit of computation that implements the following primitives:
+The classic actor model came about with the formalization of an actor as a unit of computation in Agha's _Concurrent Object-Oriented Programming_. The classic actor is formalized as the following primitive actions:
 
 * `create`: create an actor from a behavior description and a set of parameters, including other existing actors
 * `send`: send a message to another actor
 * `become`: have an actor replace their behavior with a new one
 
+As originally described, classic actors communicate by asynchronous message passing. They are a primitive independent unit of computation which can be used to build higher-level abstractions for concurrent programming. Actors are unique addressable, and have their own independent message queues. State changes using the classic actor model are specified using the `become` operation. Each time an actor processes a communication it computes a behavior in response to the next type of communication it expects to process. A `become` operation's argument is another named behavior with some state to pass to that named behavior.
+
+For purely functional actors the new behavior would be identical to the original. For more complex actors however, this enables the aggregation of state changes at a higher level of granularity than something like a variable assignment. This isolation changes the level at which one analyzes a system, freeing the programmer from worrying about interference during state changes.
+
+TODO: Not sure where this quote fits in? Maybe worth just pull-quoting it or taking it out as most of the points this hits on are better explained above.
+
 "The sequential subset of actor systems that implement this model is typically functional. Changes to the state of an actor are aggregated in a single become statement. Actors have a flexible interface that can similarly be changed by switching the behaviour of that actor." (43 Years of Actors)
 
-If you squint a little, this actor definition sounds similar to Alan Kay’s original definition of Object Oriented programming. This definition describes a system where objects have a behavior, their own memory, and communicate by sending and receiving messages that may contain other objects or simply trigger actions.
+If you squint a little, this actor definition sounds similar to Alan Kay’s original definition of Object Oriented programming. This definition describes a system where objects have a behavior, their own memory, and communicate by sending and receiving messages that may contain other objects or simply trigger actions. The focus is on the messaging and designing the interactions and communications between the objects.
 
-TODO: This
+TODO: write more here
 
 ## Concurrent Object-Oriented Programming (1990)
 
@@ -51,15 +63,35 @@ Akka is the production-ready result of the classic actor model lineage. It is ac
 
 # Process-based Actors
 
-The process-based actor model is essentially an actor modeled as a process that runs from start to completion. These actors use a `receive` primitive to specify messages that an actor can receive during a given state. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values. Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor.
+TODO: better opening sentence
+
+The process-based actor model is essentially an actor modeled as a process that runs from start to completion.
+
+The first language to explicitly implement this model is Erlang, and they even say in a retrospective that their view of computation is broadly similar to the Agha's classic actor model. However, with process-based actors different mechanics are used.
+
+Process-based actors are defined by a computation which runs from start to completion, rather than the classic actor model, which defines an actor almost as a state machine of behaviors and the logic to transition between those. Similar state-machine like expressions are possible through recursion, but programming those feels fundamentally different than using the previously described `become` statement.
+
+These actors use a `receive` primitive to specify messages that an actor can receive during a given state/point in time. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values.
+
+Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor.
 
 ## Erlang
 
-Erlang was the primary driver of the process-based actor model, originally developing it to program large highly-reliable fault-tolerant telecommunications switching systems. This model was essentially developed independently from other actor systems and research. (It would be nice to have more details here, to emphasize how this actor model independently organically arose from some of the core needs of distributed systems)
+Erlang was the primary driver of the process-based actor model. This model was originally developed to program large highly-reliable fault-tolerant telecommunications switching systems. Erlang's development started in 1985, but its model of programming is still used today. The motivations of the Erlang model were around four key properties that were needed to program fault-tolerant operations:
 
-Erlang actors run as lightweight isolated processes. They do not have visibility into one another, and pass around pure messages, which are immutable. These have no dangling points or data references between objects, and really enforce the idea of immutable separated data between actors unlike many of the classic actor implementations in which references to actors and data can be passed around freely.
+* Isolated processes
+* Pure message passing between processes
+* Detection of errors in remote processes
+* The ability to determine what type of error caused a process crash
 
-TODO: mention disadvantages of Erlang's `receive`
+The Erlang researchers initially believed that shared-memory was preventing fault-tolerance and they saw message-passing of immutable data between processes as the solution to avoiding shared-memory. This model was essentially developed independently from other actor systems and research, especially as its development was started before Agha's classic actor model formalization was even published, but it ends up with a broadly similar view of computation to Agha's classic actor model.
+
+Erlang actors run as lightweight isolated processes. They do not have visibility into one another, and pass around pure messages, which are immutable. These have no dangling pointers or data references between objects, and really enforce the idea of immutable separated data between actors unlike many of the early classic actor implementations in which references to actors and data can be passed around freely.
+
+
+TODO: is it really worth mentioning `receive` again here? I think its assumed that the `receive` semantics above apply here?
+
+Erlang implements a blocking `receive` operation as a means of processing messages from a processes' mailbox.
 
 Erlang also seeks to build failure into the programming model, as one of the core assumptions of a distributed system is that things are going to fail. Erlang provides the ability for processes to monitor one another through two primitives:
 
@@ -84,11 +116,26 @@ In addition to the more natural abstraction, the Erlang model is further enhance
 
 The communicating event-loop model was introduced in the E language, and is similar to process actors, but doesn't make a distinction between passive and active objects.
 
+TODO: what does that sentence really mean?
+
 ## E Language
 
-The E language implements a model that is closer to imperative object-oriented programming. Within a single actor-like node of computation called a "vat" many objects are contained.
+The E language implements a model that is closer to imperative object-oriented programming. Within a single actor-like node of computation called a "vat" many objects are contained. This vat contains not just objects, but a mailbox for all of the objects inside, as well as a call stack. There is a shared message queue and event-loop that acts as one abstraction barrier for computation. The actual references to objects within a vat which are used for communication and computation across actors operate at a different level of abstraction.
 
-TODO: write more here
+When handing out references at a different level of granularity than actor-global, how do you ensure the benefits of isolation that the actor model provides? After all, by handing out references inside of an actor it sounds like we're just reinventing shared-memory problems. The answer is that E's reference-states define many of the isolation guarantees around computation that we expect from actors. Two different reference-states are defined:
+
+* _Near reference_: This is a reference between two objects in the same vat. These expose both immediate-calls and eventual-sends.
+* _Eventual reference_: This is a reference which crosses vat boundaries, and only exposes eventual-sends, not immediate-calls.
+
+The difference in semantics between the two types of references means that only objects within the same vat are granted synchronous access to one another. The most an eventual reference can do is send and queue a message for processing at some unspecified point in the future. This means that within the execution of a vat, a degree of temporal isolation can be defined between the objects and communications within the vat, and the communications to and from other vats.
+
+TODO: better transition sentence from reference types -> why we care about references at a less abstract level than the actor.
+
+Additionally, it some of motivation here comes from wanting to work at a finer-grained level of references than a traditional actor exposes.
+
+The simplest example is that you want to ensure that another actor in your system can read a value, but can't write to it. How do you do that within another actor model? You might imagine creating a read-only variant of an actor which doesn't expose a write message type, or proxies only `read` messages to another actor which supports both `read` and `write` operations. In E because you are handing out object references, you would simply only pass around references to a `read` method, and you don't have to worry about other actors in your system being able to write values. These finer-grained references make reasoning about state guarantees easier because you are no longer exposing references to an entire actor, but instead the granular capabilities of the actor.
+
+TODO: write more here, maybe something around promise pipelining and partial failure? implications of different types of communication?
 
 ## AmbientTalk
 
