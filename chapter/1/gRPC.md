@@ -12,7 +12,6 @@ by: "Paul Grosu (Northeastern U.),  Muzammil Abdul Rehman (Northeastern U.), Eri
 <p align="center">Paul Grosu (Northeastern U.),  Muzammil Abdul Rehman (Northeastern U.), Eric Anderson (Google, Inc.), Vijay Pai (Google, Inc.), and Heather Miller (Northeastern U.)</p>
 </em></h4>
 
-
 <hr>
 
 <h3><em><p align="center">Abstract</p></em></h3>
