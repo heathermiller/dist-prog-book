@@ -40,7 +40,6 @@ The HTTP/2 protocol is now a framed protocol, which expands the capability for b
 
 The HTTP header is one of the primary methods of passing information about the state of other endpoints, the request or response and the payload.  This enables endpoints to save time when processing a large quantity to streams, with the ability to forward information along without wasting time to inspect the payload.  Since the header information can be quite large, it is possible to now compress the them to allow for better throughput and capacity of stored stateful information.
 
-
 <h3>1.3 <em>Multiplexed Streams</em></h3>
 
 As streams are core to the implementation of HTTP/2, it is important to discuss the details of their implemenation in the protocol.  As many streams can be open simultanously from many endpoints, each stream will be in one of the following states.  Each stream is multiplexed together forming a chain of streams that are transmitted over the wire, allowing for asynchronous bi-directional concurrency to be performed by the receiving endpoint.  Below is the lifecycle of a stream {% cite RFC7540 %}:
@@ -67,6 +66,18 @@ message Hello {
 <p align="center">
   <em>Figure 3: Protocol Buffer version 2.0 representing a message data-structure.</em>
 </p>
+
+This message will also be encoded for highest compression when sent over the wire.  For example, let us say that the message is the string <em>"Hi"</em>.
+
+<table width="50%" border=1>
+<tr><th>Type</th><th>Meaning</th><th>Used For</th></tr>
+<tr><td>0</td><td>Varint</td><td>int32, int64, uint32, uint64, sint32, sint64, bool, enum</td><tr>
+<tr><td>1</td><td>64-bit</td><td>fixed64, sfixed64, double</td><tr>
+<tr><td>2</td><td>Length-delimited</td><td>string, bytes, embedded messages, packed repeated fields</td><tr>
+<tr><td>3</td><td>Start group</td><td>groups (deprecated)</td><tr>
+<tr><td>4</td><td>End group</td><td>groups (deprecated)</td><tr>
+<tr><td>5</td><td>32-bit</td><td>fixed32, sfixed32, float</td><tr>
+</table>
 
 Thus the language had to be updated to support gRPC and the development of a service message with a request and a response definition was added for version version 3.0 of Protocol Buffers.  The updated implementation would look as follows {% cite HelloWorldProto %}:
 
