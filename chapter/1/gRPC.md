@@ -67,12 +67,18 @@ message Hello {
   <em>Figure 3: Protocol Buffer version 2.0 representing a message data-structure.</em>
 </p>
 
-This message will also be encoded for highest compression when sent over the wire.  For example, let us say that the message is the string <em>"Hi"</em>.
+This message will also be encoded for highest compression when sent over the wire.  For example, let us say that the message is the string <em>"Hi"</em>.  Every Protocol Buffer type has a value, and in this case a string has a value of `2`, as noted in the Table 1 {% cite Protobuf-Types %}.
 
 <p align="center">
   <img src="figures/protobuf-types.png" /><br>
   <em>Table 1: Tag values for Protocol Buffer types.</em>
 </p>
+
+One will notice that there is a number associated with each field element in the Protocol Buffer definition, which represents its <em>tag</em>.  In Figure 3, the field `name` has a tag of `1`.  When a message gets encoded each field will start with a one byte value (8 bits), where the least-significant 3-bit value encode the <em>type</em> and the rest the <em>tag</em>.  In this case tag which is `1`, with a type of 2.  Thus the encoding will be `00001 010`, which has a hexdecimal value of `A`.  The following byte is the length of the string which is `2`, followed by the string as `48` and `69` representing `H` and `i`.  Thus the whole tranmission will look as follows:
+
+```
+A 2 48 69
+```
 
 Thus the language had to be updated to support gRPC and the development of a service message with a request and a response definition was added for version version 3.0 of Protocol Buffers.  The updated implementation would look as follows {% cite HelloWorldProto %}:
 
@@ -125,4 +131,4 @@ gRPC was built on top of HTTP/2, and we will cover the specifics of gRPC-Java, b
 [Netty]: http://netty.io/ 
 [RFC7540]: http://httpwg.org/specs/rfc7540.html  
 [HelloWorldProto]: https://github.com/grpc/grpc/blob/master/examples/protos/helloworld.proto
-
+[Protobuf-Types]: https://developers.google.com/protocol-buffers/docs/encoding
