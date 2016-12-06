@@ -69,15 +69,10 @@ message Hello {
 
 This message will also be encoded for highest compression when sent over the wire.  For example, let us say that the message is the string <em>"Hi"</em>.
 
-<table width="50%" border=1>
-<tr><th>Type</th><th>Meaning</th><th>Used For</th></tr>
-<tr><td>0</td><td>Varint</td><td>int32, int64, uint32, uint64, sint32, sint64, bool, enum</td><tr>
-<tr><td>1</td><td>64-bit</td><td>fixed64, sfixed64, double</td><tr>
-<tr><td>2</td><td>Length-delimited</td><td>string, bytes, embedded messages, packed repeated fields</td><tr>
-<tr><td>3</td><td>Start group</td><td>groups (deprecated)</td><tr>
-<tr><td>4</td><td>End group</td><td>groups (deprecated)</td><tr>
-<tr><td>5</td><td>32-bit</td><td>fixed32, sfixed32, float</td><tr>
-</table>
+<p align="center">
+  <img src="figures/protobuf-types.png" /><br>
+  <em>Table 1: Tag values for Protocol Buffer types.</em>
+</p>
 
 Thus the language had to be updated to support gRPC and the development of a service message with a request and a response definition was added for version version 3.0 of Protocol Buffers.  The updated implementation would look as follows {% cite HelloWorldProto %}:
 
