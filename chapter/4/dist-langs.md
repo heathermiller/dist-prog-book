@@ -3,6 +3,9 @@ layout: page
 title:  "Distributed Programming Languages"
 by: "A Systems Person"
 ---
+## Outline
+
+*
 
 ### Two major major, orthogonal approaches to distributed languages:
 
@@ -48,6 +51,8 @@ Why is this language not considered redundant?
 Unlike Erlang, MapReduce and DSL's that implement the paradigm are "all the rage."
 Unlike Erlang, MapReduce has experienced adoption because it offers true abstraction of the problems of distributed computing.
 Erlang only provided a way of detecting a process failure; it did not consider machine or network failures.
+
+* MapReduce is a GPL for the domain of distribution
 
 ## References
 
