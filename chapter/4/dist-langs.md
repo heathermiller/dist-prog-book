@@ -3,19 +3,33 @@ layout: page
 title:  "Distributed Programming Languages"
 by: "A Systems Person"
 ---
-## Outline
 
-*
+### Three major approaches to distributed languages:
 
-### Two major major, orthogonal approaches to distributed languages:
+#### Shared Memory
+
+What is it?
+
+Some examples:
+
+* Linda
+* Orca
+
+Tries to make many machines look like a single machine.
+This is hard because of consistency and partitioning.
+The logic of the program is simple, but requiring that the system handle shared memory opens up many opportunities for performance bugs.
 
 #### Actor / Object model
 
-The actor model has its roots in procedural programming.
-This model maps in a straighforward way to a distributed environment.
+The actor model has its roots in procedural and object oriented programming.
+Communication through RPC or message-passing.
+Actors/Objects are location agnostic, because state is not shared.
+The system can decide how to most efficiently place actors.
 
 * Erlang
 * Cloud Haskell (I know, right? Why?)
+* Emerald
+* Argus
 
 #### Dataflow model (static and stream)
 
@@ -24,6 +38,7 @@ Some languages that use this model are:
 
 * Multilisp
 * MapReduce (Spark, Hadoop, etc.)
+* Orleans (Wait, what??)
 
 ### Why GPL's not DSL's?
 
