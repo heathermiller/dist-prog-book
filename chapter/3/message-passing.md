@@ -11,7 +11,7 @@ In the field of message passing programming models, it is not only important to 
 Message passing programming models are continuing to develop and become more robust, as some of the recently published papers and systems in the field show. Orleans gives an example of this, detailing not just a programming model, but a runtime system that is a quite advanced implementation of a message passing and actor model to solve real world problems.
 The important question to ask about these sources is “Why message passing?” There are a number of distributed programming models, so why was this one so important when it was initially proposed. What are the advantages of it for the programmer? Why has it facilitated advanced languages, systems, and libraries that are widely used today?
 
-# Original Proposal of the Actor Model
+# Original proposal of the actor model
 
 The actor model was originally proposed in _A Universal Modular ACTOR Formalism for Artificial Intelligence_ in 1973 as a method of computation for artificial intelligence research. The original goal of the model was to model parallel communication while safely exploiting distributed concurrency across workstations. The paper makes few presumptions about implementation details, instead defining the high-level message passing communication model.
 
@@ -21,7 +21,7 @@ Actors attempt to process messages from their mailboxes by matching their `reque
 
 One interesting thing to note is that this original paper talks about actors in the context of hardware. They mention actors as almost another machine architecture. This paper describes the concepts of an "actor machine" and a "hardware actor" as the context for the actor model, which is totally different from the way we think about modern actors as abstracting away a lot of the hardware details we don't want to deal with. This concept reminds me of something like a Lisp machine, but built to specially utilize the actor model of computation for artificial intelligence.
 
-# Classic Actor Model
+# Classic actor model
 
 The classic actor model came about with the formalization of an actor as a unit of computation in Agha's _Concurrent Object-Oriented Programming_. The classic actor is formalized as the following primitive actions:
 
@@ -50,6 +50,8 @@ This paper looks at a lot of systems and languages that are implementing solutio
 ## Rosette
 
 
+TODO: fill this out
+
 
 ## Akka
 
@@ -61,7 +63,7 @@ The Akka runtime also provides advantages over Scala Actors. The runtime uses a 
 
 Akka is the production-ready result of the classic actor model lineage. It is actively developed and actually used to build scalable systems.
 
-# Process-based Actors
+# Process-based actors
 
 TODO: better opening sentence
 
@@ -116,7 +118,7 @@ In addition to the more natural abstraction, the Erlang model is further enhance
 
 The communicating event-loop model was introduced in the E language, and is similar to process actors, but doesn't make a distinction between passive and active objects.
 
-TODO: what does that sentence really mean?
+TODO: what does that sentence really mean? need a better introduction to this model.
 
 ## E Language
 
@@ -138,6 +140,8 @@ The simplest example is that you want to ensure that another actor in your syste
 TODO: write more here, maybe something around promise pipelining and partial failure? implications of different types of communication?
 
 ## AmbientTalk
+
+TODO: fill out
 
 # Active Objects
 
@@ -165,7 +169,19 @@ TODO: there should be something here to wrap up ABCL/1, and its impact?
 
 ## Orleans
 
+Orleans takes the concept of lifecycle-less (not sure this is the term I want to use) actors, which are activated in response to asynchronous messages and places them in the context of cloud applications. Orleans does this via actors (called "grains") which are isolated units of computation and behavior that can have multiple instantiations (called "activations") for scalability. These actors also have persistence, meaning they have a persistent state that is kept in durable storage so that it can be used to manage things like user data.
 
+TODO: something about the notion of identity of an actor here. There are words below, but they could flow better into other points.
+
+It feels like Orleans uses a different notion of identity than other actor systems. In other systems an "actor" might refer to a behavior and instances of that actor might refer to identities that the actor represents like individual users. In Orleans, an actor represents that persistent identity, and the actual instantiations are in fact reconcilable copies of that identity.
+
+The programmer essentially assumes that a single entity is handling requests to an actor, but the Orleans runtime actually allows for multiple instantiations for scalability. These instantiations are invoked in response to an RPC-like call from the programmer which immediately returns an asynchronous promise. Multiple instances of an actor can be running and modifying the state of that actor at the same time. The immediate question here is how does that actually work? It doesn't intuitively seem like transparently accessing and changing multiple isolated copies of the same state should produce anything but problems when its time to do something with that state.
+
+Orleans solves this problem by providing mechanisms to reconcile conflicting changes. If multiple instances of an actor modify persistent state, they need to be reconciled into a consistent state in some meaningful way. The default here is a last-write-wins strategy, but Orleans also exposes the ability to create fine-grained reconciliation policies, as well as a number of common reconcilable data structures. If an application requires a certain reconciliation algorithm, the developer can implement it using Orleans. These reconciliation mechanisms are built upon Orleans' concept of transactions.
+
+Transactions in Orleans are a way to causally reason about the different instances of actors that are involved in a computation. Because in this model computation happens in response to a single outside request, a given actor's chain of computation via. associated actors always contains a single instantiation of each actor. These causal chain of instantiations is treated as a single transaction. At reconciliation time Orleans uses these transactions, along with current instantiation state to reconcile to a consistent state.
+
+All of this is a longwinded way of saying that Orleans' programmer-centric contributions are that it separates the concerns of running and managing actor lifecycles from the concerns of how data flows throughout your distributed system. It does this is a fault-tolerant way, and for most programming tasks, you likely wouldn't have to worry about scaling and reconciling data in response to requests. It provides many of the benefits of the actor model, through a programming model that attempts to abstract away many of the details that you would have to worry about when using actors in production.
 
 # Why the actor model?
 
@@ -195,11 +211,11 @@ One trend that seems common among the actor systems we see in production is exte
 
 Akka and Erlang provide modules that you can piece together to build various pieces of functionality into your system. Akka provides a huge number of modules and extensions to configure and monitor a distributed system built using actors. They provide a number of utilities to meet common use-case and deployment scenarios, and these are thoroughly listed and documented. Additionally they provide support for Akka Extensions, which are a mechanism for adding your own features to Akka. These are powerful enough that some core features of Akka like Typed Actors or Serialization are implemented as Akka Extensions. Erlang provides the Open Telecom Platform (OTP), which is a framework comprised of a set of modules and standards designed to help build applications. OTP takes the generic patterns and components of Erlang, and provides them as libraries that enable code reuse and best practices when developing new systems.
 
-### Module vs. Runtime approaches to tooling
+## Module vs. "managed" runtime approaches
 
 Both Akka and Erlang take a module-based approach to tooling around their actor systems. The Orleans framework goes in another direction, instead providing an
 
-TODO: finish this thought
+TODO: finish this thought, avoid the word tooling because that implies like IDEs and stuff
 
 
 # References
