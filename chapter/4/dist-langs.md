@@ -4,6 +4,13 @@ title:  "Distributed Programming Languages"
 by: "A Systems Person"
 ---
 
+### Problems of Distributed Programming
+
+* Partial failure
+* Consistency
+* Efficiency
+* Scallability
+
 ### Three major approaches to distributed languages:
 
 #### Shared Memory
@@ -39,6 +46,15 @@ Some languages that use this model are:
 * Multilisp
 * MapReduce (Spark, Hadoop, etc.)
 * Orleans (Wait, what??)
+
+#### Which is best? Why?
+
+Why is MR all-the-rage?
+
+* Dataflow / MapReduce fundamentally changed the programming style for distributed systems
+* Other models (Actor, DSM) tried to mask distribution
+* By changing the style, programs need necessarily consider communication patterns (disk, network)
+* Although, system may still handle fault tolerance
 
 ### Why GPL's not DSL's?
 
