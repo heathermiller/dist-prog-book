@@ -9,6 +9,7 @@ by: "Nathaniel Dempkowski"
 In the field of message passing programming models, it is not only important to consider recent state of the art research, but additionally the historic initial papers on message passing and the actor model that are the roots of the programming models described in newer papers. Message passing programming models have strong roots in computer science, and have essentially been discussed since the advent of object-oriented programming with Smalltalk in the 1980's. It is enlightening to see which aspects of the models have stuck around, and many of the newer papers reference and address deficiencies present in older papers. There have been plenty of programing languages designed around message passing, including those focused on the actor model of programming and organizing units of computation.
 
 Message passing programming models are continuing to develop and become more robust, as some of the recently published papers and systems in the field show. Orleans gives an example of this, detailing not just a programming model, but a runtime system that is a quite advanced implementation of a message passing and actor model to solve real world problems.
+
 The important question to ask about these sources is “Why message passing?” There are a number of distributed programming models, so why was this one so important when it was initially proposed. What are the advantages of it for the programmer? Why has it facilitated advanced languages, systems, and libraries that are widely used today?
 
 # Original proposal of the actor model
@@ -49,9 +50,22 @@ This paper looks at a lot of systems and languages that are implementing solutio
 
 ## Rosette
 
+Rosette was both a language for concurrent object-oriented programming of actors, as well as a runtime system for managing the usage of and access to resources by those actors. Rosette is mentioned throughout Agha's _Concurrent Object-Oriented Programming_, and the code examples given in the paper are written in Rosette. It is important to mention as it seems to be a language which almost defines what the classic actor model looks like in the context of concurrent object-oriented programming.
 
-TODO: fill this out
+The motivation behind Rosette was to provide strategies for dealing with problems like search, where the programmer needs a means of control over how resources are allocated to subcomputations to optimize performance in the face of combinatorial explosion. This supports the use of concurrency in solving computationally intensive problems whose structure is not statically defined. Rosette has an architecture which uses actors in two distinct ways. They describe two different layers with different responsibilities:
 
+* _Interface layer_: This implements mechanisms for monitoring and control of resources. The system resources and hardware are viewed as actors.
+* _System environment_: This is comprised of actors who actually describe the behavior of concurrent applications and implement resource management policies based on the interface layer.
+
+The Rosette language features, many of which we take for granted in object-oriented programming languages. It implements dynamic creation and modification of objects for extensible and reconfigurable systems, supports inheritance, and has objects which can be organized into classes. I think the more interesting characteristic is that the concurrency in Rosette is inherent and declarative rather than explicit as with many modern object-oriented languages. The motivation behind this declarative concurrency comes from the heterogeneous nature of distributed concurrent computers. Different computers have varying concurrency characteristics, and the authors argue that forcing the programmer to tailor their concurrency to the machine makes it difficult to re-map a program to another one. I think this idea of using actors as a more flexible and natural abstraction is an important one which is seen in some form within many of the actor systems described here.
+
+Actors in Rosette are organized into three types of classes which describe different aspects of the actors within the system:
+
+* _Abstract classes_ specify requests, responses, and actions within the system which can be observed. The idea behind these is to expose the higher-level behaviors of the system, but tailor the actual actor implementations to the resource constraints of the system.
+* _Representation classes_ specify the resource management characteristics of implementations of abstract classes.
+* _Behavior classes_ specify the actual implementations of actors in given abstract and representation classes.
+
+These classes represent a concrete object-oriented abstraction to organize actors which handles the practical constraints of a distributed system. It represents a step in the direction of handling not just the information flow and behavior of the system, but the underlying hardware and resources. Rosette's model feels like a direct expression of those concerns which are something every actor system in production inevitably ends up addressing.
 
 ## Akka
 
@@ -118,7 +132,7 @@ In addition to the more natural abstraction, the Erlang model is further enhance
 
 The communicating event-loop model was introduced in the E language, and is similar to process actors, but doesn't make a distinction between passive and active objects.
 
-TODO: what does that sentence really mean? need a better introduction to this model.
+TODO: what does that sentence really mean? need a better introduction to this model. Could add more about AmbientTalk in the intro? If this is too expanded its going to be repeating the same idea of accessing objects within actors 3 times though. 
 
 ## E Language
 
@@ -139,9 +153,21 @@ The simplest example is that you want to ensure that another actor in your syste
 
 TODO: write more here, maybe something around promise pipelining and partial failure? implications of different types of communication?
 
-## AmbientTalk
+## AmbientTalk/2
 
-TODO: fill out
+AmbientTalk/2 is a modern revival of the communicating event-loops actor model as a distributed programming language with an emphasis on developing mobile peer-to-peer applications. This idea was originally realized in AmbientTalk/1 where actors were modelled as ABCL/1-like active objects, but AmbientTalk/2 models actors similarly to E's vats. The authors of AmbientTalk/2 felt limited by not allowing passive objects within an actor to be referenced by other actors, so they chose to go with the more fine-grained approach which allows for remote interactions between passive objects.
+
+Actors in AmbientTalk/2 are representations of an event loops. The message queue is the event queue, messages are events, asynchronous message sends are event notifications, and object methods are the event handlers. The event loop serially processes messages from the queue to avoid race conditions. Local objects within an actor are owned by that actor, which is the only entity allowed to directly execute methods on them. Like E, objects within an actor can communicate using synchronous or asynchronous methods of communication. Again similar to E, objects that are referenced outside of an actor can only be communicated to asynchronously by sending messages. Objects can additionally declare themselves serializable, which means they can be copied and sent to other actors for use as local objects. When this happens, there is no maintained relationship between the original object and its copy.
+
+AmbientTalk/2 uses the event loop model to enforce three essential concurrency control properties:
+
+* _Serial execution_: Events are processed sequentially from an event queue, so the handling of a single event is atomic with respect to other events.
+* _Non-blocking communication_: An event loop doesn't suspend computation to wait for other event loops, instead all communication happens strictly as asynchronous event notifications.
+* _Exclusive state access_: Event handlers (object methods) and their associated state belong to a single event loop, which has access to their mutable state. Mutation of other event loop state is only possible indirectly by passing an event notification asking for mutation to occur.
+
+The end result of all this decoupling and isolation of computation is that it is a natural fit for mobile ad hoc networks. In this domain, connections are volatile with limited range and transient failures. Removing coupling based on time or synchronization is a natural fit for the domain, and the communicating event-loop actor model is a natural model for programming these systems. AmbientTalk/2 provides additional features on top of the communicating event-loop model like service discovery. These enable ad hoc network creation as actors near each other can broadcast their existence and advertise common services that can be used for communication.
+
+AmbientTalk/2 is most notable as a reimagining of the communicating event-loops actor model for a modern use case.
 
 # Active Objects
 
