@@ -116,13 +116,6 @@ gRPC was built on top of HTTP/2, and we will cover the specifics of gRPC-Java, b
   <em>Figure 5: gRPC allows for asynchronous language-agnostic message passing via Protocol Buffers.</em>
 </p>
 
-The officially supported languages are listed in Table 2 {% cite gRPC-Languages %}.
-
-<p align="center">
-  <img src="figures/grpc-languages.png" /><br>
-  <em>Table 2: Officially supported languages by gRPC.</em>
-</p>
-
 There are benchmarks being performed on a daily basis to ensure that gRPC performs optimally under high-throughput conditions as illustrated in Figure 6 {% cite gRPC-Benchmark %}.
 
 <p align="center">
@@ -137,6 +130,16 @@ Most of the public Google APIs - including the Speech API, Vision API, Bigtable,
   <em>Figure 7: The public Google APIs have been updated for gRPC, and be found at <a href="https://github.com/googleapis/googleapis/tree/master/google">https://github.com/googleapis/googleapis/tree/master/google</a></em>
 </p>
 
+
+<h3>3.1 <em>Supported Languages</em></h3>
+
+The officially supported languages are listed in Table 2 {% cite gRPC-Languages %}.
+
+<p align="center">
+  <img src="figures/grpc-languages.png" /><br>
+  <em>Table 2: Officially supported languages by gRPC.</em>
+</p>
+
 <h3>3.2 <em>Authentication</em></h3>
 
 There are two methods of authentication that are available in gRPC:
@@ -145,6 +148,8 @@ There are two methods of authentication that are available in gRPC:
 * Google Token (via OAuth2)
 
 gRPC is flexible in that once can implement their custom authentication if that is preferred.
+
+
 
 <h3>3.3 <em>gRPC Java</em></h3>
 
