@@ -216,7 +216,7 @@ You should see the following:
 
 <p align="center">
   <img src="figures/hello-world-server.png" /><br>
-  <em>Figure 8: The Hello World gRPC Server.
+  <em>Figure 8: The Hello World gRPC Server.</em>
 </p>
 
 In the second of the two windows type the following command:
@@ -229,7 +229,7 @@ You should see the following response:
 
 <p align="center">
   <img src="figures/hello-world-client.png" /><br>
-  <em>Figure 9: The Hello World gRPC Client and the response from the Server.
+  <em>Figure 9: The Hello World gRPC Client and the response from the Server.</em>
 </p>
 
 ## References
