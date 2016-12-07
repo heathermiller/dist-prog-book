@@ -4,7 +4,7 @@ title:  "Distributed Programming Languages"
 by: "A Systems Person"
 ---
 
-### Problems of Distributed Programming
+## Problems of Distributed Programming
 
 * Partial failure
 * Consistency (Concurrency)
@@ -16,9 +16,9 @@ For the above points cite "A Note on Distributed Computing," "Fallacies of Distr
 Languages and systems designed for distribution aim to abstract these problems from the application developer.
 
 
-### Three major approaches to distributed languages:
+## Three major approaches to distributed languages:
 
-#### Shared Memory
+### Shared Memory
 
 What is it?
 
@@ -32,7 +32,7 @@ Tries to make many machines look like a single machine.
 This is hard because of consistency and partitioning.
 The logic of the program is simple, but requiring that the system handle shared memory opens up many opportunities for performance bugs.
 
-#### Actor / Object model
+### Actor / Object model
 
 The actor model has its roots in procedural and object oriented programming.
 Communication through RPC or message-passing.
@@ -45,7 +45,7 @@ The system can decide how to most efficiently place actors.
 * Argus
 * Orleans
 
-#### Dataflow model (static and stream)
+### Dataflow model (static and stream)
 
 The dataflow model has its roots in functional programming.
 Some languages that use this model are:
@@ -55,7 +55,7 @@ Some languages that use this model are:
 * RDD
 * Dryad, DryadLinq
 
-#### Which is best? Why?
+### Which is best? Why?
 
 MR vs Actors: depends on problem, solution
 
@@ -74,9 +74,9 @@ Actors:
 
 * Message-passing chapter
 
-### Support for Distribution
+## Support for Distribution
 
-#### Intro
+### Intro
 
 * What is a DSL?
 
@@ -86,14 +86,14 @@ Another definition:
 
 > A domain-specific language is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
 
-#### Where is it in the stack?
+### Where is it in the stack?
 
 * Libraries:
 * Compiler Extension
 * Compiler / Runtime:
 * Hardware
 
-#### Why GPL's not DSL's?
+### Why GPL's not DSL's?
 
 Reasons for moving to GPL's as base for DSL's
 
