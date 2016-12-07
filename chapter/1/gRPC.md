@@ -283,6 +283,10 @@ You should see the following response:
   <em>Figure 10: The Hello World gRPC Client and the response from the Server.</em>
 </p>
 
+<h3>4 <em>Conclusion</em></h3>
+
+This chapter presented an overview of the concepts behing gRPC, HTTP/2 and will be expanded in both breadth and language implementations.  The area of microservices one can see how a server endpoint can actually spawn more endpoints where the message content is the protobuf definition for new endpoints to be generated for load-balancing like for the classical Actor Model.
+
 ## References
 
 ` `[Apigee]: https://www.youtube.com/watch?v=-2sWDr3Z0Wo
