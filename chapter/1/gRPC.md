@@ -116,14 +116,14 @@ gRPC was built on top of HTTP/2, and we will cover the specifics of gRPC-Java, b
   <em>Figure 5: gRPC allows for asynchronous language-agnostic message passing via Protocol Buffers.</em>
 </p>
 
-There are benchmarks being performed on a daily basis to ensure that gRPC performs optimally under high-throughput conditions as illustrated in Figure 6 {% cite gRPC-Benchmark %}.
+To ensure scalability, benchmarks are run on a daily basis to ensure that gRPC performs optimally under high-throughput conditions as illustrated in Figure 6 {% cite gRPC-Benchmark %}.
 
 <p align="center">
   <img src="figures/grpc-benchmark.png" /><br>
   <em>Figure 6: Benchmark showing the queries-per-second on two virtual machines with 32 cores each.</em>
 </p>
 
-Most of the public Google APIs - including the Speech API, Vision API, Bigtable, Pub/Sub, etc. - have been ported to support gRPC, and their definitions can be found at the following location:
+To standardize, most of the public Google APIs - including the Speech API, Vision API, Bigtable, Pub/Sub, etc. - have been ported to support gRPC, and their definitions can be found at the following location:
 
 <p align="center">
   <img src="figures/grpc-googleapis.png" /><br>
