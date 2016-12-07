@@ -79,6 +79,7 @@ Actors:
 #### Intro
 
 * What is a DSL?
+
 > Domain-specific languages are languages tailored to a specific application domain.
 
 > A domain-specific language is a programming language or executable specification language that offer, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
