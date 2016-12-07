@@ -80,7 +80,7 @@ One will notice that there is a number associated with each field element in the
 A 2 48 69
 ```
 
-Thus the language had to be updated to support gRPC and the development of a service message with a request and a response definition was added for version version 3.0 of Protocol Buffers.  The updated implementation would look as follows {% cite HelloWorldProto %}:
+Thus the language had to be updated to support gRPC and the development of a service message with a request and a response definition was added for version version 3.0.0 of Protocol Buffers.  The updated implementation would look as follows {% cite HelloWorldProto %}:
 
 ```
 // The request message containing the user's name.
@@ -100,7 +100,7 @@ service Greeter {
 }
 ```
 <p align="center">
-  <em>Figure 4: Protocol Buffer version 3.0 representing a message data-structure with the accompanied RPC definition.</em>
+  <em>Figure 4: Protocol Buffer version 3.0.0 representing a message data-structure with the accompanied RPC definition.</em>
 </p>
 
 Notice the addition of a service, where the RPC call would use one of the messages as the structure of a <em>Request</em> with the other being the <em>Response</em> message format.
@@ -171,13 +171,30 @@ The connection can be asynchronous and bi-directionally streaming so that data i
 
 The <em>Transport Layer</em> performs the retrieval and placing of binary protocol on the wire.  For <em>gRPC-Java</em> has three implementations, though a user can implement their own: <em>Netty, OkHttp, and inProcess.</em>
 
-<h3>3... <em>gRPC Java</em></h3>
+<h3>3.5 <em>gRPC Java</em></h3>
 
 The Java implementation of gRPC been built with Mobile platform in mind and to provide that capability it requires JDK 6.0 to be supported.  Though the core of gRPC is built with data centers in mind - specifically to support C/C++ for the Linux platform - the Java and Go implementations are two very reliable platform to experiment the microservice ecosystem implementations.
 
-<h3>3... <em>Downloading gRPC Java</em></h3>
+<h3>3.5.1 <em>Downloading gRPC Java</em></h3>
 
-The easiest way to download the gRPC-Java implemenation is by performing the following command:
+The easiest way to download the gRPC-Java implementation is by performing the following command:
+
+```
+git clone -b v1.0.0 https://github.com/grpc/grpc-java.git
+```
+
+Next compile on a Windows machine using Gradle using the following steps - and if you are using any Firewall software it might be necessary to temporarily disable it while compiling gRPC-Java as sockets are used for the tests:
+
+```
+cd grpc-java
+set GRADLE_OPTS=-Xmx2048m
+set JAVA_OPTS=-Xmx2048m
+set DEFAULT_JVM_OPTS="-Dfile.encoding=utf-8"
+echo skipCodegen=true > gradle.properties
+gradlew.bat build -x test
+cd examples
+gradlew.bat installDist
+```
 
 
 <h3>3... <em>Hello World Demonstration</em></h3>
