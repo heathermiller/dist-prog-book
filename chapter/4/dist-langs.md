@@ -7,9 +7,11 @@ by: "A Systems Person"
 ### Problems of Distributed Programming
 
 * Partial failure
-* Consistency
-* Efficiency
+* Consistency (Concurrency)
+* Efficiency (Latency)
 * Scallability
+
+For the above points cite "A Note on Distributed Computing"
 
 Languages and systems designed for distribution aim to abstract these problems from the application developer.
 
