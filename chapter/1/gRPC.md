@@ -145,18 +145,34 @@ The Java implementation of gRPC been built with Mobile platform in mind and to p
 ## References
 
 ` `[Apigee]: https://www.youtube.com/watch?v=-2sWDr3Z0Wo
+
 ` `[Authentication]: http://www.grpc.io/docs/guides/auth.html
+
 ` `[Benchmarks]: http://www.grpc.io/docs/guides/benchmarking.html
+
 ` `[CoreSurfaceAPIs]: https://github.com/grpc/grpc/tree/master/src/core
-[ErrorModel]: http://www.grpc.io/docs/guides/error.html
-[gRPC]: https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md
-[gRPC-Companies]: http://www.grpc.io/about/
-[gRPC-Languages]: http://www.grpc.io/docs/
-[gRPC-Protos]: https://github.com/googleapis/googleapis/ 
-[Netty]: http://netty.io/ 
-[RFC7540]: http://httpwg.org/specs/rfc7540.html  
-[HelloWorldProto]: https://github.com/grpc/grpc/blob/master/examples/protos/helloworld.proto
-[Protobuf-Types]: https://developers.google.com/protocol-buffers/docs/encoding
-[gRPC-Overview]: http://www.grpc.io/docs/guides/
-[gRPC-Languages]: http://www.grpc.io/about/#osp
-[gRPC-Benchmark]: http://www.grpc.io/docs/guides/benchmarking.html
+
+` `[ErrorModel]: http://www.grpc.io/docs/guides/error.html
+
+` `[gRPC]: https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md
+
+` `[gRPC-Companies]: http://www.grpc.io/about/
+
+` `[gRPC-Languages]: http://www.grpc.io/docs/
+
+` `[gRPC-Protos]: https://github.com/googleapis/googleapis/ 
+
+` `[Netty]: http://netty.io/ 
+
+` `[RFC7540]: http://httpwg.org/specs/rfc7540.html  
+
+` `[HelloWorldProto]: https://github.com/grpc/grpc/blob/master/examples/protos/
+helloworld.proto
+
+` `[Protobuf-Types]: https://developers.google.com/protocol-buffers/docs/encoding
+
+` `[gRPC-Overview]: http://www.grpc.io/docs/guides/
+
+` `[gRPC-Languages]: http://www.grpc.io/about/#osp
+
+` `[gRPC-Benchmark]: http://www.grpc.io/docs/guides/benchmarking.html
