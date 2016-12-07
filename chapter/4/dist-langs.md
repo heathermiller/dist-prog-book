@@ -11,6 +11,9 @@ by: "A Systems Person"
 * Efficiency
 * Scallability
 
+Languages and systems designed for distribution aim to abstract these problems from the application developer.
+
+
 ### Three major approaches to distributed languages:
 
 #### Shared Memory
@@ -51,10 +54,14 @@ Some languages that use this model are:
 
 Why is MR all-the-rage?
 
+* MR is DSL for distribution? (wouldn't use it to develop single-machine app (probably))
+
 * Dataflow / MapReduce fundamentally changed the programming style for distributed systems
 * Other models (Actor, DSM) tried to mask distribution
 * By changing the style, programs need necessarily consider communication patterns (disk, network)
 * Although, system may still handle fault tolerance
+
+## Maybe use below topics
 
 ### Why GPL's not DSL's?
 
