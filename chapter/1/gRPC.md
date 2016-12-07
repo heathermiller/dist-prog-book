@@ -81,7 +81,7 @@ Since many streams will compete for the bandwidth of a connection, in order to p
 
 <h3>2 <em>Protocol Buffers with RPC</em></h3>
 
-Though gRPC was built on top of HTTP/2, an IDL had to be used to perform the communication between endpoints.  The natural direction was to use Protocol Buffers is the method of stucturing data for serialization between a server and client.  At the time of the start of gRPC development only version 2.0 (proto2) was available, which only implemented data structures without any request/response mechanism.  An example of a Protocol Buffer data structure would look something like this:
+Though gRPC was built on top of HTTP/2, an IDL had to be used to perform the communication between endpoints.  The natural direction was to use Protocol Buffers is the method of stucturing key-value-based data for serialization between a server and client.  At the time of the start of gRPC development only version 2.0 (proto2) was available, which only implemented data structures without any request/response mechanism.  An example of a Protocol Buffer data structure would look something like this:
 
 ```
 // A message containing the user's name.
@@ -100,7 +100,7 @@ This message will also be encoded for highest compression when sent over the wir
   <em>Table 1: Tag values for Protocol Buffer types.</em>
 </p>
 
-One will notice that there is a number associated with each field element in the Protocol Buffer definition, which represents its <em>tag</em>.  In Figure 3, the field `name` has a tag of `1`.  When a message gets encoded each field will start with a one byte value (8 bits), where the least-significant 3-bit value encode the <em>type</em> and the rest the <em>tag</em>.  In this case tag which is `1`, with a type of 2.  Thus the encoding will be `00001 010`, which has a hexdecimal value of `A`.  The following byte is the length of the string which is `2`, followed by the string as `48` and `69` representing `H` and `i`.  Thus the whole tranmission will look as follows:
+One will notice that there is a number associated with each field element in the Protocol Buffer definition, which represents its <em>tag</em>.  In Figure 3, the field `name` has a tag of `1`.  When a message gets encoded each field (key) will start with a one byte value (8 bits), where the least-significant 3-bit value encode the <em>type</em> and the rest the <em>tag</em>.  In this case tag which is `1`, with a type of 2.  Thus the encoding will be `00001 010`, which has a hexdecimal value of `A`.  The following byte is the length of the string which is `2`, followed by the string as `48` and `69` representing `H` and `i`.  Thus the whole tranmission will look as follows:
 
 ```
 A 2 48 69
