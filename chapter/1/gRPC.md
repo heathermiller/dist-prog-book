@@ -137,10 +137,27 @@ Most of the public Google APIs - including the Speech API, Vision API, Bigtable,
   <em>Figure 7: The public Google APIs have been updated for gRPC, and be found at <a href="https://github.com/googleapis/googleapis/tree/master/google">https://github.com/googleapis/googleapis/tree/master/google</a></em>
 </p>
 
+<h3>3.2 <em>Authentication</em></h3>
 
-<h3>3.1 <em>gRPC Java</em></h3>
+There are two methods of authentication that are available in gRPC:
+
+* SSL/TLS
+* Google Token (via OAuth2)
+
+gRPC is flexible in that once can implement their custom authentication if that is preferred.
+
+<h3>3.3 <em>gRPC Java</em></h3>
 
 The Java implementation of gRPC been built with Mobile platform in mind and to provide that capability it requires JDK 6.0 to be supported.  Though the core of gRPC is built with data centers in mind - specifically to support C/C++ for the Linux platform - the Java and Go implementations are two very reliable platform to experiment the microservice ecosystem implementations.
+
+<h3>3... <em>Downloading gRPC Java</em></h3>
+
+The easiest way to download the gRPC-Java implemenation is by performing the following command:
+
+
+<h3>3... <em>Hello World Demonstration</em></h3>
+
+
 
 ## References
 
