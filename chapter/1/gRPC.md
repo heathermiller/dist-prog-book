@@ -163,7 +163,18 @@ In its simplest form gRPC has a structured set of steps one goes about using it,
 
 Most of these will require tweaking the Protobuf file and testing the throughput to ensure that the network and CPU capacities are optimally maximized.
 
-<h3>3.3 <em>gRPC Java</em></h3>
+<h3>3.4 <em>The gRPC Framework (Stub, Channel and Transport Layer)</em></h3>
+
+One starts by initializing a communication <em>Channel</em> between <em>Client</em> to a <em>Server</em> and storing that as a <em>Stub</em>.  The <em>Credentials</em> are provided to the Channel when being initialized.  These form a <em>Context</em> for the Client's connection to the Server.  Then a <em>Request</em> can be built based on the definition in the Protobuf file.  The Request and associated expected<em>Response</em> is executed by the <em>service</em> constructed in the Protobuf file.  The Response is them parsed for any data coming from the Channel.
+
+The connection can be asynchronous and bi-directionally streaming so that data is constantly flowing back and available to be read when ready.  This allows one to treat the Client and Server as endpoints where one can even adjust not just the flow but also intercept to filter and thus request the data of interest.
+
+That stub can be referenced later in order
+
+
+The Java implementation of gRPC been built with Mobile platform in mind and to 
+
+<h3>3... <em>gRPC Java</em></h3>
 
 The Java implementation of gRPC been built with Mobile platform in mind and to provide that capability it requires JDK 6.0 to be supported.  Though the core of gRPC is built with data centers in mind - specifically to support C/C++ for the Linux platform - the Java and Go implementations are two very reliable platform to experiment the microservice ecosystem implementations.
 
