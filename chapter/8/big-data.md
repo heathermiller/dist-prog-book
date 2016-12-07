@@ -232,15 +232,16 @@ Graph-parallel computation requires every vertex or edge to be processed in the 
 Edge-cuts for partitioning requires random assignment of vertices and edges across all the machines. hus the communication and storage overhead is proportional to the number of edges cut, and this makes balancing the number of cuts a priority. For most real-world graphs, constructing an optimal edge-cut is cost prohibitive, and most systems use random edge-cuts which achieve appropriate work balance, but nearly worst-case communication overhead. 
 
 <figure class="main-container">
-  <img src="./spark_pipeline.png" alt="Vertex cuts" />
+  <img src="./vertex-cuts.png" alt="Vertex cuts" />
 </figure>
 
 ***Vertex-cuts - GraphX’s solution to effective partitioning*** : An alternative approach which does the opposite of edge-cut — evenly assign edges to machines, but allow vertices to span multiple machines. The communication and storage overhead of a vertex-cut is directly proportional to the sum of the number of machines spanned by each vertex. Therefore, we can reduce communication overhead and ensure balanced computation by evenly assigning edges to machines in way that minimizes the number of machines spanned by each vertex.
 
 The GraphX RDG structure implements a vertex-cut representation of a graph using three unordered horizontally partitioned RDD tables. These three tables are gone into in more detail in the paper, but the general purposes are as follows:
-	•	EdgeTable(pid, src, dst, data): Stores adjacency structure and edge data
-	•	VertexDataTable(id, data): Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
-	•	VertexMap(id, pid): Maps from vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
+	- EdgeTable(pid, src, dst, data): Stores adjacency structure and edge data
+	- VertexDataTable(id, data): Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
+	- VertexMap(id, pid): Maps from vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
+	
 A three-way relational join is used to bring together source vertex data, edge data, and target vertex data. The join is straightforward, and takes advantage of a partitioner to ensure the join site is local to the edge table. This means GraphX only has to shuffle vertex data.
 
 ***Operators in GraphX***
