@@ -134,7 +134,7 @@ Most of the public Google APIs - including the Speech API, Vision API, Bigtable,
 
 <p align="center">
   <img src="figures/grpc-googleapis.png" /><br>
-  <em>Figure 7: The public Google APIs have been updated for gRPC, and be found at <em><a href="https://github.com/googleapis/googleapis/tree/master/google">https://github.com/googleapis/googleapis/tree/master/google</a></em>
+  <em>Figure 7: The public Google APIs have been updated for gRPC, and be found at <a href="https://github.com/googleapis/googleapis/tree/master/google">https://github.com/googleapis/googleapis/tree/master/google</a></em>
 </p>
 
 
@@ -150,7 +150,7 @@ The Java implementation of gRPC been built with Mobile platform in mind and to p
 
 ` `[Benchmarks]: http://www.grpc.io/docs/guides/benchmarking.html
 
-[CoreSurfaceAPIs]: https://github.com/grpc/grpc/tree/master/src/core
+` `[CoreSurfaceAPIs]: https://github.com/grpc/grpc/tree/master/src/core
 [ErrorModel]: http://www.grpc.io/docs/guides/error.html
 [gRPC]: https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md
 [gRPC-Companies]: http://www.grpc.io/about/
