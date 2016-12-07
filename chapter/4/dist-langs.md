@@ -59,7 +59,7 @@ Some languages that use this model are:
 
 MR vs Actors: depends on problem, solution
 
-How fine grain is your data and logic?
+How fine grain is your data and logic? (MR job can be built from actor model)
 Does your algorithm map to a batch processing job?
 
 MR:
