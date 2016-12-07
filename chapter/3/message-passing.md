@@ -255,9 +255,8 @@ TODO: where should this live in the chapter?
 
 You might argue that I've ignored some other concurrency primitives that could be considered message-passing or actors at some level. After all, from a high level a Goroutine with channels feels a bit like an actor. As does an RPC system which can buffer sequential calls. I think a lot of discussions of actors are looking at them form a not-so-useful level of abstraction. A lot of the discussions of actors simply take them as something that is a lightweight concurrency primitive which passes messages. I think this view is zoomed out too far, and misses many of the subtleties that differentiate these programming models. Many of these differences stem from the flexibility and scalability of actors. Trying to use CSP-like channels to build a scalable system like you would an actor system would arguably be a tightly-coupled nightmare. The advantages of actors are around the looser coupling, variable topology, and focus on isolation of state and behavior. CSP has a place in building systems, and has proven to be a popular concurrency primitive, but lumping actors in with CSP misses the point of both. Actors are operating at a fundamentally different level of abstraction from CSP.
 
-
 # References
 
-TODO: fill these out
+TODO: Add non-journal references
 
 {% bibliography --file message-passing %}
