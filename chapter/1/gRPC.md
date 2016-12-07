@@ -130,12 +130,12 @@ There are benchmarks being performed on a daily basis to ensure that gRPC perfor
   <em>Figure 6: Benchmark showing the queries-per-second on two virtual machines with 32 cores each.</em>
 </p>
 
-Most of the public Google APIs have been ported to support gRPC and their definitions can be analyzed at the following location:
+Most of the public Google APIs - including the Speech API, Vision API, BigTable, Pub/Sub, etc. - have been ported to support gRPC, and their definitions can be found at the following location:
 
 <p align="center">
-  <em><a href="https://github.com/googleapis/googleapis/tree/master/google">https://github.com/googleapis/googleapis/tree/master/google</a></em><br>
-<p>
-
+  <img src="figures/grpc-googleapis.png" /><br>
+  <em>Figure 7: The public Google APIs have been updated for gRPC, and be found at <em><a href="https://github.com/googleapis/googleapis/tree/master/google">https://github.com/googleapis/googleapis/tree/master/google</a></em>
+</p>
 
 
 <h3>3.1 <em>gRPC Java</em></h3>
