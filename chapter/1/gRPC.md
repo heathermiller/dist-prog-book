@@ -130,7 +130,7 @@ There are benchmarks being performed on a daily basis to ensure that gRPC perfor
   <em>Figure 6: Benchmark showing the queries-per-second on two virtual machines with 32 cores each.</em>
 </p>
 
-Most of the public Google APIs - including the Speech API, Vision API, BigTable, Pub/Sub, etc. - have been ported to support gRPC, and their definitions can be found at the following location:
+Most of the public Google APIs - including the Speech API, Vision API, Bigtable, Pub/Sub, etc. - have been ported to support gRPC, and their definitions can be found at the following location:
 
 <p align="center">
   <img src="figures/grpc-googleapis.png" /><br>
@@ -140,13 +140,13 @@ Most of the public Google APIs - including the Speech API, Vision API, BigTable,
 
 <h3>3.1 <em>gRPC Java</em></h3>
 
-The Java implementation of gRPC been built with Mobile platform in mind and to provide that capability it requires JDK 6.0 to be supported.  Though the core of gRPC is built for data centers specifically to support C/C++ for the Linux platform, the Java and Go implementations are two very reliable platform to experiment the microservice ecosystem implementations.
+The Java implementation of gRPC been built with Mobile platform in mind and to provide that capability it requires JDK 6.0 to be supported.  Though the core of gRPC is built with data centers in mind - specifically to support C/C++ for the Linux platform - the Java and Go implementations are two very reliable platform to experiment the microservice ecosystem implementations.
 
 ## References
 
-[Apigee]: https://www.youtube.com/watch?v=-2sWDr3Z0Wo
-[Authentication]: http://www.grpc.io/docs/guides/auth.html
-[Benchmarks]: http://www.grpc.io/docs/guides/benchmarking.html
+`[Apigee]: https://www.youtube.com/watch?v=-2sWDr3Z0Wo` [Apigee]: https://www.youtube.com/watch?v=-2sWDr3Z0Wo
+`[Authentication]: http://www.grpc.io/docs/guides/auth.html` [Authentication]: http://www.grpc.io/docs/guides/auth.html
+`[Benchmarks]: http://www.grpc.io/docs/guides/benchmarking.html` [Benchmarks]: http://www.grpc.io/docs/guides/benchmarking.html
 [CoreSurfaceAPIs]: https://github.com/grpc/grpc/tree/master/src/core
 [ErrorModel]: http://www.grpc.io/docs/guides/error.html
 [gRPC]: https://github.com/grpc/grpc/blob/master/doc/g_stands_for.md
