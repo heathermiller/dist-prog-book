@@ -49,6 +49,30 @@ As streams are core to the implementation of HTTP/2, it is important to discuss 
   <em>Figure 2: The lifecycle of a HTTP/2 stream.</em>
 </p>
 
+To better understand this diagram, it is important to define some of the terms in it:
+
+<em>PUSH_PROMISE</em> - This is being performed by one endpoint to alert another that it will be sending some data over the wire.
+
+<em>RST_STREAM</em> - This makes termination of a stream possible.
+
+<em>PRIORITY</em> - This is sent by an endpoint on the priority of a stream.
+
+<em>END_STREAM</em> - This flag denotes the end of a <em>DATA</em> frame.
+
+<em>HEADERS</em> - This frame will open a stream.
+
+<em>Idle</em> - This is a state that a stream can be in when it is opened by receiving a <em>HEADERS</em> frame.
+
+<em>Reserved (Local)</em> - To be in this state is means that one has sent a PUSH_PROMISE frame.
+
+<em>Reserved (Remote)</em> - To be in this state is means that it has been reserved by a remote endpoint.
+
+<em>Open</em> - To be in this state means that both endpoints can send frames.
+
+<em>Closed</em> - This is a terminal state.
+
+<em>Half-Closed (Local)</em> - This means that no frames can be sent except for <em>WINDOW_UPDATE</em>, <em>PRIORITY</em>, and <em>RST_STREAM</em>.
+
 <h3>1.4 <em>Flow Control of Streams</em></h3>
 
 Since many streams will compete for the bandwidth of a connection, in order to prevent bottlenecks and collisions in the transmission.  This is done via the <em>WINDOW_UPDATE</em> payload for every stream - and the overall connection as well - to let the sender know how much room the receiving endpoint has for processing new data.
