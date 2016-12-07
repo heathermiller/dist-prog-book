@@ -123,6 +123,18 @@ The officially supported languages are listed in Table 2 {% cite gRPC-Languages 
   <em>Table 2: Officially supported languages by gRPC.</em>
 </p>
 
+There are benchmarks being performed on a daily basis to ensure that gRPC performs optimally under high-throughput conditions as illustrated in Figure 6.
+
+<p align="center">
+  <img src="figures/grpc-benchmark.png" /><br>
+  <em>Figure 6: Benchmark showing the queries-per-second on two virtual machines with 32 cores each.</em>
+</p>
+
+
+<h3>3.1 <em>gRPC Java</em></h3>
+
+The Java implementation of gRPC has been built with Mobile platform in mind and requires support of JDK 6.0 and higher.  There are 
+
 ## References
 
 [Apigee]: https://www.youtube.com/watch?v=-2sWDr3Z0Wo
