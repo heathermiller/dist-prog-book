@@ -196,7 +196,7 @@ cd examples
 gradlew.bat installDist
 ```
 
-If you are having issues with Unicode translation of Git on Windows you can try the following commands after entering the `examples` folder:
+If you are having issues with Unicode (UTF-8) translation when using Git on Windows, you can try the following commands after entering the `examples` folder:
 
 ```
 wget https://raw.githubusercontent.com/benelot/grpc-java/feb88a96a4bc689631baec11abe989a776230b74/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideServer.java
