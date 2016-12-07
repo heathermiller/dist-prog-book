@@ -238,21 +238,23 @@ Edge-cuts for partitioning requires random assignment of vertices and edges acro
 ***Vertex-cuts - GraphX’s solution to effective partitioning*** : An alternative approach which does the opposite of edge-cut — evenly assign edges to machines, but allow vertices to span multiple machines. The communication and storage overhead of a vertex-cut is directly proportional to the sum of the number of machines spanned by each vertex. Therefore, we can reduce communication overhead and ensure balanced computation by evenly assigning edges to machines in way that minimizes the number of machines spanned by each vertex.
 
 The GraphX RDG structure implements a vertex-cut representation of a graph using three unordered horizontally partitioned RDD tables. These three tables are gone into in more detail in the paper, but the general purposes are as follows:
-	- EdgeTable(pid, src, dst, data): Stores adjacency structure and edge data
-	- VertexDataTable(id, data): Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
-	- VertexMap(id, pid): Maps from vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
+
+- `EdgeTable(pid, src, dst, data)`: Stores adjacency structure and edge data.
+-  `VertexDataTable(id, data)`: Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
+- `VertexMap(id, pid)`: Maps from vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
 	
 A three-way relational join is used to bring together source vertex data, edge data, and target vertex data. The join is straightforward, and takes advantage of a partitioner to ensure the join site is local to the edge table. This means GraphX only has to shuffle vertex data.
 
 ***Operators in GraphX***
 Other than standard data-parallel operators like filter, map, leftJoin, and reduceByKey, GraphX supports following graph-parallel operators:
-	•	graph - constructs property graph given a collection of edges and vertices.
-	•	vertices, edges - decompose the graph into a collection of vertices or edges by extracting vertex or edge RDDs.
-	•	mapV, mapE - transform the vertex or edge collection.
-	•	triplets -returns collection of form ((i, j), (PV(i), PE(i, j), PV(j))). The operator essentially requires a multiway join between vertex and edge RDD. This operation is optimized by shifting the site of joins to edges, using the routing table, so that only vertex data needs to be shuffled.
-	•	leftJoin - given a collection of vertices and a graph, returns a new graph which incorporates the property of matching vertices from the given collection into the given graph without changing the underlying graph structure.
-	•	subgraph - returns a subgraph of the original graph by applying predicates on edges and vertices
-	•	mrTriplets (MapReduce triplet) - logical composition of triplets followed by map and reduceByKey. It is the building block of graph-parallel algorithms.
+
+- graph - constructs property graph given a collection of edges and vertices.
+- vertices, edges - decompose the graph into a collection of vertices or edges by extracting vertex or edge RDDs.
+- mapV, mapE - transform the vertex or edge collection.
+- triplets -returns collection of form ((i, j), (PV(i), PE(i, j), PV(j))). The operator essentially requires a multiway join between vertex and edge RDD. This operation is optimized by shifting the site of joins to edges, using the routing table, so that only vertex data needs to be shuffled.
+- leftJoin - given a collection of vertices and a graph, returns a new graph which incorporates the property of matching vertices from the given collection into the given graph without changing the underlying graph structure.
+- subgraph - returns a subgraph of the original graph by applying predicates on edges and vertices
+- mrTriplets (MapReduce triplet) - logical composition of triplets followed by map and reduceByKey. It is the building block of graph-parallel algorithms.
 
 
 ### 1.3 Querying
