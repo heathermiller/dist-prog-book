@@ -11,7 +11,7 @@ by: "A Systems Person"
 * Efficiency (Latency)
 * Scallability
 
-For the above points cite "A Note on Distributed Computing"
+For the above points cite "A Note on Distributed Computing," "Fallacies of Distributed Computing Explained"
 
 Languages and systems designed for distribution aim to abstract these problems from the application developer.
 
@@ -26,6 +26,7 @@ Some examples:
 
 * Linda
 * Orca
+* RPC ( and why RPC is shared-memory )
 
 Tries to make many machines look like a single machine.
 This is hard because of consistency and partitioning.
@@ -39,7 +40,7 @@ Actors/Objects are location agnostic, because state is not shared.
 The system can decide how to most efficiently place actors.
 
 * Erlang
-* Cloud Haskell (I know, right? Why?)
+* Cloud Haskell
 * Emerald
 * Argus
 * Orleans
@@ -51,49 +52,46 @@ Some languages that use this model are:
 
 * Multilisp
 * MapReduce (Spark, Hadoop, etc.)
-
+* RDD
+* Dryad, DryadLinq
 
 #### Which is best? Why?
 
-Why is MR all-the-rage?
+MR vs Actors: depends on problem, solution
+
+How fine grain is your data and logic?
+Does your algorithm map to a batch processing job?
+
+MR:
 
 * MR is DSL for distribution? (wouldn't use it to develop single-machine app (probably))
-
 * Dataflow / MapReduce fundamentally changed the programming style for distributed systems
 * Other models (Actor, DSM) tried to mask distribution
 * By changing the style, programs need necessarily consider communication patterns (disk, network)
 * Although, system may still handle fault tolerance
 
-## Maybe use below topics
+Actors:
 
-### Why GPL's not DSL's?
+* 
+
+### Support for Distribution
+
+#### Intro
+
+* What is a DSL?
+> Domain-specific languages are languages tailored to a specific application domain.
+
+> A domain-specific language is a programming language or executable specification language that offer, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
+
+#### Where is it in the stack?
+
+#### Why GPL's not DSL's?
 
 * problem of domain-composition
 * problem of abstraction
 * problem of ecosystem
 * problem of tumultuous architecture
 * "any gpl + library can act as a dsl" - mernik"
-
-#### Erlang vs C: A Tar and Feathering
-
-{% cite Armstrong2010 --file dist-langs %}
-
-Erlang offers nothing that is unavailable in C.
-
-For example, dynamic code swapping is one of Erlang's major selling points.
-However, code swapping can easily be achieved in C with dynamic linking.
-This approach is analogous to the example offered in the Erlang paper.
-
-Other selling points, such as isolation, concurrency, and message passing can all be accomplished with unix-style system calls.
-Why is this language not considered redundant?
-
-#### MapReduce: A New Hope
-
-Unlike Erlang, MapReduce and DSL's that implement the paradigm are "all the rage."
-Unlike Erlang, MapReduce has experienced adoption because it offers true abstraction of the problems of distributed computing.
-Erlang only provided a way of detecting a process failure; it did not consider machine or network failures.
-
-* MapReduce is a GPL for the domain of distribution
 
 ## References
 
