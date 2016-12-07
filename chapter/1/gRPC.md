@@ -73,6 +73,8 @@ To better understand this diagram, it is important to define some of the terms i
 
 <em>Half-Closed (Local)</em> - This means that no frames can be sent except for <em>WINDOW_UPDATE</em>, <em>PRIORITY</em>, and <em>RST_STREAM</em>.
 
+<em>Half-Closed (Remote)</em> - This means that a frame is not used by the remote endpoint to send frames of data.
+
 <h3>1.4 <em>Flow Control of Streams</em></h3>
 
 Since many streams will compete for the bandwidth of a connection, in order to prevent bottlenecks and collisions in the transmission.  This is done via the <em>WINDOW_UPDATE</em> payload for every stream - and the overall connection as well - to let the sender know how much room the receiving endpoint has for processing new data.
