@@ -72,7 +72,7 @@ MR:
 
 Actors:
 
-* 
+* Message-passing chapter
 
 ### Support for Distribution
 
@@ -84,11 +84,18 @@ Actors:
 
 Another definition:
 
-> A domain-specific language is a programming language or executable specification language that offer, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
+> A domain-specific language is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
 
 #### Where is it in the stack?
 
+* Libraries:
+* Compiler Extension
+* Compiler / Runtime:
+* Hardware
+
 #### Why GPL's not DSL's?
+
+Reasons for moving to GPL's as base for DSL's
 
 * problem of domain-composition
 * problem of abstraction
