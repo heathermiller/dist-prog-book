@@ -42,6 +42,7 @@ The system can decide how to most efficiently place actors.
 * Cloud Haskell (I know, right? Why?)
 * Emerald
 * Argus
+* Orleans
 
 #### Dataflow model (static and stream)
 
@@ -50,7 +51,7 @@ Some languages that use this model are:
 
 * Multilisp
 * MapReduce (Spark, Hadoop, etc.)
-* Orleans (Wait, what??)
+
 
 #### Which is best? Why?
 
