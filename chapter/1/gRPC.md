@@ -149,7 +149,7 @@ There are two methods of authentication that are available in gRPC:
 
 gRPC is flexible in that once can plug in their custom authentication system if that is preferred.
 
-<h3>3.3 <em>gRPC Mechanism</em></h3>
+<h3>3.3 <em>Development Cycle</em></h3>
 
 In its simplest form gRPC has a structured set of steps one goes about using it, which has this general flow:
 
