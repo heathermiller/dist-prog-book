@@ -167,12 +167,9 @@ Most of these will require tweaking the Protobuf file and testing the throughput
 
 One starts by initializing a communication <em>Channel</em> between <em>Client</em> to a <em>Server</em> and storing that as a <em>Stub</em>.  The <em>Credentials</em> are provided to the Channel when being initialized.  These form a <em>Context</em> for the Client's connection to the Server.  Then a <em>Request</em> can be built based on the definition in the Protobuf file.  The Request and associated expected<em>Response</em> is executed by the <em>service</em> constructed in the Protobuf file.  The Response is them parsed for any data coming from the Channel.
 
-The connection can be asynchronous and bi-directionally streaming so that data is constantly flowing back and available to be read when ready.  This allows one to treat the Client and Server as endpoints where one can even adjust not just the flow but also intercept to filter and thus request the data of interest.
+The connection can be asynchronous and bi-directionally streaming so that data is constantly flowing back and available to be read when ready.  This allows one to treat the Client and Server as endpoints where one can even adjust not just the flow but also intercept and decoration to filter and thus request and retrieve the data of interest.
 
-That stub can be referenced later in order
-
-
-The Java implementation of gRPC been built with Mobile platform in mind and to 
+The <em>Transport Layer</em> performs the retrieval and placing of binary protocol on the wire.  For <em>gRPC-Java</em> has three implementations, though a user can implement their own: <em>Netty, OkHttp, and inProcess.</em>
 
 <h3>3... <em>gRPC Java</em></h3>
 
