@@ -105,17 +105,23 @@ service Greeter {
 
 Notice the addition of a service, where the RPC call would use one of the messages as the structure of a <em>Request</em> with the other being the <em>Response</em> message format.
 
-Once of these Proto file get generated, one would then use them to compile with gRPC to for generating the <em>Client</em> and <em>Server</em> files representing the classical two endpoints of a RPC implementation.
+Once of these Proto file gets generated, one would then use them to compile with gRPC to for generating the <em>Client</em> and <em>Server</em> files representing the classical two endpoints of a RPC implementation.
 
 <h3>3 <em>gRPC</em></h3>
 
-gRPC was built on top of HTTP/2, and we will cover the specifics of gRPC-Java, but expand it to all the implementations with time.  gRPC is a framework for 
+gRPC was built on top of HTTP/2, and we will cover the specifics of gRPC-Java, but expand it to all the implementations with time.  gRPC is a cross-platform framework that allows integration across many languages as denoted in Figure 5 {% cite gRPC-Overview %}.
 
 <p align="center">
   <img src="figures/grpc-cross-language.png" /><br>
   <em>Figure 5: gRPC allows for asynchronous language-agnostic message passing via Protocol Buffers.</em>
 </p>
 
+The officially supported languages are listed in Table 2 {% cite gRPC-Languages %}.
+
+<p align="center">
+  <img src="figures/grpc-languages.png" /><br>
+  <em>Table 2: Officially supported languages by gRPC.</em>
+</p>
 
 ## References
 
@@ -132,3 +138,5 @@ gRPC was built on top of HTTP/2, and we will cover the specifics of gRPC-Java, b
 [RFC7540]: http://httpwg.org/specs/rfc7540.html  
 [HelloWorldProto]: https://github.com/grpc/grpc/blob/master/examples/protos/helloworld.proto
 [Protobuf-Types]: https://developers.google.com/protocol-buffers/docs/encoding
+[gRPC-Overview]: http://www.grpc.io/docs/guides/
+[gRPC-Languages]: http://www.grpc.io/about/#osp
