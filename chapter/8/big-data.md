@@ -6,17 +6,17 @@ by: "Jingjing and Abhilash"
 2015 NSDI Ousterhout
 latency numbers that every programmer should know
 ## Outline
-- Programming Models
-  - Data parallelism: what is data parallelism and how do the following models relate to each other?
-    - MapReduce
-    - FlumeJava
-    - Dryad
-    - Spark
-  - Large-scale Parallelism on Graphs
+- 1. Programming Models
+  - 1.1. Data parallelism: what is data parallelism and how do the following models relate to each other?
+    - 1.1.1 MapReduce
+    - 1.1.2 FlumeJava
+    - 1.1.3 Dryad
+    - 1.1.4 Spark
+  - 1.2. Large-scale Parallelism on Graphs
     - Why a separate graph processing model? what is a BSP? working of BSP? Do not stress more since its not a map reduce world exactly.
     - GraphX programming model - discuss disadvantages graph-parallel model to data parallel model for large scale graph processing? how graphX combines the advantages of both the models? representation of a graph in GraphX?  discuss the model, vertex cut partitioning and its importance? graph operations ?
 
-  - Querying: we need more declarative interfaces, built on top MR models.
+  - 1.3. Querying: we need more declarative interfaces, built on top MR models.
     - Sawzall {%cite pike2005interpreting --file big-data %}: first one propose
     - Pig {% cite olston2008pig --file big-data %}: on top of Hadoop, independent of execution platform, in theory can compiled into DryadLINQ too; what is the performance gain/lost? Easier to debug?   
     - Hive {%cite thusoo2009hive --file big-data %}
@@ -25,10 +25,10 @@ latency numbers that every programmer should know
     - Dremel, query natively w/o translating into MR jobs
     - Spark SQL {%cite --file big-data %} - Limitations of Relational alone models? how SparkSQL model overcomes it? goals of SparkSQL? how it leverages the Spark programming model? what is a DataFrame and how is it different from a RDD? what are the operations a DataFrame provides? how is in-memory caching different from Spark?
 
-- Execution Models
-  - MapReduce (intermediate writes to disk): What is the sequence of actions when a MapReduce functions are called? How is write-to-disk good/bad (fault-tolerant/slow)? How does the data are transmitted across clusters efficiently (store locally)? To shorten the total time for MR operations, it uses backup tasks. When MR jobs are pipelined, what optimizations can be performed by FlumeJava? In spite of optimizations and pipelining, what is the inherent limitation (not support iterative algorithm?)
-  - Spark (all in memory): introduce spark architecture, different layers, what happens when a spark job is executed? what is the role of a driver/master/worker, how does a scheduler schedule the tasks and what performance measures are considered while scheduling? how does a scheduler manage node failures and missing partitions? how are the user defined transformations passed to the workers? how are the RDDs stored and memory management measures on workers? do we need checkpointing at all given RDDs leverage lineage for recovery? if so why ?
-  - Graphs :
+- 2. Execution Models
+  - 2.1 MapReduce (intermediate writes to disk): What is the sequence of actions when a MapReduce functions are called? How is write-to-disk good/bad (fault-tolerant/slow)? How does the data are transmitted across clusters efficiently (store locally)? To shorten the total time for MR operations, it uses backup tasks. When MR jobs are pipelined, what optimizations can be performed by FlumeJava? In spite of optimizations and pipelining, what is the inherent limitation (not support iterative algorithm?)
+  - 2.2 Spark (all in memory): introduce spark architecture, different layers, what happens when a spark job is executed? what is the role of a driver/master/worker, how does a scheduler schedule the tasks and what performance measures are considered while scheduling? how does a scheduler manage node failures and missing partitions? how are the user defined transformations passed to the workers? how are the RDDs stored and memory management measures on workers? do we need checkpointing at all given RDDs leverage lineage for recovery? if so why ?
+  - 2.3 Graphs :
     - Pregel :Overview of Pregel. Its implementation and working. its limitations. Do not  stress more since we have a better model GraphX to explain a lot.
     - GraphX : Working on this.
   - SparkSQL Catalyst & Spark execution model : Discuss Parser, LogicalPlan, Optimizer, PhysicalPlan, Execution Plan. Why catalyst? how catalyst helps in SparkSQL , data flow from sql-core-> catalyst->spark-core
@@ -43,31 +43,30 @@ latency numbers that every programmer should know
   - Resource Management: Mesos. New frameworks keep emerging and users have to use multiple different frameworks(MR, Spark etc.) in the same clusters, so how should they share access to the large datasets instead of costly replicate across clusters?
   - Introducing streaming: what happens when data cannot be complete? How does different programming model adapt? windowing `todo: more`
 
-## Programming Models
-### Data parallelism
-*Data parallelism* is to run a single operation on different pieces of the data on different machines in parallel. Comparably, in a sequential computation, typically programmers will implement logic like *"for all elements in the dataset, do operation A"*, where dataset is in the order of terabytes or petabytes aka. big data. The challenges to do this sequential computation in a parallelized manner include how to abstract the different types of computations in a simple and correct way, how to distribute the data to hundreds/thousands of machines, how to handle failures etc.
+## 1 Programming Models
+### 1.1 Data parallelism
+*Data parallelism* is to run a single operation on different pieces of the data on different machines in parallel. Comparably, a sequential computation looks like *"for all elements in the dataset, do operation A"*, where dataset could be in the order of terabytes or petabytes aka. big data and one wants to scale up the processing. The challenges to do this sequential computation in a parallelized manner include how to abstract the different types of computations in a simple and correct way, how to distribute the data to hundreds/thousands of machines, how to handle failures and so on.
 
 <figure class="main-container">
   <img src="{{ site.baseurl }}/resources/img/data-parallelism.png" alt="Data Parallelism" />
 </figure>
 
-*MapReduce* {% cite dean2008mapreduce  --file big-data %} is a programming model proposed by Google to initially satisfy their demand of large-scale indexing for web search service. It provides a simple user program interface and automatically handles the parallelization and distribution. All programmers need to do is to specify *map* and *reduce* functions.
+*MapReduce* {% cite dean2008mapreduce  --file big-data %} is a programming model proposed by Google to initially satisfy their demand of large-scale indexing for web search service. It provides a simple user program interface: *map* and *reduce* functions and automatically handles the parallelization and distribution.
 
-The MapReduce model is simple and powerful, and quickly became very popular among developers. However, when developers start writing real-world applications, they often end up chaining together MapReduce stages. The pipeline of MapReduce forces programmers to write additional coordinating codes, i.e. the development style goes backward from simple logic computation abstraction to lower-level coordination management. And most of time, developers need to understand the execution model to do manual optimizations. *FlumeJava* library intends to provide support for developing data-parallel pipelines. It defers the evaluation, constructs an execution plan from parallel collections, optimizes the plan, and then executes underlying MR primitives. The optimized execution is comparable with hand-optimized pipelines, so there's no need to write raw MR programs directly.
+The MapReduce model is simple and powerful, and quickly became very popular among developers. However, when developers start writing real-world applications, they often end up chaining together MapReduce stages. The pipeline of MapReduce forces programmers to write additional coordinating codes, i.e. the development style goes backward from simple logic computation abstraction to lower-level coordination management. Besides, Developers mostly need to understand the execution model to do manual optimizations. *FlumeJava* library intends to provide support for developing data-parallel pipelines. It defers the evaluation, constructs an execution plan from parallel collections, optimizes the plan, and then executes underlying MR primitives. The optimized execution is comparable with hand-optimized pipelines, so there's no need to write raw MR programs directly.
 
-Microsfot Dryad {% cite isard2007dryad --file big-data %} designed differently from MapReduce and can support more general computations. It abstracts individual computation tasks as vertices, and constructs a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine to construct the execution plan and manage scheduling and optimization. One of the advantages of Dryad over MapReduce is that Dryad vertices can process an arbitrary number of inputs and outputs, while MR supports to a single input and a single output for each vertex.   
-//[`COMMENT: move this to introducing DryadLINQ`] Like MR, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ as a querying language.
+Microsfot *Dryad* {% cite isard2007dryad --file big-data %} designed differently from MapReduce and can support more general computations. It abstracts individual computation tasks as vertices, and constructs a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine to construct the execution plan and manage scheduling and optimization. One of the advantages of Dryad over MapReduce is that Dryad vertices can process an arbitrary number of inputs and outputs, while MR only supports to a single input and a single output for each vertex.   Besides the flexibility of computations, Dryad also allows memory
 
-`PLACEHOLDER FOR INTRO TO SPARK, highlights about MR vs. Spark`  
-// what is Spark? how is it different from map reduce? (RDD/lineage: can support iterative algorithm, interactive analytics;) what is pipelining? why is Spark so powerful - RDD and API? What is a RDD and why is it so efficient? properties of a RDD? why is RDD better than DSM? What are the transformations and actions available in Spark ?
 
-Details about the programming models of MapReduce, Dryad and Spark are discussed in following three sections.
+Dryad expresses computation as acyclic data flows, which might be too expensive for some complex applications, e.g. iterative machine learning algorithms. *Spark* {% cite zaharia2010spark --file big-data%} is a framework that uses functional programming and pipelining to provide such support. It is largely inspired by MapReduce, however, instead of writing data to disk for each job as MapReduce does, user program in Spark can explicitly cache an RDD in memory and reuse the same dataset across multiple parallel operations. This feature makes Spark suitable for iterative jobs and interactive analytics.
 
-**MapReduce**  
-//The motivation for MapReduce is that we want to use hundreds/thousands of machines to do data processing in parallel, but there are issues of how to parallelize the computation, distribute the data and handle failures. MapReduce solves this by abstracting parallelizable computations into simple map and reduce functions. The model can automatically handle the parallelization and distribution, provide fault tolerance, manage I/O scheduling and get proper status updates.
 
-The computation accepts a set of key/value pairs as input and produces a set of key/value pairs as output. The process involves two phases: *Map* and *Reduce*:
-- *Map*, written by the user, accepts a set of key/value pairs("record") as input, applies *map* operation on each record, then it produces a set of intermediate key/value pairs as output.
+Details about the programming models of MapReduce, FlumeJava, Dryad and Spark are discussed in following four sections.
+
+
+### 1.1.1 MapReduce  
+In this model, parallelizable computations are abstracted into map and reduce functions. The computation accepts a set of key/value pairs as input and produces a set of key/value pairs as output. The process involves two phases: *Map* and *Reduce*:
+- *Map*, written by the user, accepts a set of key/value pairs("record") as input, applies *map* operation on each record, then it computes a set of intermediate key/value pairs as output.
 - *Shuffle*, provided by MapReduce library, groups the all the intermediate values of the same key together and pass to *Reduce* function.
 - *Reduce*, also written by the user, accepts an intermediate key and a set of values associated with that key, operate on them, produces zero or one output value.
 
@@ -99,29 +98,52 @@ reduce(String key, Iterator values):
   Emit(AsString(result));
 ```
 
-*Execution*  `TODO: move this to execution and talk about fault-tolerance instead`
-At high level, when the user program calls *MapReduce* function, the input files are split into *M* pieces and it runs *map* function on corresponding splits; then intermediate key space are partitioned into *R* pieces using a partitioning function; After the reduce functions all successfully complete, the output is available in *R* files. The sequences of actions are shown in the figure below. We can see from label (4) and (5) that the intermediate key/value pairs are written/read into disks, this is a key to fault-tolerance in MapReduce model and also a bottleneck for more complex computation algorithms.  
+During executing, the MapReduce library assigns a master node to manage data partition and scheduling,  other nodes can serve as workers to run either *map* or *reduce* operations on demands. More details of the execution model is discussed later. Here, it's worth mentioning that the intermediate results are written into disks and reduce operation will read from disk. This is crucial for fault tolerance.
 
-<figure class="main-container">
-  <img src="{{ site.baseurl }}/resources/img/mapreduce-execution.png" alt="MapReduce Execution Overview" />
-</figure>
+*Fault Tolerance*  
+MapReduce runs on hundreds or thousands of unreliable commodity machines, so the library must provide fault tolerance. The library assumes that master node would not fail, and it monitors worker failures. If no status update is received from a worker on timeout, the master will mark it as failed. Then the master may schedule the associated task to other workers depending on task type and status. The commits of *map* and *reduce* task outputs are atomic, where the in-progress task writes data into private temporary files, once the task succeeds, it negotiate with the master and rename files to complete the task . In the case of failure, the worker discards those temporary files. This guarantees that if the computation is deterministic, the distribution implementation should produce same outputs as non-faulting sequential execution.
 
-*Limitations*  
+*Limitations* `TODO: re-organize`   
 - It only works for batch processing jobs. More sophisticated applications are not easy to be abstracted as a set of map/reduce operations. In sum, it cannot work well for iterative, graph, or incremental processing.
 - MR has to do I/O operation for each job and makes it too slow to support applications that require low latency. `TODO: FIX text and reference` Many a analytics workloads like K-means, logistic regression, graph processing applications like PageRank, shortest path using parallel breadth first search require multiple stages of map reduce jobs. In regular map reduce framework like Hadoop, this requires the developer to manually handle the iterations in the driver code. At every iteration, the result of each stage T is written to HDFS and loaded back again at stage T+1 causing a performance bottleneck. The reason being wastage of network bandwidth, CPU resources and mainly the disk I/O operations which are inherently slow. In order to address such challenges in iterative workloads on map reduce, frameworks like Haloop {% cite bu2010haloop --file big-data %}, Twister {% cite ekanayake2010twister --file big-data %} and iMapReduce {% cite zhang2012imapreduce --file big-data %} adopt special techniques like caching the data between iterations and keeping the mapper and reducer alive across the iterations.
 - The master is a single point of failure.
 - Writing raw MR program still requires plentiful efforts from programmers, especially when real applications require a pipeline of MapReduce jobs and programmers have to write coordinate code to chain together those MR stages.
 
+### 1.1.2 FlumeJava
+FlumeJava was introduced to make it easy to develop, test, and run efficient data-parallel pipelines. FlumeJava represents each dataset as an object and transformation is invoked by using methods on these objects. It constructs an efficient internal execution plan from a pipeline of MapReduce jobs, uses deferred evaluation and optimizes based on plan structures. The debugging ability allows programmers to run on the local machine first and then deploy to large clusters.
+
+*Core Abstraction*  
+- `PCollection<T>`, a immutable bag of elements of type `T`
+- `recordOf(...)`, specifies the encoding of the instance
+- `PTable<K, V>`, a subclass of `PCollection<Pair<K,V>>`, a immutable multi-map with keys of type `K` and values of type `V`
+- `parallelDo()`, can be expressed both the map and reduce parts of MapReduce
+- `groupByKey()`, same as shuffle step of MapReduce
+- `combineValues()`, semantically a special case of `parallelDo()`, a combination of a MapReduce combiner and a MapReduce reducer, which is more efficient than doing all the combining in the reducer.
+
+*Deferred Evaluation*  
+The state of each `PCollection` object is either *deferred* (not yet computed) and *materialized* (computed).
+
+*Example*  
+`TODO: example and explain the execution plan`
+```Java
+PCollection<String> words =
+  lines.parallelDo(new DoFn<String,String>() {
+    void process(String line, EmitFn<String> emitFn) {
+      for (String word : splitIntoWords(line)) {
+        emitFn.emit(word);
+      }
+    }
+  }, collectionOf(strings()));
+```
+
+*Optimizer*  
+`(JJ: placehoder) parallelDo Fusion; MSCR;  overall goal to produce the fewest, most efficient MSCR operations in the final optimized plan`
 
 
-**FlumeJava**  
-FlumeJava was introduced to make it easy to develop, test, and run efficient data-parallel pipelines. FlumeJava represents each dataset as an object and transformation is invoked by using methods on these objects. It constructs an efficient internal execution plan from a pipeline of MapReduce jobs using deferred evaluation and optimizers such as fusions. The debugging ability allows programmers to run on the local machine first and then deploy to large clusters.
-
-
-**Dryad/DrydaLINQ**  
+### 1.1.3 Dryad
 Dryad is a more general and flexible execution engine that execute subroutines at a specified graph vertices. Developers can specify an arbitrary directed acyclic graph to combine computational "vertices" with communication channels (file, TCP pipe, shared-memory FIFO) and  build a dataflow graph. Compared with MapReduce, Dryad can specify an arbitrary DAG that have multiple number of inputs/outputs and support multiple stages. Also it can have more channels and boost the performance when using TCP pipes and shared-memory. But like writing a pipeline of MapReduce jobs, Dryad is a low-level programming model and hard for users to program, thus a more declarative model - DryadLINQ was created to fill in the gap. It exploits LINQ, a query language in .NET and automatically translates the data-parallel part into execution plan and passed to the Dryad execution engine.
 
-**Spark**
+### 1.1.4 Spark
 
 Spark is a fast, in-memory data processing engine with an elegant and expressive development interface which enables developers to efficiently execute machine learning, SQL or streaming workloads that require fast iterative access to datasets. Its a functional style programming model (similar to DryadLINQ) where a developer can create acyclic data flow graphs and transform a set of input data through a map - reduce like operators. Spark provides two main abstractions - distributed in-memory storage (RDD) and parallel operations (based on Scala’s collection API) on data sets high performance processing, scalability and fault tolerance. 
 
@@ -173,7 +195,7 @@ Other benefits include the scheduling of tasks based on data locality to improve
 - `Debugging and profiling` : There is no availability of debugging tools and developers find it hard to realize if a computation is happening more on a single machine or if the data-structure they used were inefficient.
 
 
-### Large-scale Parallelism on Graphs
+### 1.2 Large-scale Parallelism on Graphs
 Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
 
 Also graph algorithms require exchange of messages between vertices. In case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms. One model that is commonly employed for implementing distributed graph processing is the Bulk Synchronous Parallel model.
@@ -189,10 +211,10 @@ BSP model is a message passing synchronous model where -
 
 A notable feature of the model is the complete control on data through communication between every processor at every superstep. Though similar to map reduce model, BSP preserves data in memory across supersteps and helps in reasoning iterative graph algorithms.
 
-### Querying
+### 1.3 Querying
 
 
-## SparkSQL - Where Relational meets Procedural :
+#### SparkSQL - Where Relational meets Procedural :
 Relational interface to big data is good, however, it doesn’t cater to users who want to perform
 
 - ETL to and from various semi or unstructured data sources.
@@ -229,13 +251,18 @@ Winding up - we can compare SQL vs Dataframe vs Dataset as below :
 </figure>
 
 
-## Execution Models
-**MapReduce**, as mentioned in the programming model section, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve it. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages.
+## 2 Execution Models
+**2.1 MapReduce**,   
+as mentioned in the programming model section, the execution model is interesting that all the intermediate key/value pairs are written to and read from disk. The output from distributed computation should be same as one from non-faulting sequential execution of the entire program. And the model relies on the atomic commits of map and reduce task outputs to achieve it. The basic idea is to create private temporary files and rename them only when the task has finished. This makes fault-tolerance easy, one could simple start another one if the worker failed. But this is also the bottleneck to run multiple stages.
+
+*Execution*  `TODO: move this to execution and talk about fault-tolerance instead`
+At high level, when the user program calls *MapReduce* function, the input files are split into *M* pieces and it runs *map* function on corresponding splits; then intermediate key space are partitioned into *R* pieces using a partitioning function; After the reduce functions all successfully complete, the output is available in *R* files. The sequences of actions are shown in the figure below. We can see from label (4) and (5) that the intermediate key/value pairs are written/read into disks, this is a key to fault-tolerance in MapReduce model and also a bottleneck for more complex computation algorithms.  
+
+<figure class="main-container">
+  <img src="{{ site.baseurl }}/resources/img/mapreduce-execution.png" alt="MapReduce Execution Overview" />
+</figure>
 
 
-
-- Pig/HiveQL/SparkSQL
-  - Limitations ?
 
 **Pregel**
 
@@ -370,8 +397,4 @@ Many real-world computations involves a pipeline of MapReduces, and this motivat
 `(JJ: placehoder) parallelDo Fusion; MSCR;  overall goal to produce the fewest, most efficient MSCR operations in the final optimized plan`
 
 
-**Pig Latin** : Pig latin: a not-so-foreign language for data processing. In SIGMOD, pages 1099–1110, 2008.
-
-**Hive** :
-
-**Dremel** :
+//[`COMMENT: move this to introducing DryadLINQ`] Like MR, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ as a querying language.
