@@ -199,14 +199,38 @@ gradlew.bat installDist
 If you are having issues with Unicode translation of Git on Windows you can try the following commands after entering the `examples` folder:
 
 ```
-https://raw.githubusercontent.com/benelot/grpc-java/feb88a96a4bc689631baec11abe989a776230b74/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideServer.java
+wget https://raw.githubusercontent.com/benelot/grpc-java/feb88a96a4bc689631baec11abe989a776230b74/examples/src/main/java/io/grpc/examples/routeguide/RouteGuideServer.java
 
 copy RouteGuideServer.java src\main\java\io\grpc\examples\routeguide\RouteGuideServer.java
 ```
 
-<h3>3 <em>Hello World Demonstration</em></h3>
+<h3>3.5.2 <em>Running the Hello World Demonstration</em></h3>
 
+Make sure you open two Command (Terminal) windows, each within the `grpc-java\examples\build\install\examples\bin` folder.  In the first of the two windows type the following command:
 
+```
+hello-world-server.bat
+```
+
+You should see the following:
+
+<p align="center">
+  <img src="figures/hello-world-server.png" /><br>
+  <em>Figure 8: The Hello World gRPC Server.
+</p>
+
+In the second of the two windows type the following command:
+
+```
+hello-world-client.bat
+```
+
+You should see the following response:
+
+<p align="center">
+  <img src="figures/hello-world-client.png" /><br>
+  <em>Figure 9: The Hello World gRPC Client and the response from the Server.
+</p>
 
 ## References
 
