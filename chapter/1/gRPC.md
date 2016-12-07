@@ -123,7 +123,7 @@ The officially supported languages are listed in Table 2 {% cite gRPC-Languages 
   <em>Table 2: Officially supported languages by gRPC.</em>
 </p>
 
-There are benchmarks being performed on a daily basis to ensure that gRPC performs optimally under high-throughput conditions as illustrated in Figure 6.
+There are benchmarks being performed on a daily basis to ensure that gRPC performs optimally under high-throughput conditions as illustrated in Figure 6 {% cite gRPC-Benchmark %}.
 
 <p align="center">
   <img src="figures/grpc-benchmark.png" /><br>
@@ -152,3 +152,4 @@ The Java implementation of gRPC has been built with Mobile platform in mind and 
 [Protobuf-Types]: https://developers.google.com/protocol-buffers/docs/encoding
 [gRPC-Overview]: http://www.grpc.io/docs/guides/
 [gRPC-Languages]: http://www.grpc.io/about/#osp
+[gRPC-Benchmark]: http://www.grpc.io/docs/guides/benchmarking.html
