@@ -147,9 +147,21 @@ There are two methods of authentication that are available in gRPC:
 * SSL/TLS
 * Google Token (via OAuth2)
 
-gRPC is flexible in that once can implement their custom authentication if that is preferred.
+gRPC is flexible in that once can plug in their custom authentication system if that is preferred.
 
+<h3>3.3 <em>gRPC Mechanism</em></h3>
 
+In its simplest form gRPC has a structured set of steps one goes about using it, which has this general flow:
+
+<em>1. Download gRPC for the language of interest.</em>
+
+<em>2. Implement the Request and Response definition in a ProtoBuf file.</em>
+
+<em>3. Compile the ProtoBuf file and run the code-generators for the the specific language.  This will generate the Client and Server endpoints.</em>
+
+<em>4. Customize the Client and Server code for the desired implementation.</em>
+
+Most of these will require tweaking the Protobuf file and testing the throughput to ensure that the network and CPU capacities are optimally maximized.
 
 <h3>3.3 <em>gRPC Java</em></h3>
 
