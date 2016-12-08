@@ -13,7 +13,7 @@ In this section, we present an overview of these three problems and their impact
 
 ### Partial Failure
 
-On a single-machine environment, a crash means that either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
+In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
 If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge about the failure.
 For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about another's state, etc.
 
