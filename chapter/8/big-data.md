@@ -456,8 +456,10 @@ Hence, in Spark SQL, transformation of user queries happens in four phases :
 
 
 ## 3. Big Data Ecosystem
-
-
+`TODO: text`
+<figure class="main-container">
+  <img src="./ecosystem.png" alt="SparkSQL optimization plan Overview" />
+</figure>
 
 
 ## References
