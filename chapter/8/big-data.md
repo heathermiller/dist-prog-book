@@ -198,6 +198,13 @@ Apart from Sawzal, Pig and Hive are the other major components that sit on top o
 
 Hive {% cite thusoo2009hive --file big-data %} is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.  It has a component called *metastore* that are created and reused each time the table is referenced by HiveQL like the way traditional warehousing solutions do. The drawback to using Hive is programmers have to be familiar with basic techniques and best practices for running their Hive queries at maximum speed as it depends on the Hive optimizer. Hive requires developers  train the Hive optimizer for efficient optimization of their queries.
 
+Relational interface to big data is good, however, it doesn’t cater to users who want to perform
+
+- ETL to and from various semi or unstructured data sources.
+- advanced analytics like machine learning or graph processing.
+
+These user actions require best of both the worlds - relational queries and procedural algorithms. Pig Latin and Spark SQL bridges this gap by letting users to seamlessly intermix both relational and procedural API.
+
 Pig Latin {% cite olston2008pig --file big-data%} aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. However, Pig offers 
 
 The following subsections will discuss Hive, Pig Latin, SparkSQL in details.
@@ -261,14 +268,8 @@ output = FOREACH big_groups GENERATE
 *Debugging Environment* Pig Latin has a novel interactive debugging environment that can generate a concise example data table to illustrate output of each step.
 
 ### 1.2.x SparkSQL  :
-Relational interface to big data is good, however, it doesn’t cater to users who want to perform
 
-- ETL to and from various semi or unstructured data sources.
-- advanced analytics like machine learning or graph processing.
-
-These user actions require best of both the worlds - relational queries and procedural algorithms. Spark SQL bridges this gap by letting users to seamlessly intermix both relational and procedural API.
-
-Hence, the major contributions of Spark SQL are the Dataframe API and the Catalyst. Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
+The major contributions of Spark SQL are the Dataframe API and the Catalyst. Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
 
 ***Programming API***
 
