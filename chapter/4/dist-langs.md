@@ -6,10 +6,27 @@ by: "A Systems Person"
 
 ## Problems of Distributed Programming
 
-* Partial failure
-* Consistency (Concurrency)
-* Efficiency (Latency)
-* Scallability
+There are problems that exist in distributed system environments that do not exist in single-machine environments.
+For example, programs running on distributed systems must be resilient to partial failure.
+In a single-machine environment, a program is either running or crashed.
+When instructions are distributed accross multiple machines, the program can be running, crashed, or partially crashed.
+Programs, systems, and languages designed for distribution must be able to tolerate problems such as partial failure.
+Furthermore, they must abstract some or all of these problems from the application developer and application logic.
+
+### Partial Failure
+
+On a single-machine environment, a crash means that either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
+If an application consists of multiple communicating processes, it is possible for some components to remain running when others have crashed.
+
+### Consistency (Concurrency)
+
+
+
+### Efficiency (Latency)
+
+
+
+### Scallability
 
 For the above points cite "A Note on Distributed Computing," "Fallacies of Distributed Computing Explained"
 
@@ -93,7 +110,7 @@ Another definition:
 * Compiler / Runtime:
 * Hardware
 
-### Why GPL's not DSL's?
+### Why DSL's as Libraries?
 
 Reasons for moving to GPL's as base for DSL's
 
