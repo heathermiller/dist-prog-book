@@ -7,30 +7,25 @@ by: "A Systems Person"
 ## Problems of Distributed Programming
 
 There are problems that exist in distributed system environments that do not exist in single-machine environments.
-For example, programs running on distributed systems must be resilient to partial failure.
-In a single-machine environment, a program is either running or crashed.
-When instructions are distributed accross multiple machines, the program can be running, crashed, or partially crashed.
-Programs, systems, and languages designed for distribution must be able to tolerate problems such as partial failure.
-Furthermore, they must abstract some or all of these problems from the application developer and application logic.
+Partial failure, concurrency, and latency are three problems that make distributed computing fundamentally different from local computing.
+In order to understand the design decisions behind programming languages and systems for distributed computing, it is necessary to discuss these three problems that make distributed computing unique.
+In this section, we present an overview of these three problems and their impact on distributed programming models.
 
 ### Partial Failure
 
 On a single-machine environment, a crash means that either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
-If an application consists of multiple communicating processes, it is possible for some components to remain running when others have crashed.
+If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge about the failure.
+For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about another's state, etc.
+
+Because of the presence of a network, in a distributed computing environment it is not possible to know the source of failure.
+Failure in a distributed settings means either the network or the host has failed (or both).
+Further, if the failure is network related, it is possible for the network to "come back up" at some future time.
 
 ### Consistency (Concurrency)
 
 
 
-### Efficiency (Latency)
-
-
-
-### Scallability
-
-For the above points cite "A Note on Distributed Computing," "Fallacies of Distributed Computing Explained"
-
-Languages and systems designed for distribution aim to abstract these problems from the application developer.
+### Latency
 
 
 ## Three major approaches to distributed languages:
