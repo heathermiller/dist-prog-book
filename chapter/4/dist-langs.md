@@ -17,16 +17,49 @@ On a single-machine environment, a crash means that either the machine has faile
 If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge about the failure.
 For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about another's state, etc.
 
-Because of the presence of a network, in a distributed computing environment it is not possible to know the source of failure.
-Failure in a distributed settings means either the network or the host has failed (or both).
-Further, if the failure is network related, it is possible for the network to "come back up" at some future time.
+* Failure in a single-machine setting
+* Failure in a distributed setting
+  * 2 sources, network and host
+  * no central manager (no knowledge)
+  * non-determinism
+  * consistency (leave until next section)
+  * control is not returned to the caller, message or response may "vanish"
+  
+* Impact, methods of dealing with partial failure
+  * recompute, duplicate computation (MR, RDD, Hadoop)
+  * 2-phase commit (Argus)
+  * redundancy (MR (spark's duplicate master), Orleans, Argus)
+  * checkpoint-restore (Naiad, Hadoop)
 
 ### Consistency (Concurrency)
 
+* Local
+  * enforce consistency with locks
+  * state located under one resource manager (partial local crash)
+  
 
+* Distributed
+  * preserve state in instance of failure
+ 
+* Methods
+  * sequencer
+  * message queues
+  * read only vs. write ops
 
 ### Latency
 
+* process locality
+* minimize communication
+* 
+
+### The CAP Theorem
+
+Indeed, these three issues of distributed computing are not disjoint.
+A solution designed to solve one problem may emphasize another.
+
+* Consistency
+* Availability
+* Partitioning
 
 ## Three major approaches to distributed languages:
 
