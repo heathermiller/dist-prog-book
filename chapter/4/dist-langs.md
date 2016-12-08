@@ -67,7 +67,7 @@ For example, a process can be restored based on a checkpoint, another process in
 ### The CAP Theorem
 
 Indeed, these three issues of distributed computing are not disjoint.
-A solution designed to solve one problem may emphasize another.
+A solution designed to solve one problem may exacerbate another.
 
 * Consistency
 * Availability
@@ -77,10 +77,9 @@ A solution designed to solve one problem may emphasize another.
 
 ### Shared Memory
 
-What is it?
+* Definition
 
-Some examples:
-
+* Mirage
 * Linda
 * Orca
 * RPC ( and why RPC is shared-memory )
