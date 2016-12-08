@@ -203,9 +203,11 @@ Relational interface to big data is good, however, it doesn’t cater to users w
 - ETL to and from various semi or unstructured data sources.
 - advanced analytics like machine learning or graph processing.
 
-These user actions require best of both the worlds - relational queries and procedural algorithms. Pig Latin and Spark SQL bridges this gap by letting users to seamlessly intermix both relational and procedural API.
+These user actions require best of both the worlds - relational queries and procedural algorithms. Pig Latin and Spark SQL bridges this gap by letting users to seamlessly intermix both relational and procedural API. Both the frameworks free the programmer from worrying about internal execution model by providing implicit optimization on the user input DAG of transformations.
 
-Pig Latin {% cite olston2008pig --file big-data%} aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. However, Pig offers 
+Pig Latin {% cite olston2008pig --file big-data%} aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. 
+
+SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.
 
 The following subsections will discuss Hive, Pig Latin, SparkSQL in details.
 
