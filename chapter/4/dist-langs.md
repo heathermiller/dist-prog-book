@@ -17,7 +17,6 @@ On a single-machine environment, a crash means that either the machine has faile
 If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge about the failure.
 For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about another's state, etc.
 
-* Failure in a single-machine setting
 * Failure in a distributed setting
   * 2 sources, network and host
   * no central manager (no knowledge)
@@ -36,10 +35,11 @@ For example, a process can be restored based on a checkpoint, another process in
 * Local
   * enforce consistency with locks
   * state located under one resource manager (partial local crash)
-  
 
 * Distributed
   * preserve state in instance of failure
+  * concurrent method invocations / messages
+  * operations on replicated objects (for scalability)
  
 * Methods
   * sequencer
@@ -48,10 +48,22 @@ For example, a process can be restored based on a checkpoint, another process in
 
 ### Latency
 
-* process locality
-* minimize communication
-* 
+* Local
+  * operations are relatively fast
+  * topology doesn't change
 
+* Distributed
+  * Network failures and recovery
+  * changing topology
+  * efficiency
+
+* Methods
+  * process locality (static, dynamic analysis)
+  * minimize communication
+  * data replication (Orca)
+  * pipelining (HTTP)
+  * asynchronous callbacks
+  
 ### The CAP Theorem
 
 Indeed, these three issues of distributed computing are not disjoint.
