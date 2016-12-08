@@ -116,9 +116,30 @@ Till now we have talked about what is stream processing and what are the differe
 
 Despite all the differences among them, they all started with more or less the same goal: to be *the* stream processing system that would be used by companies, and we showed several examples of why companies might need such system. In this section, we would discuss two companies that use the stream processing system as the core of their bussiness: Twitter and Spotify.
 ###Twitter
+
+Twitter is one of the 'go-to' exmaples that people would think of when considering large scale stream processing system, since it has a huge amount of data that needed to be processed in real-time. Twitter bought the company that created *Storm* and used *Storm* as its real-time analysis tool for several years. However, as the data volume along with the more complex use cases increased, Twitter needed to build a new real-time stream data processing system as *Storm* can no longer satisfies the new requirements. We would talk about how *Storm* was used at Twitter and then the system that tey built to replace *Storm*-*Heron*.
+
 ####Storm@Twitter
+
+Twitter requires processing complext computation on streaming data in real-time since each interaction with a user requires making a number of complex decisions, often based on data that has just been created, and they use *Storm* as the real-time distributed stream data processing engine. As we described before, *Storm* represents one of the early open-source and popular stream processing systems that is in use today, and was developed by Nathan Marz at BackType which was acquired by Twitter in 2011. After the acquisition, *Storm* has been improved and open-sourced by Twitter and then picked up by various other organizations.
+
+We will first briefly introduce the structure of *Storm* at Twitter. *Storm* runs on a distributed cluster, and clients submit topologies to a master node, which is in charge of distributing and coordinating the execution of the topologies. The actual bolts and spouts are tasks, and multiple tasks are grouped into executor, multiple executors are in turn grouped into a worker. The worker process would then be distributed to an actual worker node (i.e., machine), where there can be multiple worker processes be running on. Each worker node runs a supervisor that communicates with the master node thus the state of the computation can be tracked.
+
+As shown before, *Storm* can guarantee each tuple is processed 'at least once', however, at Twitter, *Storm* can provide two types of semantic guarantees-'at least once' and 'at most once'. 'At least once' semantic is guaranteed by the directed acyclic graph as we showed before, and 'at most once' semantic is guaranteed by dropping the tuple in case of a failure (e.g., by disabling the acknowledgements of each tuple). Note that for 'at least once' semantic, the coordinators (i.e., Zookeeper) would checkpoint each processed tuple in the topology, and the system can start processing tuples from the last 'checkpoint' that is recorded once recovered from a failure.
+
+*Storm* fulfilled many requirements at Twitter with satisfactory performance. *Storm* was running on hundreds of servers and several hundreds of topologies ran on these clusters some of which run on more than a few hundred nodes, terabytes of data flows through the cluster everyday and generated several billions of output tuples. These topologies were used to do both simple tasks such as filtering and aggregating the content of various streams and complex tasks such as machine learning on stream data. *Storm* was resilient to failures and achieved relatively low latency, a machine can be taken down for maintainance without interrupting the topology and the 99% response time for processing a tuple is close to 1ms.
+
+In conclusion, *Storm* was a critical infrastructure at Twitter that powered many of the real-time data-driven decisions that were made at Twitter.
+
 ####Twitter Heron 
 
+*Storm* has long serverd as the core of Twitter for real-time analysis, however, as the scale of data being processed has increased, along with the increase in the diversity and the number of use cases, many limitations of *Storm* became apparent.
+
+There are several issues with *Storm* that make using is at Twitter become challenging. The first challenge is debug-bility, there is no clean mapping from the logical units of computation in the topology to each physical process, this makes finding the root cause of misbehavior extremely hard. Another challenge is as the cluster resouces becomes precious, the need for dedicated cluster resources in *Storm* leads to inefficiency and it is better to share resources across different types of systems. In addition, since in *Storm* provisioning a new production topology needs manual isolation of machines, this makes the management process cumbersome. Finally, Twitter needs a more efficient system, simply with the increase scale, any improvement in performance can translate to huge benefit.
+
+Twitter realized in order to meet all the needs, they needed a new real-time stream data processing system-Heron, which is API-compatible with Storm and provides significant performance improvements, lower resouce consumption along with better debug-ability scalability and manageability.
+
+A key design goal for Heron is compatibility with the Storm API, thus Heron runs topologies, graphs with spouts and bolts like Storm.
 
 ###Spotify
 
