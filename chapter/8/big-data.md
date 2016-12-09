@@ -468,6 +468,32 @@ Hence, in Spark SQL, transformation of user queries happens in four phases :
   <img src="./ecosystem.png" alt="SparkSQL optimization plan Overview" />
 </figure>
 
+***Spark Ecosystem***
+
+Apache Spark's rich-ecosystem constitutes of third party libraries like Mesos/Yarn and several major components that have been already discussed in this articlelike Spark-core, SparkSQL, GraphX.
+In this section we will discuss the remaining yet very important components/libraries which help Spark deliver high performance.
+
+<figure class="main-container">
+  <img src="./spark-ecosystem.png" alt="Spark ecosystem" />
+</figure>
+
+*Spark Streaming - A Spark component for streaming workloads*
+
+Spark achieves fault tolerant, high throughput data streaming workloads in real-time through a light weight Spark Streaming API. Spark streaming is based on Discretized Streams model. Spark Streaming processes streaming workloads as a series of small batch workloads by leveraging the fast scheduling capacity of Apache Spark Core and fault tolerance capabilities of a RDD. A RDD in here represents each batch of streaming data and transformations are applied on the same. Data source in Spark Streaming could be from many a live streams like Twitter, Apache Kafka, Akka Actors, IoT Sensors, Amazon Kinesis, Apache Flume, etc. Spark streaming also enables unification of batch and streaming workloads and hence developers can use the same code for both batch and streaming workloads. It supports integration of streaming data with historical data. 
+
+
+*Apache Mesos*
+
+Apache Mesos is an open source cluster/resource manager developed at the University of California, Berkley and used by  companies such  as Twitter, Airbnb, Netflix etc. for handling workloads in a distributed environment through dynamic resource sharing and isolation. It aids in the deployment and management of applications in large-scale clustered environments. Mesos abstracts node allocation by combining the existing resources of the machines/nodes in a cluster into a single pool and enabling fault-tolerant elastic distributed systems. Variety of workloads can utilize the nodes from this single pool voiding the need of allocating specific machines for different workloads. Mesos is highly scalable, achieves fault tolerance through Apache Zookeeper and is a efficient CPU and memory-aware resource scheduler.
+
+
+*Alluxio/Tachyon*
+
+Alluxio/Tachyon is an open source memory-centric distributed storage system that provides high throughput writes and reads enabling reliable data sharing at memory-speed across cluster jobs. Tachyon can integrate with  different computation frameworks, such as Apache Spark and Apache MapReduce. In the big data ecosystem, Tachyon fits between computation frameworks or jobs like spark or mapreducce and various kinds of storage systems, such as Amazon S3, OpenStack Swift, GlusterFS, HDFS, or Ceph. It caches the frequently read datasets in memory, thereby avoiding going to disk to load every dataset. In Spark RDDs can automatically be stored inside Tachyon to make Spark more resilient and avoid GC overheads.
+
+
+
+
 
 ## References
 {% bibliography --file big-data %}
