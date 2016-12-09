@@ -150,6 +150,13 @@ Heron addresses the challenges of *Storm*. First, each task is performed by a si
 *Storm* has been decommissioned and Heron is now the de-facto streaming system at Twitter and an interesting note is that after migrating all the topologies to Heron, there was an overall 3X reduction in hardware. Not only Heron reduces the infrastracture needed, it also outperform *Storm* by delivering 6-14X improvements in throughput, and 5-10X reductions in tuple latencies.
 
 ###Spotify
+Another company that deployes large scale distributed system is Spotify. Every small piece of information, such as listening to a song or searching an artist, is sent to Spotify servers and processed. There are many features of Spotify that need such stream processing system, such as music/playlist recommendations. Originally, Spotify would collect all the data generated from client softwares and store them in their HDFS, and those data would then be processed on hourly basis by a batch job (i.e., the data collected each hour would be stored and processed together).
+
+In the original Spotify structure, each job must determine, with high probability, that all data from the hourly bucket has successflly written to a persistent storage before firing the job. Each job were running as a batch job by reading the files from the storage, so late-arriving data for already completed bucket can not be appended since jobs generally only read data once from a hourly bucket, thus each job has to treat late data differently. All late data is written to a currently open hourly bucket then. 
+
+Spotify then decided to use *Google Dataflow*, since the features provided by it is exactly what Spotify wants. The previous batch jobs can be written as streaming jobs with one hour window size, and all the data stream can be grouped based on both window and key, while the late arriving data can be gracefully handled if the controlling is set to *accumulating & retracting*. Also, *Google Dataflow* also reduces the export latency of the hourly analysis results, since when assigning windows, Spotify would have an early trigger that is set to emit pane (i.e., result) every N tuples until the window is closed.
+
+The worst end-to-end latency observed with new Spotify system based on *Google Dataflow* is four times lower than the previous system and also with much lower operational overhead.
 
 {% cite Uniqueness --file streaming %}
 
