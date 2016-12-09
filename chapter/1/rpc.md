@@ -4,7 +4,7 @@ title:  "RPC is Not Dead: Rise, Fall and the Rise of Remote Procedure Calls"
 by: "Muzammil Abdul Rehman and Paul Grosu"
 ---
 
-## Introduction
+## Introduction:
 
 *Remote Procedure Call* (RPC) is a design *paradigm* that allow two entities to communicate over a communication channel in a general request-response mechanism. It was initially built as a tool for outsourcing computation to a server in a distributed system, however, it has evolved over the years to build modular, scalable, distributed, language-agnostic ecosystem of applications. This RPC *paradigm* has been part of the driving force in creating truly revolutionizing distributed systems and giving rise to various communication schemes and protocols between diverse systems.
 
@@ -168,7 +168,7 @@ Although, it's difficult to specifically choose one over the other, however, wit
 
 **Note:** This study is performed in December 2016 so the results are expected to change with time. 
 
-## Applications
+## Applications:
 
 Since its inception, various papers have been published in applying RPC paradigm to different domains, as well as using RPC implementations to create new systems. Here are some of applications and systems that incorporated RPC.
 
@@ -208,7 +208,7 @@ RPC can be defined as the "glue" that holds all the microservices together{% cit
 
 An example of a microservices ecosystem that uses futures/promises is Finagle at Twitter.
 
-## Security in RPC
+## Security in RPC:
 
 The initial RPC implementation {% cite implementingrpc --file rpc %} was developed for an isolated LAN network and didn't focus much on security. There're various attack surfaces in that model, from the malicious registry, to a malicious server, to a client targeting for Denial-of-Service to Man-in-the-Middle attack between client and server.
 
@@ -218,7 +218,7 @@ For example, the Oracle Network File System uses a *Secure RPC*{% cite oraclenfs
 
 Although, it's possible to come up with a *Threat Model* that would make an RPC implementation insecure to use, however, one has to understand that using any distributed system increases the attack surface anyways and claiming one *paradigm* to be more secure than another would be a biased statement, since *paradigms* are generally an idea and it depends on different system designers to use these *paradigms* to build their systems and take care of features specific to real systems, like security and load-balancing. There's always a possibility of rerouting a request to a malicious server(if the registry gets hacked), or there's no trust between the *caller* and *callee*. However, we maintain that RPC *paradigm* is not secure or insecure(for that matter), and that the most secure systems are the ones that are in an isolated environment, disconnected from the public internet with a self-destruct mechanism{% cite self --file rpc %} in place, in an impenetrable bunker, and guarded by the Knights Templar(*they don't exist! Well, maybe Fort Meade comes close*).
 
-## Discussion
+## Discussion:
 
 RPC *paradigm* shines the most in *request-response* mechanisms. Futures and Promises also appear to a new breed of RPC. This leads one to question, as to whether every *request-response* system is a modified implementation to of the RPC *paradigm*, or does it actually bring anything new to the table? These modern communication protocols, like HTTP and REST, might just be a different flavor of RPC. In HTTP, a client *requests* a web page(or some other content), the server then *responds* with the required content. The dynamics of this communication might be slightly different from your traditional RPC, however, an HTTP Stateless server adheres to most of the concepts behind RPC *paradigm*. Similarly, consider sending a request to your favorite Google API. Say, you want to translate your latitude/longitude to an address using their Reverse Geocoding API, or maybe want to find out a good restaurant in your vicinity using their Places API, you'll send a *request* to their server to perform a *procedure* that would take a few input arguments, like the coordinates, and return the result. Even though these APIs follow a RESTful design, it appears to be an extension to the RPC *paradigm*.
 
