@@ -97,7 +97,7 @@ Orca is a programming language built for distribution and is based on the DSM mo
 Orca expresses parallelism explicitly through processes.
 Processes in Orca are similar to procedures, but are concurrent instead of serial.
 When a process is forked, it can take parameters that are either passed as a copy of the original data, or passed as a *shared data-object*.
-Processes can then communicate through these shared objects.
+Processes communicate through these shared objects.
 
 Shared data objects in Orca are similar to objects in OOP.
 An object is defined abstractly by a name and a set of interfaces.
@@ -107,22 +107,6 @@ Although serializability alone does not eliminate indeterminism from Orca progra
 
 Another key feature of Orca is the ability to express symbolic data structures as shared data objects.
 Because shared data is expressed through data-objects, it is easy to serialize, for instance, operations on a binary tree.
-
-* processes - for distribution, sharing data
-    * concurrency is explicit
-    * control over where processes are located
-    * invocation ( fork( parameters ) [ on CPU # ]; )
-* abstract data types - shared data objects
-    * similar to objects in OOP
-    * interfaces
-    * operations on objects (methods) are indivisible (serializable)
-    * talk about their implementation
-
-#### RPC ( and why RPC is shared-memory )
-
-Tries to make many machines look like a single machine.
-This is hard because of consistency and partitioning.
-The logic of the program is simple, but requiring that the system handle shared memory opens up many opportunities for performance bugs.
 
 ### Actor / Object model
 
