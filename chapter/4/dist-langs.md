@@ -78,13 +78,14 @@ A solution designed to solve one problem may exacerbate another.
 ### Distributed Shared Memory
 
 Virtual memory provides a powerful abstraction for processes.
-It allows each program running on a machine to believe it is the sole user of the machine, as well as provide each process with more (or less) memory addresses than may be physically present.
+It allows each process running on a machine to believe it is the sole user of the machine, as well as provide each process with more (or less) memory addresses than may be physically present.
 The operating system is responsible for mapping virtual memory addresses to physical ones and swapping addresses to and from disk.
 
-Distributed takes the virtual memory abstraction one step further by allowing virtual addresses to be mapped to physical memory regions on  remote machines.
+Distributed shared memory (DSM) takes the virtual memory abstraction one step further by allowing virtual addresses to be mapped to physical memory regions on  remote machines.
 Given such an abstraction, programs can communicate simply by reading from and writing to shared memory addresses.
-Distributed shared memory is appealing because the programming model is the same for local and distributed systems.
+DSM is appealing because the programming model is the same for local and distributed systems.
 However, it requires an underlying system to function properly.
+Mirage, Linda, and Orca are three systems that use distributed shared memory to provide a distributed programming model.
 
 #### Mirage
 
@@ -92,7 +93,30 @@ However, it requires an underlying system to function properly.
 
 #### Orca
 
+Orca is a programming language built for distribution and is based on the DSM model.
+Orca expresses parallelism explicitly through processes.
+Processes in Orca are similar to procedures, but are concurrent instead of serial.
+When a process is forked, it can take parameters that are either passed as a copy of the original data, or passed as a *shared data-object*.
+Processes can then communicate through these shared objects.
 
+Shared data objects in Orca are similar to objects in OOP.
+An object is defined abstractly by a name and a set of interfaces.
+An implementation of the object defines any private data fields as well as the interfaces (methods).
+Importantly, these interfaces are gauranteed to be indivisible, meaning that simultaneous calls to the same interface are serializable.
+Although serializability alone does not eliminate indeterminism from Orca programs, it keeps the model simple while it allows programmers to construct richer, multi-operation locks for arbitrary semantics and logic.
+
+Another key feature of Orca is the ability to express symbolic data structures as shared data objects.
+Because shared data is expressed through data-objects, it is easy to serialize, for instance, operations on a binary tree.
+
+* processes - for distribution, sharing data
+    * concurrency is explicit
+    * control over where processes are located
+    * invocation ( fork( parameters ) [ on CPU # ]; )
+* abstract data types - shared data objects
+    * similar to objects in OOP
+    * interfaces
+    * operations on objects (methods) are indivisible (serializable)
+    * talk about their implementation
 
 #### RPC ( and why RPC is shared-memory )
 
