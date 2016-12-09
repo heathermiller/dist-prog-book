@@ -75,14 +75,26 @@ A solution designed to solve one problem may exacerbate another.
 
 ## Three major approaches to distributed languages:
 
-### Shared Memory
+### Distributed Shared Memory
 
-* Definition
+Virtual memory provides a powerful abstraction for processes.
+It allows each program running on a machine to believe it is the sole user of the machine, as well as provide each process with more (or less) memory addresses than may be physically present.
+The operating system is responsible for mapping virtual memory addresses to physical ones and swapping addresses to and from disk.
 
-* Mirage
-* Linda
-* Orca
-* RPC ( and why RPC is shared-memory )
+Distributed takes the virtual memory abstraction one step further by allowing virtual addresses to be mapped to physical memory regions on  remote machines.
+Given such an abstraction, programs can communicate simply by reading from and writing to shared memory addresses.
+Distributed shared memory is appealing because the programming model is the same for local and distributed systems.
+However, it requires an underlying system to function properly.
+
+#### Mirage
+
+#### Linda
+
+#### Orca
+
+
+
+#### RPC ( and why RPC is shared-memory )
 
 Tries to make many machines look like a single machine.
 This is hard because of consistency and partitioning.
