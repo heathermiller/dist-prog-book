@@ -26,7 +26,7 @@ by: "James Larisch"
 
   But as Section 6 already explained, this is not so trivial. Messages between your servers in Beijing and Paris could get dropped, corrupted, reordered, duplicated, or delayed. Servers can crash. Sharks can cut the network cables between countries. Since you have no guarantees about when you'll be able to synchronize state between two servers, it's possible that the customer could see two different cart-states depending on which country she's in (which server she asks).
 
-  It's possible to implement "consensus" protocols that provide coordination between your machines. When failure happens, such as a network shark-attack, the protocol detects a lack of consistency and becomes *unavailable*. For some applications, this is appropriate. For a shopping cart, this seems like overkill. If our shopping cart distributed systems experienced a failure, it means users would not be able to add or remove things from the cart. They also couldn't check out. This means our startup would lose money! Perhaps it's not so important that our clients' shopping carts be completely synchronized across the entire world at all times. After all, how often are people going to be doing such wanderlust shopping?
+  It's possible to implement "consensus" protocols such as Paxos and 3-Phase-Commit that provide coordination between your machines. When failure happens, such as a network shark-attack, the protocol detects a lack of consistency and becomes *unavailable*. For some applications, this is appropriate. For a shopping cart, this seems like overkill. If our shopping cart distributed systems experienced a failure, it means users would not be able to add or remove things from the cart. They also couldn't check out. This means our startup would lose money! Perhaps it's not so important that our clients' shopping carts be completely synchronized across the entire world at all times. After all, how often are people going to be doing such wanderlust shopping?
 
   This is an important moment. By thinking about our specific problem, we've realized a compromise we're willing to make: our users always need to be able to add things, remove things, and checkout. In other words, our service needs to be *available*. Servers don't necessarily need to agree all the time. We'd like them to, but the system shouldn't shut down if they don't. We'll find a way to deal with it.
 
@@ -58,10 +58,21 @@ by: "James Larisch"
 
   It's important to understand that Amazon has multiple machines storing the contents of your cart. These machines are asynchronously communicating in order to tell each other about updates they've received. Conflicts like this can happen when you try to read before the nodes have had time to gossip about your cart. More likely, however, is the situation in which one of the machines holding your cart goes offline and missing some updates. When it comes back online, you try to read, and this resolution process must occur.
 
+### Good & Bad
+  What do we love about Dynamo? It's a highly available key-value store. It replicates data well, and according to the paper, has an insanely high uptime and low latency. We love that it's *eventually consistent*. Nodes are constantly gossiping, so given enough time (and assuming failures are resolved), nodes' states will eventually converge. However, this property is *weak*. It's weak because when failures+conflicts occur, and [and they will occur](https://www.youtube.com/watch?v=JG2ESDGwHHY), it's up to the application developer to figure out how to handle it. In the case of the shopping cart, it's relatively trivial. But as a programmer, every time you'd like to use DynamoDB you need to consider your resolution strategy. The database doesn't provide a general solution.
+
+  Instead of constructing an all-purpose database and forcing the burden of resolution on programmers, what if we constructed general-purpose data structures that required no manual resolution? These data structures would resolve conflicts inherently, themselves, and depending on your application you could choose which data structure works best for you.
+
+  Let's try this transfiguration on the shopping cart. Let's strip it down: how does Amazon handle resolution, really? It treats shopping cart versions as sets of items. In order to perform resolution, Amazon unions the two sets.
+
+  ```
+  { Red Candle, Blue Skateboard } U { Red Candle, Green Umbrella } == { Red Candle, Blue Skateboard, Green Umbrella }
+  ```
+
+  Cool. Using this knowledge, let's try to construct our own shopping cart that automatically resolves conflicts.
 
 
-
-  Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. [This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at LWW-Sets.]
+  (Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at LWW-Sets.)
 
 ### Example
 
@@ -90,9 +101,11 @@ by: "James Larisch"
     }
 
     run() {
-      var clientAddition = Interface.receiveInput(); // contrived
-      this.addItem(clientAddition);
-      var receivedState = mySocket.nonBlockingRead(); // contrived
+      var clientAddition = Interface.nonBlockingReceiveInput(); // invented
+      if (clientAddition !== undefined) {
+        this.addItem(clientAddition);
+      }
+      var receivedState = mySocket.nonBlockingRead(); // invented
       if (receivedState !== undefined) {
         this.receiveState(receivedState);
       }
@@ -104,26 +117,84 @@ by: "James Larisch"
 
   // theoretical usage
 
-  var socket = new UDPSocket(); // contrived
+  var socket = new UDPSocket(); // invented
   var cart = new Cart(peerSockets, socket); // peerSockets is an array of UDP sockets
   cart.run();
+  cart.items // the cart's items
   ```
 
   Here is an (almost) fully functional shopping cart program. You can imagine this code running across multiple nodes scattered over the world. The meat of the program lies in the `run()` method. Let's walk through that:
   1. Program receives an addition to the cart from the user.
-  2. Program adds that item to the current local state.
+  2. Program adds that item to the current local state if it exists.
   3. Program checks its UDP socket for any messages.
   4. If it received one, it's means another instance of this program has sent us its state. What is state in this case? Simply a set of cart items. Let's handle this set of items by unioning it with our current set.
   5. Synchronize our current state by sending our state to every peer that we know about.
   6. Sleep for 10 seconds.
   7. Repeat!
 
-  Hopefully it's clear that if a client adds an item to her cart in Beijing and then 10 seconds later checks her cart in Paris, she should see the same thing. Well, not exactly - remember, the network is unreliable, and Beijing's `synchronize` messages might have been dropped. But no worries! Beijing is `synchronizing` again in another 10 seconds.
+  W
 
-  This is the *Strong Eventual Consistency* concept that Aviral introduced in Section 6. It's *eventual* because given a long enough timeline the clients' states will sync up: they are constantly trying to synchronize. [mention you can't remove things trivially, this is actually a CRDT, union is a monotonic operation]
+  Hopefully it's clear that if a client adds an item to her cart in Beijing and then 10 seconds later checks her cart in Paris, she should see the same thing. Well, not exactly - remember, the network is unreliable, and Beijing's `synchronize` messages might have been dropped. But no worries! Beijing is `synchronizing` again in another 10 seconds. This should remind you of Dynamo's gossiping: nodes are constantly attempting to converge.
+
+  Both systems are eventually consistent - the difference here is our Javascript shopping cart displays *strong* eventual consistency. It's strong because it requires no specialized resolution. When a node transmits its state to another node, there's absolutely no question about how to integrate that state into the current one. There's no conflict.
 
 ### The Intern
-  Unfortunately Jerry, the intern, has found your code. He'd like to make a few changes. He messes it up somehow. I'm not entirely sure how yet.
+  Unfortunately Jerry, the intern, has found your code. He'd like to add `remove` functionality to the cart. So he makes the following changes:
+
+  ```javascript
+  class Cart {
+    constructor(peers, socket) {
+      this.mySocket = socket;
+      this.peers = peers;
+      this.items = new Set();
+    }
+
+    addItem(item) {
+      this.items.add(item);
+    }
+
+    synchronize() {
+      peers.forEach(function(peer) {
+        peer.send(items);
+      });
+    }
+
+    receiveState(items) {
+      // JERRY WAS HERE
+      this.items = this.items.intersection(items);
+      // END JERRY WAS HERE
+    }
+
+    run() {
+      var clientAddition = Interface.nonBlockingReceiveInput(); // invented
+      if (clientAddition !== undefined) {
+        this.addItem(clientAddition);
+      }
+      // JERRY WAS HERE
+      var clientDeletion = Interface.nonBlockingReceiveInput():
+      if (clientDeletion !== undefined) {
+        this.items.delete(clientDeletion);
+      }
+      // END JERRY WAS HERE
+      var receivedState = mySocket.nonBlockingRead(); // invented
+      if (receivedState !== undefined) {
+        this.receiveState(receivedState);
+      }
+      synchronize();
+      sleep(10);
+      run();
+    }
+  }
+
+  // theoretical usage
+
+  var socket = new UDPSocket(); // invented
+  var cart = new Cart(peerSockets, socket); // peerSockets is an array of UDP sockets
+  cart.run();
+  cart.items // the cart's items
+  ```
+
+  Uh-oh. Can you spot the problem? Let's break it down. In the original code, the current node's cart items were *unioned* with the communicating node's cart. Since there was no deletion,
 
 ### Guarantees
   The original Javascript we wrote down exhibits the property from Section 6 known as *monotonicity*. The union operation ensures that a given node's state is always "greater than or equal to" the states of the other nodes. However, how can we be *sure* that this property is maintained throughout the development of this program? As we've seen, there's nothing stopping an intern from coming along, making a mindless change, and destroying this wonderful property. Ideally, we want to make it impossible (or at least very difficult) to write programs that violate this property. Or, at the very least, we want to make it very easy to write programs that maintain these types of properties.
