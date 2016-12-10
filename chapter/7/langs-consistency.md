@@ -124,13 +124,13 @@ cart.items // the cart's items
 ```
 
 Here is an (almost) fully functional shopping cart program. You can imagine this code running across multiple nodes scattered over the world. The meat of the program lies in the `run()` method. Let's walk through that:
-1. Program receives an addition to the cart from the user.
-2. Program adds that item to the current local state if it exists.
-3. Program checks its UDP socket for any messages.
-4. If it received one, it's means another instance of this program has sent us its state. What is state in this case? Simply a set of cart items. Let's handle this set of items by unioning it with our current set.
-5. Synchronize our current state by sending our state to every peer that we know about.
-6. Sleep for 10 seconds.
-7. Repeat!
+  1. Program receives an addition to the cart from the user.
+  2. Program adds that item to the current local state if it exists.
+  3. Program checks its UDP socket for any messages.
+  4. If it received one, it's means another instance of this program has sent us its state. What is state in this case? Simply a set of cart items. Let's handle this set of items by unioning it with our current set.
+  5. Synchronize our current state by sending our state to every peer that we know about.
+  6. Sleep for 10 seconds.
+  7. Repeat!
 
 Hopefully it's clear that if a client adds an item to her cart in Beijing and then 10 seconds later checks her cart in Paris, she should see the same thing. Well, not exactly - remember, the network is unreliable, and Beijing's `synchronize` messages might have been dropped. But no worries! Beijing is `synchronizing` again in another 10 seconds. This should remind you of Dynamo's gossiping: nodes are constantly attempting to converge.
 
