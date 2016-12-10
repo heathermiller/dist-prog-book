@@ -222,8 +222,87 @@ We define Implicit promises as ones where we don’t have to manually trigger th
 
 The idea for explicit futures were introduced in the Baker and Hewitt paper. They’re a little trickier to implement, and require some support from the underlying language, and as such they aren’t that common. The Baker and Hewitt paper talked about using futures as placeholders for arguments to a function, which get evaluated in parallel, but when they’re needed. Also, lazy futures in Alice ML have a similar explicit invocation mechanism, the first thread touching a future triggers its evaluation.
 
-
 Implicit futures were introduced originally by Friedman and Wise in a paper in 1978. The ideas presented in that paper inspired the design of promises in MultiLisp. Futures are also implicit in Scala and Javascript, where they’re supported as libraries on top of the core languages. Implicit futures can be implemented this way as they don’t require support from language itself. Alice ML’s concurrent futures are also an example of implicit invocation. 
+
+# Promise Pipelining
+One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
+
+<figure class="main-container">
+  <img src="./9.png" alt="timeline" />
+</figure>
+
+Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason. 
+
+The history of promise pipelining can be traced back to the call-streams in Argus and channels in Joule. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated futures into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
+
+
+Modern promise specifications, like one in Javascript comes with methods which help working with promise pipelining easier. In javascript, a Promises.all method is provided, which takes in an iterable over Promises, and returns a new Promise which gets resolved when all the promises in the iterable get resolved. There’s also a race method, which returns a promise which is resolved when the first promise in the iterable gets resolved. 
+
+
+In scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
+
+# Handling Errors
+
+In a synchronous programming model, the most logical way of handling errors is a try...catch block. 
+
+<figure class="main-container">
+  <img src="./10.png" alt="timeline" />
+</figure>
+
+
+Unfortunately, the same thing doesn’t directly translate to asynchronous code. 
+
+<figure class="main-container">
+  <img src="./11.png" alt="timeline" />
+</figure>
+
+In javascript world, some patterns emerged, most noticeably the error-first callback style, also adopted by Node. Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises come to the rescue.
+
+
+Although most of the earlier papers did not talk about error handling, the Promises paper by Liskov and Shrira did acknowledge the possibility of failure in a distributed environment. They talked about propagation of exceptions from the called procedure to the caller and also about call streams, and how broken streams could be handled. E language also talked about broken promises and setting a promise to the exception of broken references.
+
+In modern languages, Promises generally come with two callbacks. One to handle  the success case and other to handle the failure.
+
+<figure class="main-container">
+  <img src="./12.png" alt="timeline" />
+</figure>
+
+In Javascript, Promises also have a catch method, which help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler. 
+
+
+<figure class="main-container">
+  <img src="./13.png" alt="timeline" />
+</figure>
+
+The same behavior can be written using catch block.
+
+<figure class="main-container">
+  <img src="./14.png" alt="timeline" />
+</figure>
+
+
+#Futures and Promises in Action
+
+
+##Twitter Finagle
+
+
+Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any JVM-hosted language. It uses idea of Futures to encapsulate concurrent tasks and are analogous to threads, but even more lightweight.
+
+
+##Correctables
+Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adrian Seredinschi at OSDI ‘16, in a paper titled Incremental Consistency Guarantees for Replicated Objects. As the title suggests, Correctables aim to solve the problems with consistency in  replicated objects. They provide incremental consistency guarantees by capturing successive changes to the value of a replicated object. Applications can opt to receive a fast but possibly inconsistent result if eventual consistency is acceptable, or to wait for a strongly consistent result. Correctables API draws inspiration from, and builds on the API of Promises.  Promises have a two state model to represent an asynchronous task, it starts in blocked state and proceeds to a ready state when the value is available. This cannot represent the incremental nature of correctables. Instead, Correctables have a updating state when it starts. From there on, it remains in updating state during intermediate updates, and when the final result is available, it transitions to final state. If an error occurs in between, it moves into an error state. Each state change triggers a callback. 
+
+<figure class="main-container">
+  <img src="./15.png" alt="timeline" />
+</figure>
+
+##Folly Futures
+Folly is a library by Facebook for asynchronous C++ inspired by the implementation of Futures by Twitter for Scala. It builds upon the Futures in the C++11 Standard. Like Scala’s futures, they also allow for implementing a custom executor which provides different ways of running a Future (thread pool, event loop etc).
+
+
+##NodeJS Fiber
+Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for nodejs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
 
 ## References
 
