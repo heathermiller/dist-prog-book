@@ -16,8 +16,10 @@ The processor can either handle blocking calls in two ways:
 In the world of asynchronous communications many terminologies were defined to help programmers reach the ideal level of resource utilization. As a part of this article we will talk about motivation behind rise of Promises and Futures, we will explain programming model associated with it and discuss evolution of this programming construct, finally we will end this discussion with how this construct helps us today in different general purpose programming languages.
 
 
+<figure class="main-container">
+  <img src="./1.png" alt="timeline" />
+</figure>
 
-{% cite Uniqueness --file futures %}
 
 ## References
 
