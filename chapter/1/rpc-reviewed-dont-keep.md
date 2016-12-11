@@ -418,7 +418,7 @@ past year has started to shift in favor of gRPC and it's giving Thrift a run for
 its money.
 
 **Note:** This study is performed in December 2016 so the results are expected
-**to change with time.
+to change with time.
 
 ## Applications:
 
