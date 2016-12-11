@@ -7,13 +7,13 @@ by: "Muzammil Abdul Rehman and Paul Grosu"
 ## Introduction:
 
 *Remote Procedure Call* (RPC) is a design *paradigm* that allow two entities to
-*communicate over a communication channel in a general request-response
-*mechanism. It was initially built as a tool for outsourcing computation to a
-*server in a distributed system, however, it has evolved over the years to build
-*modular, scalable, distributed, language-agnostic ecosystem of applications.
+communicate over a communication channel in a general request-response
+mechanism. It was initially built as a tool for outsourcing computation to a
+server in a distributed system, however, it has evolved over the years to build
+modular, scalable, distributed, language-agnostic ecosystem of applications.
 *This RPC *paradigm* has been part of the driving force in creating truly
-*revolutionizing distributed systems and giving rise to various communication
-*schemes and protocols between diverse systems.
+revolutionizing distributed systems and giving rise to various communication
+schemes and protocols between diverse systems.
 
 RPC *paradigm* has been implemented in various forms in our every-day systems.
 From lower level applications like Network File Systems{% cite sunnfs --file rpc %}
@@ -35,12 +35,12 @@ paradigms and communication protocols.
 ## Remote Procedure Calls:
 
 *Remote Procedure Call paradigm* can be defined, at a high level, as a set of
-*two language-agnostic communication *endpoints* connected over a network with
-*one endpoint sending a request and the other endpoint generating a response
-*based on that request. In the simplest terms, it's a request-response paradigm
-*where the two *endpoints*/hosts have different *address space*. The host that
-*requests a remote procedure can be referred to as *caller* and the host that
-*responds to this can be referred to as *callee*.
+two language-agnostic communication *endpoints* connected over a network with
+one endpoint sending a request and the other endpoint generating a response
+based on that request. In the simplest terms, it's a request-response paradigm
+where the two *endpoints*/hosts have different *address space*. The host that
+requests a remote procedure can be referred to as *caller* and the host that
+responds to this can be referred to as *callee*.
 
 The *endpoints* in the RPC can either be a client and a server, two nodes in a
 peer-to-peer network, two hosts in a grid computation system, or even two
