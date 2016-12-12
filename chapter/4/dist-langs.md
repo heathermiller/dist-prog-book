@@ -295,6 +295,7 @@ Rather, the programmer designs the data transformations, and a system is respons
 * Map and Reduce may emit zero, one, or many key-value pairs per input
 
 ![Alt text] (./MR.png "MapReduce Wordcount Workflow")
+(http://www.milanor.net/blog/an-example-of-mapreduce-with-rmr2/)
 
 #### DryadLINQ ()
 #### Discretized Streams (2012)
