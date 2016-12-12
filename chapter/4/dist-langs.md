@@ -249,6 +249,32 @@ It is worth noting that stack frame growth is still possible, but if the recursi
 
 #### Orleans (2011)
 
+Orleans is a programming model for distributed computing based on actors.
+An Orleans program can be conceptualized as a collection of actors.
+Because Orleans is intended as a model for building cloud applications, actors do not spawn independent processes as they do in Emerald or Argus.
+Rather, Orleans actors are designed to execute only when responding to requests.
+
+As in Argus, Orleans encapsulates requests (root function calls) within *transactions*.
+When processing a transaction, function calls may span many actors.
+To ensure consistency in the end result of a transaction, Orleans offers another abstraction, *activations*, to allow each transaction to operate on a consistent state of actors.
+An activation is an instance of an actor.
+Activations allow (1) consistent access to actors during concurrent transactions, and (2) high throughput when an actor becomes "hot."
+Consistency is achieved by only allowing transactions to "touch" activations of actors that are not being used by another transaction.
+High throughput is achieved by spawning many activations of an actor for handling concurrent requests.
+
+For example, suppose there is an actor that represents a specific YouTube video.
+This actor will have data fields like `title`, `content`, `num_views`, etc.
+Suppose their are concurrent requests (in turn, transactions) for viewing the video.
+In the relevent transaction, the `num_views` field is incremented.
+Therefore, in order to run the view requests concurrently, two activations (or copies) of the actor are created.
+
+Because there is concurrency within individual actors, Orleans also supports means of state reconciliation.
+When concurrent transactions modify different activations of an actor, state must eventually be reconciled.
+In the case of the above example, it may not be necessary to know immediately the exact view count of a video, but we would like to be able to know this value eventually.
+To accomplish reconciliation, Orleans provides data structures that can be automatically merged.
+As well, the developer can implement arbitrary logic for merging state.
+In the case of the YouTube video, we would want logic to determine the delta of views since the start of the activation, and add that to the actors' sum.
+
 ### Dataflow model (static and stream)
 
 The dataflow model has its roots in functional programming.
