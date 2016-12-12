@@ -366,12 +366,12 @@ Persistent RDDs are stored in memory as java objects (for performance) or in mem
   <img src="./Hive-architecture.png" alt="Hive architecture" />
 </figure>
 
+
 The query is submitted via CLI/web UI/any other interface. This query goes to the compiler and undergoes parse, type-check and semantic analysis phases using the metadata from Metastore. The compiler generates a logical plan which is optimized by the rule-based optimizer and an optimized plan in the form of DAG of MapReduce and hdfs tasks is generated. The execution engine executes these tasks in the correct order using Hadoop.
 
 The Hive execution model as shown above composes of the below important components :
 
 - Driver : Similar to the Drivers of Spark/Map reduce application, the driver in Hive handles query submission & its flow across the system. It also manages the session and its statistics.
-Metastore : 
 
 - Metastore – A Hive metastore stores all information about the tables, their partitions, schemas, columns and their types, etc. enabling transparency of data format and its storage to the users.  It in turn helps in data exploration, query compilation and optimization. Criticality of the Matastore for managing the structure of hadoop files requires it to be updated on a regular basis.
 
@@ -382,9 +382,10 @@ Metastore :
  - Optimization : Optimization forms the core of any declarative interface. In case of Hive, optimization happens through chains of transformation of DAG. A transformation could include even a user defined optimization and it applies an action on the DAG only if a rule is satisfied. Every node in the DAG implements a special interface called as Node interface which makes it easy for the manipulation of the operator DAG using other interfaces like GraphWalker, Dispatcher, Rule and Processor. Hence, by transformation, we mean walking through a DAG and for every Node we encounter we perform a Rule satisfiability check. If a Rule is satisfied, a corresponding processor is invoked. A Dispatcher maintains a list of Rule to Processor mappings.
 
 <figure class="main-container">
-  <img src="./Hive-transformation.jpeg" alt="Hive transformation" />
+  <img src="./Hive-transformation.png" alt="Hive transformation" />
 </figure>
- 
+*Figure from:* %cite thusoo2010hive --file big-data %}
+
  Some of the important transformations are :
 
  - Column Pruning - Consider only the required columns needed in the query processing for projection.
