@@ -148,12 +148,26 @@ Although an underlying system is required to differentiate between local and rem
 
 #### Erlang
 
-* functional programming language
-* process is the unit of concurrency
-* messages are sent to mailboxes
-    * asynchronous
-* functional programming
-* variables, atoms, lists
+Erlang is a distributed language which combines functional programming with message passing.
+Units of distribution in Erlang are processes.
+These processes may be colocated on the same node or distributed amongst a cluster.
+
+Processes in Erlang communicate by message passing.
+Specifically, a process can send an asynchronous message to another process' *mailbox*.
+At some future time, the receiving process may enter a *receive* clause, which searches the mailbox for the first message that matches a set of patterns.
+The branch of code that is executed in response to a message is dependent on the pattern that is matched.
+
+In general, an application written in Erlang is separated into two broad components: *workers* and *monitors*.
+Workers are responsible for application logic.
+Erlang offers a special function `link(Pid)` which allows one process to monitor another.
+If the process indicated by `Pid` fails, the monitor process will be notified and is expected to handle the error.
+Worker processes are "linked" by monitor processes which implement the fault-tolerance logic of the application.
+
+Erlang, first implemented in Prolog, has the features and styles of a functional programming language.
+Variables in Erlang are immutable; once assigned a value, they cannot be changed.
+Because of this, loops in Erlang are written as tail recursive function calls.
+Although this at first seems like a flawed practice (to traditional procedural programmers), recursive calls do not grow the current stack frame, but instead replace it.
+It is worth noting that stack frame growth is still possible, but if the recursive call is "alone" (the result of the inner function is the result of the outer function), the stack will not grow.
 
 #### Cloud Haskell
 
