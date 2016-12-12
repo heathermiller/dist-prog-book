@@ -189,7 +189,7 @@ Critically, Emerald provides the programmer with a unified object model so as to
 With that in mind, Emerald also provides the developer with the tools to designate explicitly the location of objects.
 
 Objects in Emerald resemble objects in other OOP languages such as Java.
-Emerald objects can only be manipulated by methods that are exposed, and may contain internal state.
+Emerald objects expose methods to execute logic, and may contain internal state.
 However, their are a few key differences between Emerald and Java Objects.
 First, objects in Emerald may have an associated process which starts after initialization.
 In Emerald, object processes are the basic unit of concurrency.
