@@ -201,7 +201,7 @@ Third, objects in Emerald may contain a special *monitor* section which can cont
 If multiple processes make simultaneous calls to a "monitored" method, the calls are effectively serialized.
 
 Emerald also takes an OOP approach to system upgrades.
-With a large system, it may not be desirable to disable the system, recompile, and relaunch.
+With a large system, it may not be desirable to disable the system, recompile, and re-launch.
 Emerald uses abstract types to define sets of interfaces.
 Objects that implement such interfaces can be "plugged in" where needed.
 Therefore, code may be dynamically upgraded, and different implementations may be provided for semantically similar operations.
