@@ -194,11 +194,17 @@ However, their are a few key differences between Emerald and Java Objects.
 First, objects in Emerald may have an associated process which starts after initialization.
 In Emerald, object processes are the basic unit of concurrency.
 Additionally, an object may *not* have an associated process.
-These objects more closely resemble traditional Java objects, and their code is executed when called by processes.
+Objects that do not have a process are known as passive and more closely resemble traditional Java objects; their code is executed when called by processes belonging to other objects.
 Second, processes may not touch internal state (members) of other objects.
 Unlike Java, all internal state of Emerald objects must be accessed through method calls.
 Third, objects in Emerald may contain a special *monitor* section which can contain methods and variables that are accessed atomically.
 If multiple processes make simultaneous calls to a "monitored" method, the calls are effectively serialized.
+
+Emerald also takes an OOP approach to system upgrades.
+With a large system, it may not be desirable to disable the system, recompile, and relaunch.
+Emerald uses abstract types to define sets of interfaces.
+Objects that implement such interfaces can be "plugged in" where needed.
+Therefore, code may be dynamically upgraded, and different implementations may be provided for semantically similar operations.
 
 * single object model
     * objects only manipulated by exposed methods
