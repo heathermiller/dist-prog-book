@@ -285,16 +285,30 @@ Rather, the programmer designs the data transformations, and a system is respons
 
 #### MapReduce (2004)
 
-* input key-value pairs -> output key-value pairs
-* Map and Reduced chained to create programs
-* Map
-    * input key-value pairs transformed into intermediate key-value pairs
-* Reduce
-    * intermediate keys are aggregated by key
-    * function performs some action based on all values associated with an intermediate key
-* Map and Reduce may emit zero, one, or many key-value pairs per input
+MapReduce is a model and system for writing distributed programs that is data-centric.
+Distributed programs are structed as series of *Map* and *Reduce* data transformations.
+These two primitives are borrowed from traditional functional languages, and can be used to express a wide range of logic.
+The key strength of this approach is that computations can be reasoned about and expressed easily while an underlying system takes care of the "dirty" aspects of distributed computing such as communication, fault-tolerance, and efficiency.
 
-![Alt text] (./MR.png "MapReduce Wordcount Workflow")
+A MapReduce program consists of a few key stages.
+First, the data is read from a filesystem or other data source as a list of key-value pairs.
+These pairs are distributed amongst a set of workers called *Mappers*.
+Each mapper processes each element in its partition, and may output zero, one, or many *intermediate* key-value pairs.
+Then, intermediate key-value pairs are grouped by key.
+Finally, *Reducers* take all values pertaining to an intermediate key and output zero, one, or many output key-value pairs.
+A MapReduce job may consist of one or many iterations of map and reduce.
+
+Crucially, for each stage the programmer is only responsible for programming the Map and Reduce logic.
+The underlying system (in the case of Google, a C++ library), handles distributing input data and *shuffling* intermediate entries.
+Optionally, the user can implement custom logic for formatting input and output data.
+
+An example program in MapReduce is illustrated below.
+First, the input file is partitioned and distributed to a set of worker nodes.
+Then, the map function transforms lines of the text file into key-value pairs in the format (\< word \>, 1).
+These intermediate pairs are aggregated by key: the word.
+In the reduce phase, the list of 1's is summed to compute a wordcount for each word.
+
+![Alt text] (./MR.png "MapReduce Workflow")
 (http://www.milanor.net/blog/an-example-of-mapreduce-with-rmr2/)
 
 #### DryadLINQ ()
