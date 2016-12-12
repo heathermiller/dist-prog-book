@@ -102,7 +102,12 @@ To accomplish this, Mirage uses a protocol for requesting read or write access t
 Depending on the permissions of the current "owner" of a page, the page may be invalidated on other nodes.
 The behavior of the protocol is outlined by the table below.
 
-
+| State of Owner | State of Requester | Clock Check? | Invalidation?                                               |
+|----------------|--------------------|--------------|-------------------------------------------------------------|
+| Reader         | Reader             | No           | No                                                          |
+| Reader         | Writer             | Yes          | Yes, Requester is possibly sent current version of the page |
+| Writer         | Reader             | Yes          | No, Owner is demoted to Reader                              |
+| Writer         | Writer             | Yes          | Yes                                                         |
 
 Crucially, the semantics of this protocol are that at any time there may only be either (1) a single writer or (2) one or more readers of a page.
 When a single writer exists, no other copies of the page are present.
