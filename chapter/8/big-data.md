@@ -361,15 +361,7 @@ Persistent RDDs are stored in memory as java objects (for performance) or in mem
 
 ### 2.3 Hive execution model
 
-
-<figure class="main-container">
-  <img src="./Hive-architecture.png" alt="Hive architecture" />
-</figure>
-
-
-The query is submitted via CLI/web UI/any other interface. This query goes to the compiler and undergoes parse, type-check and semantic analysis phases using the metadata from Metastore. The compiler generates a logical plan which is optimized by the rule-based optimizer and an optimized plan in the form of DAG of MapReduce and hdfs tasks is generated. The execution engine executes these tasks in the correct order using Hadoop.
-
-The Hive execution model as shown above composes of the below important components :
+The Hive execution model composes of the below important components (and as shown in the below diagram):
 
 - Driver : Similar to the Drivers of Spark/Map reduce application, the driver in Hive handles query submission & its flow across the system. It also manages the session and its statistics.
 
@@ -389,16 +381,22 @@ The Hive execution model as shown above composes of the below important componen
  Some of the important transformations are :
 
   - Column Pruning - Consider only the required columns needed in the query processing for projection.
-  - Predicate Pushdown - Filter the rows as early as possible by pushing down the predicates.
+  - Predicate Pushdown - Filter the rows as early as possible by pushing down the predicates. Its important that unnecessary records are filtered first and transformations are applied on only the needed ones.
   - Partition Pruning - Predicates on partitioned columns are used to prune out files of partitions that do not satisfy the predicate.
-  - Map Side Joins - In case the tables involved in the join are very small, the tables are replicated in all the mappers and the reducers.
-  - Join Reordering - Large tables are streamed and not materialized in-memory in the reducer to reduce memory requirements.Some optimizations are not enabled by default but can be activated by setting certain flags.
-  - Repartitioning data to handle skew in GROUP BY processing.This is achieved by performing GROUP BY in two MapReduce stages first where data is distributed randomly to the reducers and partial aggregation is performed. In the second stage, these partial aggregations are distributed on GROUP BY columns to different reducers.
-  - Hash bases partial aggregations in the mappers to reduce the data that is sent by the mappers to the reducers which help in reducing the amount of time spent in sorting and merging the resulting data.
- 
+  - Map Side Joins - Smaller tables in the join operation can be replicated in all the mappers and the reducers.
+  - Join Reordering - Reduce reducer side join operation memory by keeping only smaller tables in memory. Larger tables need not be kept in memory.
+  - Repartitioning data to handle skew in GROUP BY processing can be achieved by performing GROUP BY in two MapReduce stages. In first stage data is distributed randomly to the reducers and partial aggregation is performed. In the second stage, these partial aggregations are distributed on GROUP BY columns to different reducers.
+  - Similar to combiners in Map reduce, hash based partial aggregations in the mappers can be performed reduce the data that is sent by the mappers to the reducers. This helps in reducing the amount of time spent in sorting and merging the resulting data.
 
-- Execution Engine : Execution Engine executes the tasks in order of their dependencies. A MapReduce task first serializes its part of the plan into a plan.xml file. This file is then added to the job cache and mappers and reducers are spawned to execute relevant sections of the operator DAG. The final results are stored to a temporary location and then moved to the final destination (in the case of say INSERT INTO query).
 
+Execution Engine : Execution Engine finally executes the tasks in order of their dependencies. A MapReduce task first serializes its part of the plan into a plan.xml file. This file is then added to the job cache and mappers and reducers are spawned to execute relevant sections of the operator DAG. The final results are stored to a temporary location and then moved to the final destination (in the case of say INSERT INTO query).
+
+<figure class="main-container">
+  <img src="./Hive-architecture.png" alt="Hive architecture" />
+</figure>
+
+
+Summarizing the flow - the query is first submitted via CLI/web UI/any other interface. The query undergoes all the compiler phases as explained above to form an optimized DAG of MapReduce and hdfs tasks which the execution engine executes in its correct order using Hadoop.
 
 ### 2.4 SparkSQL execution model
 
