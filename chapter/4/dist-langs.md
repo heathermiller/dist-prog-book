@@ -183,6 +183,33 @@ It is worth noting that stack frame growth is still possible, but if the recursi
 
 #### Emerald
 
+Emerald is a distributed programming language based around a unified object model.
+Programs in Emerald consist of collections of Objects.
+Critically, Emerald provides the programmer with a unified object model so as to abstract object location from the invocation of methods.
+With that in mind, Emerald also provides the developer with the tools to designate explicitly the location of objects.
+
+Objects in Emerald resemble objects in other OOP languages such as Java.
+Emerald objects can only be manipulated by methods that are exposed, and may contain internal state.
+However, their are a few key differences between Emerald and Java Objects.
+First, objects in Emerald may have an associated process which starts after initialization.
+In Emerald, object processes are the basic unit of concurrency.
+Additionally, an object may *not* have an associated process.
+These objects more closely resemble traditional Java objects, and their code is executed when called by processes.
+Second, processes may not touch internal state (members) of other objects.
+Unlike Java, all internal state of Emerald objects must be accessed through method calls.
+Third, objects in Emerald may contain a special *monitor* section which can contain methods and variables that are accessed atomically.
+If multiple processes make simultaneous calls to a "monitored" method, the calls are effectively serialized.
+
+* single object model
+    * objects only manipulated by exposed methods
+    * can be moved
+    * identity, operations, process (optional)
+    * process, monitor, initially sections
+* abstract types
+    * interfaces
+    * allow system upgrades, new implementations
+    * implementations can have different semantics for an interface
+
 #### Argus
 
 #### Orleans
