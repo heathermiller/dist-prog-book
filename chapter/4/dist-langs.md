@@ -283,9 +283,21 @@ Computation is data-centric, and expressed easily as a directed acyclic graph (D
 Unlike the DSM and actor models, processes are not exposed to the programmer.
 Rather, the programmer designs the data transformations, and a system is responsible for initializing processes and distributing work accross a system.
 
-#### Multilisp ()
-#### MapReduce ()
+#### MapReduce (2004)
+
+* input key-value pairs -> output key-value pairs
+* Map and Reduced chained to create programs
+* Map
+    * input key-value pairs transformed into intermediate key-value pairs
+* Reduce
+    * intermediate keys are aggregated by key
+    * function performs some action based on all values associated with an intermediate key
+* Map and Reduce may emit zero, one, or many key-value pairs per input
+
+![Alt text] (/MR.png "MapReduce Wordcount Workflow")
+
 #### DryadLINQ ()
+#### Discretized Streams (2012)
 
 ### Which is best? Why?
 
