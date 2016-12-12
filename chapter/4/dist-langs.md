@@ -150,12 +150,10 @@ Because operations are serializable at the method level, the graph data-object c
 
 Unlike DSM, communication in the actor model is explicit and exposed through message passing.
 Messages can be synchronous or asynchronous, point-to-point or broadcast style.
-
 In the actor model, concurrent entities do not share state as they do in DSM.
 Each process, object, actor, etc., has its own address space.
 The model maps well to single multicore machines as well as to clusters of machines.
 Although an underlying system is required to differentiate between local and remote messages, the location of processes, objects, or actors can be transparent to the application programmer.
-
 Erlang, Emerald, Argus, and Orleans are just a few of many implementations of the actor model.
 
 #### Erlang
