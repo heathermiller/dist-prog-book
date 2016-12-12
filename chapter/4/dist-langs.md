@@ -15,7 +15,7 @@ In this section, we present an overview of these three problems and their impact
 
 In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
 If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge about the failure.
-For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about another's state, etc.
+For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about the failed process' state state, etc.
 
 * Failure in a distributed setting
   * 2 sources, network and host
@@ -61,7 +61,7 @@ For example, a process can be restored based on a checkpoint, another process in
   * process locality (static, dynamic analysis)
   * minimize communication
   * data replication (Orca)
-  * pipelining (HTTP)
+  * pipe-lining (HTTP)
   * asynchronous callbacks
   
 ### The CAP Theorem
@@ -102,7 +102,7 @@ When a process is finished with a segment, the region can be *detached*.
 Requests to shared memory are transparent to user processes.
 Faults occur on the page level.
 
-Operations on shared pages are gauranteed to be coherent; after a process writes to a page, all subsequent reads will observe the results of the write.
+Operations on shared pages are guaranteed to be coherent; after a process writes to a page, all subsequent reads will observe the results of the write.
 To accomplish this, Mirage uses a protocol for requesting read or write access to a page.
 Depending on the permissions of the current "owner" of a page, the page may be invalidated on other nodes.
 The behavior of the protocol is outlined by the table below.
@@ -123,7 +123,7 @@ When a write request arrives for a page, all read instances of the page are inva
 
 To ensure fairness, the system associates each page with a timer.
 When a request is honored for a page, the timer is reset.
-The timer gaurantees that the page will not be invalidated for a minimum period of time.
+The timer guarantees that the page will not be invalidated for a minimum period of time.
 Future request that result in invalidation or demotion (writer to reader) are only honored if the timer is satisfied.
 
 #### Linda
@@ -139,7 +139,7 @@ Processes communicate through these shared objects.
 Shared data objects in Orca are similar to objects in OOP.
 An object is defined abstractly by a name and a set of interfaces.
 An implementation of the object defines any private data fields as well as the interfaces (methods).
-Importantly, these interfaces are gauranteed to be indivisible, meaning that simultaneous calls to the same interface are serializable.
+Importantly, these interfaces are guaranteed to be indivisible, meaning that simultaneous calls to the same interface are serializable.
 Although serializability alone does not eliminate indeterminism from Orca programs, it keeps the model simple while it allows programmers to construct richer, multi-operation locks for arbitrary semantics and logic.
 
 Another key feature of Orca is the ability to express symbolic data structures as shared data objects.
@@ -160,7 +160,7 @@ Erlang, Emerald, Argus, and Orleans are just a few of many implementations of th
 
 Erlang is a distributed language which combines functional programming with message passing.
 Units of distribution in Erlang are processes.
-These processes may be colocated on the same node or distributed amongst a cluster.
+These processes may be co-located on the same node or distributed amongst a cluster.
 
 Processes in Erlang communicate by message passing.
 Specifically, a process can send an asynchronous message to another process' *mailbox*.
@@ -194,7 +194,7 @@ However, their are a few key differences between Emerald and Java Objects.
 First, objects in Emerald may have an associated process which starts after initialization.
 In Emerald, object processes are the basic unit of concurrency.
 Additionally, an object may *not* have an associated process.
-Objects that do not have a process are known as passive and more closely resemble traditional Java objects; their code is executed when called by processes belonging to other objects.
+Objects that do not have a process are known as *passive* and more closely resemble traditional Java objects; their code is executed when called by processes belonging to other objects.
 Second, processes may not touch internal state (members) of other objects.
 Unlike Java, all internal state of Emerald objects must be accessed through method calls.
 Third, objects in Emerald may contain a special *monitor* section which can contain methods and variables that are accessed atomically.
@@ -206,17 +206,30 @@ Emerald uses abstract types to define sets of interfaces.
 Objects that implement such interfaces can be "plugged in" where needed.
 Therefore, code may be dynamically upgraded, and different implementations may be provided for semantically similar operations.
 
-* single object model
-    * objects only manipulated by exposed methods
-    * can be moved
-    * identity, operations, process (optional)
-    * process, monitor, initially sections
-* abstract types
-    * interfaces
-    * allow system upgrades, new implementations
-    * implementations can have different semantics for an interface
-
 #### Argus
+
+Argus is a distributed programming language and system.
+It uses a special kind of object, called a *guardian*, to create units of distribution and group highly coupled data and logic.
+Argus procedures are encapsulated in atomic transactions, or *actions*, which allow operations that encompass multiple guardians to exhibit serializability.
+The presence of guardians and actions was motivated by Argus' use as a platform for building distributed, consistent applications.
+
+An object in Argus is known as a guardian.
+Like traditional objects, guardians contain internal data members for maintaining state.
+Unique to Argus is the distinction between volatile and stable data members.
+To cope with crashes, data members that are stable are periodically serialized to disk.
+When a guardian crashes and is restored, this serialized state is used to reconstruct guardians.
+Like in Emerald, internal data members may not be accessed directly, but rather through handlers.
+Guardians are interacted with through methods known as *handlers*.
+When a handler is called, a new process is created to handle the operation.
+Additionally, guardians may contain a background process for performing continual work.
+
+Argus encapsulates handler calls in what it calls *actions*.
+Actions are designed to solve the problems of consistency, synchronization, and fault tolerance.
+To accomplish this, actions are serializable as well as total.
+Being serializable means that no actions interfere with one another.
+For example, a read operation that spans multiple guardians either "sees" the complete effect of a simultaneous write operation, or it sees nothing.
+Being total means that write operations that span multiple guardians either fully complete or fully fail.
+This is accomplished by a two-phase commit protocol that serializes the state of *all* guardians involved in an action, or discards partial state changes.
 
 #### Orleans
 
