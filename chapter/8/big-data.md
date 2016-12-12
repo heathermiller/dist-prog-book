@@ -388,14 +388,15 @@ The Hive execution model as shown above composes of the below important componen
 
  Some of the important transformations are :
 
- - Column Pruning - Consider only the required columns needed in the query processing for projection.
- - Predicate Pushdown - Filter the rows as early as possible by pushing down the predicates.
- - Partition Pruning - Predicates on partitioned columns are used to prune out files of partitions that do not satisfy the predicate.
- - Map Side Joins - In case the tables involved in the join are very small, the tables are replicated in all the mappers and the reducers.
- - Join Reordering - Large tables are streamed and not materialized in-memory in the reducer to reduce memory requirements.Some optimizations are not enabled by default but can be activated by setting certain flags.
- - Repartitioning data to handle skew in GROUP BY processing.This is achieved by performing GROUP BY in two MapReduce stages - first where data is distributed randomly to the reducers and partial aggregation is performed. In the second stage, these partial aggregations are distributed on GROUP BY columns to different reducers.
- - Hash bases partial aggregations in the mappers to reduce the data that is sent by the mappers to the reducers which help in reducing the amount of time spent in sorting and merging the resulting data.
+  - Column Pruning - Consider only the required columns needed in the query processing for projection.
+  - Predicate Pushdown - Filter the rows as early as possible by pushing down the predicates.
+  - Partition Pruning - Predicates on partitioned columns are used to prune out files of partitions that do not satisfy the predicate.
+  - Map Side Joins - In case the tables involved in the join are very small, the tables are replicated in all the mappers and the reducers.
+  - Join Reordering - Large tables are streamed and not materialized in-memory in the reducer to reduce memory requirements.Some optimizations are not enabled by default but can be activated by setting certain flags.
+  - Repartitioning data to handle skew in GROUP BY processing.This is achieved by performing GROUP BY in two MapReduce stages first where data is distributed randomly to the reducers and partial aggregation is performed. In the second stage, these partial aggregations are distributed on GROUP BY columns to different reducers.
+  - Hash bases partial aggregations in the mappers to reduce the data that is sent by the mappers to the reducers which help in reducing the amount of time spent in sorting and merging the resulting data.
  
+
 - Execution Engine : Execution Engine executes the tasks in order of their dependencies. A MapReduce task first serializes its part of the plan into a plan.xml file. This file is then added to the job cache and mappers and reducers are spawned to execute relevant sections of the operator DAG. The final results are stored to a temporary location and then moved to the final destination (in the case of say INSERT INTO query).
 
 
