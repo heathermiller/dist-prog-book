@@ -126,7 +126,25 @@ When a request is honored for a page, the timer is reset.
 The timer guarantees that the page will not be invalidated for a minimum period of time.
 Future request that result in invalidation or demotion (writer to reader) are only honored if the timer is satisfied.
 
-#### Linda
+#### Linda (1993)
+
+Linda is a programming model based on DSM.
+In Linda, shared memory is known as the *tuple space*; the basic unit of shared data is the tuple.
+Instead of processes reading and writing to shared memory addresses, processes can insert, extract, or copy entries from the tuple space.
+Under the Linda model, processes communicate and distribute work through tuples.
+
+A Linda tuple is not a fixed size; it can contain any combination of primitive data types and values.
+To insert a tuple into the space, the fields of the tuple are fully evaluated before insertion.
+A process can decide to evaluate a tuple serially, or spin up a background task to first evaluate the fields, then insert the tuple.
+To retrieve a tuple from the space, a *template* tuple is provided that contains a number of fixed fields to match against, as well as *formals* that are "filled in" by the tuple that matches the search.
+If many tuples match the template, one is selected arbitrarily.
+When retrieving a tuple, the tuple may be left in the tuple space or removed.
+
+In practice, the tuple space is disjointly distributed among the nodes in the cluster.
+The number and type of elements in a tuple defines the tuple's *class*.
+All requests made for a particular class of tuple are sent through a *rendezvous point*, which provides a logically central way of performing book keeping about tuples.
+The rendezvous services requests for insertion and deletions of all tuples of a class.
+In the most basic implementation of Linda, each rendezvous point is located on a single participating node in the cluster.
 
 #### Orca
 
