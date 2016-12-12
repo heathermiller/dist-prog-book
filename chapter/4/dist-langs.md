@@ -275,15 +275,17 @@ To accomplish reconciliation, Orleans provides data structures that can be autom
 As well, the developer can implement arbitrary logic for merging state.
 In the case of the YouTube video, we would want logic to determine the delta of views since the start of the activation, and add that to the actors' sum.
 
-### Dataflow model (static and stream)
+### Dataflow model
 
-The dataflow model has its roots in functional programming.
-Some languages that use this model are:
+In the dataflow model, programs are expressed as transformations on data.
+Given a set of input data, programs are constructed as a series of transformations and reductions.
+Computation is data-centric, and expressed easily as a directed acyclic graph (DAG).
+Unlike the DSM and actor models, processes are not exposed to the programmer.
+Rather, the programmer designs the data transformations, and a system is responsible for initializing processes and distributing work accross a system.
 
-* Multilisp
-* MapReduce (Spark, Hadoop, etc.)
-* RDD
-* Dryad, DryadLinq
+#### Multilisp ()
+#### MapReduce ()
+#### DryadLINQ ()
 
 ### Which is best? Why?
 
