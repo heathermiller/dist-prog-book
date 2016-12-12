@@ -89,6 +89,33 @@ Mirage, Linda, and Orca are three systems that use distributed shared memory to 
 
 #### Mirage
 
+Mirage is an OS-level implementation of DSM.
+In Mirage, regions of memory known as *segments* are created and indicated as shared.
+A segment consists of one or more fixed-size pages.
+Other local or remote processes can *attach* segments to arbitrary regions of their own virtual address space.
+When a process is finished with a segment, the region can be *detached*.
+Requests to shared memory are transparent to user processes.
+Faults occur on the page level.
+
+Operations on shared pages are gauranteed to be coherent; after a process writes to a page, all subsequent reads will observe the results of the write.
+To accomplish this, Mirage uses a protocol for requesting read or write access to a page.
+Depending on the permissions of the current "owner" of a page, the page may be invalidated on other nodes.
+The behavior of the protocol is outlined by the table below.
+
+
+
+Crucially, the semantics of this protocol are that at any time there may only be either (1) a single writer or (2) one or more readers of a page.
+When a single writer exists, no other copies of the page are present.
+When a read request arrives for a page that is being written to, the writer is demoted to a reader.
+These two properties ensure coherence.
+Many read copies of a page may be present, both to minimize network traffic and provide locality.
+When a write request arrives for a page, all read instances of the page are invalidated.
+
+To ensure fairness, the system associates each page with a timer.
+When a request is honored for a page, the timer is reset.
+The timer gaurantees that the page will not be invalidated for a minimum period of time.
+Future request that result in invalidation or demotion (writer to reader) are only honored if the timer is satisfied.
+
 #### Linda
 
 #### Orca
@@ -106,20 +133,35 @@ Importantly, these interfaces are gauranteed to be indivisible, meaning that sim
 Although serializability alone does not eliminate indeterminism from Orca programs, it keeps the model simple while it allows programmers to construct richer, multi-operation locks for arbitrary semantics and logic.
 
 Another key feature of Orca is the ability to express symbolic data structures as shared data objects.
-Because shared data is expressed through data-objects, it is easy to serialize, for instance, operations on a binary tree.
+In Orca, a generic graph type is offered as a first-class data-object.
+Because operations are serializable at the method level, the graph data-object can offer methods that span multiple nodes while still retaining serializability.
 
 ### Actor / Object model
 
-The actor model has its roots in procedural and object oriented programming.
-Communication through RPC or message-passing.
-Actors/Objects are location agnostic, because state is not shared.
-The system can decide how to most efficiently place actors.
+Unlike DSM, communication in the actor model is explicit and exposed through message passing.
+Messages can be synchronous or asynchronous, point-to-point or broadcast style.
 
-* Erlang
-* Cloud Haskell
-* Emerald
-* Argus
-* Orleans
+In the actor model, concurrent entities do not share state as they do in DSM.
+Each process, object, actor, etc., has its own address space.
+The model maps well to single multicore machines as well as clusters of machines.
+Although an underlying system is required to differentiate between local and remote messages, the location of processes, objects, or actors can be transparent to the application programmer.
+
+#### Erlang
+
+* functional programming language
+* process is the unit of concurrency
+* messages are sent to mailboxes
+    * asynchronous
+* functional programming
+* variables, atoms, lists
+
+#### Cloud Haskell
+
+#### Emerald
+
+#### Argus
+
+#### Orleans
 
 ### Dataflow model (static and stream)
 
