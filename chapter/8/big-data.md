@@ -391,10 +391,11 @@ The Hive execution model composes of the below important components (and as show
 
 Execution Engine : Execution Engine finally executes the tasks in order of their dependencies. A MapReduce task first serializes its part of the plan into a plan.xml file. This file is then added to the job cache and mappers and reducers are spawned to execute relevant sections of the operator DAG. The final results are stored to a temporary location and then moved to the final destination (in the case of say INSERT INTO query).
 
+
 <figure class="main-container">
   <img src="./Hive-architecture.png" alt="Hive architecture" />
 </figure>
-
+*Hive architecture diagram*
 
 Summarizing the flow - the query is first submitted via CLI/web UI/any other interface. The query undergoes all the compiler phases as explained above to form an optimized DAG of MapReduce and hdfs tasks which the execution engine executes in its correct order using Hadoop.
 
