@@ -294,7 +294,7 @@ Rather, the programmer designs the data transformations, and a system is respons
     * function performs some action based on all values associated with an intermediate key
 * Map and Reduce may emit zero, one, or many key-value pairs per input
 
-![Alt text] (/MR.png "MapReduce Wordcount Workflow")
+![Alt text] (./MR.png "MapReduce Wordcount Workflow")
 
 #### DryadLINQ ()
 #### Discretized Streams (2012)
