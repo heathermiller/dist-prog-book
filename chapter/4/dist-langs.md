@@ -90,9 +90,9 @@ Distributed shared memory (DSM) takes the virtual memory abstraction one step fu
 Given such an abstraction, programs can communicate simply by reading from and writing to shared memory addresses.
 DSM is appealing because the programming model is the same for local and distributed systems.
 However, it requires an underlying system to function properly.
-Mirage, Linda, and Orca are three systems that use distributed shared memory to provide a distributed programming model.
+Mirage, Orca, and Linda are three systems that use distributed shared memory to provide a distributed programming model.
 
-#### Mirage
+#### Mirage (1989)
 
 Mirage is an OS-level implementation of DSM.
 In Mirage, regions of memory known as *segments* are created and indicated as shared.
@@ -126,6 +126,24 @@ When a request is honored for a page, the timer is reset.
 The timer guarantees that the page will not be invalidated for a minimum period of time.
 Future request that result in invalidation or demotion (writer to reader) are only honored if the timer is satisfied.
 
+#### Orca (1992)
+
+Orca is a programming language built for distribution and is based on the DSM model.
+Orca expresses parallelism explicitly through processes.
+Processes in Orca are similar to procedures, but are concurrent instead of serial.
+When a process is forked, it can take parameters that are either passed as a copy of the original data, or passed as a *shared data-object*.
+Processes communicate through these shared objects.
+
+Shared data objects in Orca are similar to objects in OOP.
+An object is defined abstractly by a name and a set of interfaces.
+An implementation of the object defines any private data fields as well as the interfaces (methods).
+Importantly, these interfaces are guaranteed to be indivisible, meaning that simultaneous calls to the same interface are serializable.
+Although serializability alone does not eliminate indeterminism from Orca programs, it keeps the model simple while it allows programmers to construct richer, multi-operation locks for arbitrary semantics and logic.
+
+Another key feature of Orca is the ability to express symbolic data structures as shared data objects.
+In Orca, a generic graph type is offered as a first-class data-object.
+Because operations are serializable at the method level, the graph data-object can offer methods that span multiple nodes while still retaining serializability.
+
 #### Linda (1993)
 
 Linda is a programming model based on DSM.
@@ -146,24 +164,6 @@ All requests made for a particular class of tuple are sent through a *rendezvous
 The rendezvous services requests for insertion and deletions of all tuples of a class.
 In the most basic implementation of Linda, each rendezvous point is located on a single participating node in the cluster.
 
-#### Orca
-
-Orca is a programming language built for distribution and is based on the DSM model.
-Orca expresses parallelism explicitly through processes.
-Processes in Orca are similar to procedures, but are concurrent instead of serial.
-When a process is forked, it can take parameters that are either passed as a copy of the original data, or passed as a *shared data-object*.
-Processes communicate through these shared objects.
-
-Shared data objects in Orca are similar to objects in OOP.
-An object is defined abstractly by a name and a set of interfaces.
-An implementation of the object defines any private data fields as well as the interfaces (methods).
-Importantly, these interfaces are guaranteed to be indivisible, meaning that simultaneous calls to the same interface are serializable.
-Although serializability alone does not eliminate indeterminism from Orca programs, it keeps the model simple while it allows programmers to construct richer, multi-operation locks for arbitrary semantics and logic.
-
-Another key feature of Orca is the ability to express symbolic data structures as shared data objects.
-In Orca, a generic graph type is offered as a first-class data-object.
-Because operations are serializable at the method level, the graph data-object can offer methods that span multiple nodes while still retaining serializability.
-
 ### Actor / Object model
 
 Unlike DSM, communication in the actor model is explicit and exposed through message passing.
@@ -174,32 +174,7 @@ The model maps well to single multicore machines as well as to clusters of machi
 Although an underlying system is required to differentiate between local and remote messages, the location of processes, objects, or actors can be transparent to the application programmer.
 Erlang, Emerald, Argus, and Orleans are just a few of many implementations of the actor model.
 
-#### Erlang
-
-Erlang is a distributed language which combines functional programming with message passing.
-Units of distribution in Erlang are processes.
-These processes may be co-located on the same node or distributed amongst a cluster.
-
-Processes in Erlang communicate by message passing.
-Specifically, a process can send an asynchronous message to another process' *mailbox*.
-At some future time, the receiving process may enter a *receive* clause, which searches the mailbox for the first message that matches one of a set of patterns.
-The branch of code that is executed in response to a message is dependent on the pattern that is matched.
-
-In general, an application written in Erlang is separated into two broad components: *workers* and *monitors*.
-Workers are responsible for application logic.
-Erlang offers a special function `link(Pid)` which allows one process to monitor another.
-If the process indicated by `Pid` fails, the monitor process will be notified and is expected to handle the error.
-Worker processes are "linked" by monitor processes which implement the fault-tolerance logic of the application.
-
-Erlang, first implemented in Prolog, has the features and styles of a functional programming language.
-Variables in Erlang are immutable; once assigned a value, they cannot be changed.
-Because of this, loops in Erlang are written as tail recursive function calls.
-Although this at first seems like a flawed practice (to traditional procedural programmers), tail recursive calls do not grow the current stack frame, but instead replace it.
-It is worth noting that stack frame growth is still possible, but if the recursive call is "alone" (the result of the inner function is the result of the outer function), the stack will not grow.
-
-#### Cloud Haskell
-
-#### Emerald
+#### Emerald (1987)
 
 Emerald is a distributed programming language based around a unified object model.
 Programs in Emerald consist of collections of Objects.
@@ -224,7 +199,7 @@ Emerald uses abstract types to define sets of interfaces.
 Objects that implement such interfaces can be "plugged in" where needed.
 Therefore, code may be dynamically upgraded, and different implementations may be provided for semantically similar operations.
 
-#### Argus
+#### Argus (1988)
 
 Argus is a distributed programming language and system.
 It uses a special kind of object, called a *guardian*, to create units of distribution and group highly coupled data and logic.
@@ -249,7 +224,30 @@ For example, a read operation that spans multiple guardians either "sees" the co
 Being total means that write operations that span multiple guardians either fully complete or fully fail.
 This is accomplished by a two-phase commit protocol that serializes the state of *all* guardians involved in an action, or discards partial state changes.
 
-#### Orleans
+#### Erlang (2000)
+
+Erlang is a distributed language which combines functional programming with message passing.
+Units of distribution in Erlang are processes.
+These processes may be co-located on the same node or distributed amongst a cluster.
+
+Processes in Erlang communicate by message passing.
+Specifically, a process can send an asynchronous message to another process' *mailbox*.
+At some future time, the receiving process may enter a *receive* clause, which searches the mailbox for the first message that matches one of a set of patterns.
+The branch of code that is executed in response to a message is dependent on the pattern that is matched.
+
+In general, an application written in Erlang is separated into two broad components: *workers* and *monitors*.
+Workers are responsible for application logic.
+Erlang offers a special function `link(Pid)` which allows one process to monitor another.
+If the process indicated by `Pid` fails, the monitor process will be notified and is expected to handle the error.
+Worker processes are "linked" by monitor processes which implement the fault-tolerance logic of the application.
+
+Erlang, first implemented in Prolog, has the features and styles of a functional programming language.
+Variables in Erlang are immutable; once assigned a value, they cannot be changed.
+Because of this, loops in Erlang are written as tail recursive function calls.
+Although this at first seems like a flawed practice (to traditional procedural programmers), tail recursive calls do not grow the current stack frame, but instead replace it.
+It is worth noting that stack frame growth is still possible, but if the recursive call is "alone" (the result of the inner function is the result of the outer function), the stack will not grow.
+
+#### Orleans (2011)
 
 ### Dataflow model (static and stream)
 
