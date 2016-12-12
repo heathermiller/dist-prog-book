@@ -73,7 +73,12 @@ A solution designed to solve one problem may exacerbate another.
 * Availability
 * Partitioning
 
-## Three major approaches to distributed languages:
+## Three Major Approaches to Distributed Languages
+
+Clearly, there are problems present in distributed programming that prevent traditional local programming models from applying directly to distributed environments.
+Languages and systems built for writing distributed applications can be classified into three categories: distributed shared memory, actors, and dataflow.
+Each model has strengths and weaknesses.
+Here, we describe each model and provide examples of languages and systems that implement them.
 
 ### Distributed Shared Memory
 
@@ -150,6 +155,8 @@ In the actor model, concurrent entities do not share state as they do in DSM.
 Each process, object, actor, etc., has its own address space.
 The model maps well to single multicore machines as well as to clusters of machines.
 Although an underlying system is required to differentiate between local and remote messages, the location of processes, objects, or actors can be transparent to the application programmer.
+
+Erlang, Emerald, Argus, and Orleans are just a few of many implementations of the actor model.
 
 #### Erlang
 
