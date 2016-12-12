@@ -24,7 +24,7 @@ Single node databases can simply rely upon locking to ensure *ACID*ity. Each tra
 
 This model works well on a single node. But it exposes a serious limitation when too many concurrent transactions are performed. A single node database server will only be able to process so many concurrent read operations. The situation worsens when many concurrent write operations are performed. To guarantee *ACID*ity, the write operations will be performed in sequence. The last write request will have to wait for an arbitrary amount of time, a totally unacceptable situation for many real time systems. This requires the application developer to decide on a **Scaling** strategy.
 
-## 2. Transaction Volume 
+### Transaction Volume 
 
 To increase the volume of transactions against a database, two scaling strategies can be considered
 
@@ -40,23 +40,21 @@ Horizontal Scaling through functional partitioning enables high degree of scalab
 
 2PC is a blocking protocol and is usually employed for updates which can take from a few milliseconds up to a few minutes to commit. This means that while a transaction is being processed, other transactions will be blocked. So the application that initiated the transaction will be blocked. Another option is to handle the consistency across databases at the application level. This only complicates the situation for the application developer who is likely to implement a similar strategy if *ACID*ity is to be maintained.
 
-# The part below is in bits and pieces. A lot of details need to be filled in.
+
+## The **ACID*ic side effect
+Traditional distributed databases provide strong consistency guarantees. While processing a transaction, they block other client requests. Imagine a large scale internet based shopping service with consistency enforced across functional partitions. This means that any tra
 
 ## 3. A Distributed Concoction
 
-**I am a cute diagram for the paragraph below.**
+![Partitioned Network](resources/partitioned-network.jpg)
 
-In the network above, all messages between the node set G1 and G2 are lost due to a network issue. The system as a whole detects this situation. There are two options -
+In the network above, all messages between the node set M and N are lost due to a network issue. The system as a whole detects this situation. There are two options -
 
-* The system allows any application to read and write to data objects on these nodes as they are **available**. The application writes to a data object. This write operation completes in one of the nodes of G1. Due to **network partition**, this change is not propagated to replicas of the data object in G2. Subsequently the application tries to read the value of that data object and the read operation executes in one of the nodes of G2. The read operation returns the older value of the data object, thus making the application state not **consistent**.
+1. **Availability first** - The system allows any application to read and write to data objects on these nodes independently even though they are not able to communicate. The application writes to a data object on node M. Due to **network partition**, this change is not propagated to replicas of the data object in N. Subsequently, the application tries to read the value of that data object and the read operation executes in one of the nodes of N. The read operation returns the older value of the data object, thus making the application state not **consistent**.
 
-## 4. The volatile network 
+2. **Consistency first** - The system  does not allow any application to write to data objects as it cannot ensure **consistency** of replica states. This means that the system is perceived to be **unavailable** by the applications. 
 
-Network Partition is a contentious subject among distributed database architects. While some maintain that network partitions are rare, other point to their. 9
-
-
-## 4. The spicy ingredients
-
+If there are no partitions, clearly both consistency and availability can be guaranteed by the system.
 
 This simple observation shows a tension between three issues concerning distributed systems -
 
@@ -66,7 +64,6 @@ This simple observation shows a tension between three issues concerning distribu
 
 **Partitioning** is the loss of messages between the nodes of a distributed system. 
 
-
 This observation led Eric Brewer to conjecture in an invited talk at PODC 2000 - 
 
 <blockquote>It is impossible for a web service to provide the following three guarantees:
@@ -74,39 +71,49 @@ Consistency
 Availability
 Partition Tolerance</blockquote>
 
-It is clear that the prime culprit here is network partition. If there are no network partitions, any distributed service will be both highly available and provide strong consistency of shared data objects. Unfortunately, network partitions cannot be remedied in a distributed system. 
+This is called the CAP theorem. It is clear that the prime culprit here is network partition. If there are no network partitions, any distributed service will be both highly available and provide strong consistency of shared data objects. Unfortunately, network partitions cannot be remedied in a distributed system. 
 
+## The **BASE**ic distributed state
 
+When viewed through the lens of CAP theorem and its consequences on distributed application design, we realize that we cannot commit to perfect availability and strong consistency. But surely we can explore the middle ground. We can guarantee availability most of the time with sometimes inconsistent view of the data. The consistency is eventually achieved when the communication between the nodes resumes. This leads to the following properties of the current distributed applications, referred to by the acronym BASE.
 
-
-
-## 3. Strong Consistency
-
-
-
-
-
-
-
-
-
-We observed how in the event of a network partition, we could not have both availability and consistency at the same time. Let's study their pairwise interaction -
-
-
-For many applications *ACID*ic datastores impose a more severe consistency guarantee than is actually needed and this reduces their availability. By relaxing the constraints on data consistency one can achieve higher scalability and availability. 
-
-### 2. The **BASE**ic distributed state
-
-When viewed through the lens of CAP theorem and its consequences on distributed applications we realize that we cannot commit to perfect availability and strong consistency. But surely we can explore the middle ground. We can guarantee availability most of the time with sometimes inconsistent view of the data. The consistency is eventually achieved when the communication between the nodes resumes. This leads to the following properties of the current distributed applications, referred to by the acronym BASE.
-
-**Basically Available** services are those which are partially available when partitions happen. Thus, they appear to work most of the time.
+**Basically Available** services are those which are partially available when partitions happen. Thus, they appear to work most of the time. Partial failures result in the system being unavailable only for a section of the users.
 **Soft State** services provide no strong consistency guarantees. They are not write consistent. Since replicas may not be mutually consistent, applications have to accept stale data.
 **Eventually Consistent** services try to make application state consistent whenever possible.
 
+## Partitions and latency
+Any large scale distributed system has to deal with latency issue. In fact, network partitions and latency are fundamentally related. Once a request is made and no response is received within some duration, the sender node has to assume that a partition has happened. The sender node can take one of the following steps:
+
+1) Cancel the operation as a whole. In doing so, the system is choosing consistency over availability. 
+2) Proceed with the rest of the operation. This can lead to inconsistency but makes the system highly available.
+3) Retry the operation until it succeeds. This means that the system is trying to ensure consistency and reducing availability. 
+
+Essentially, a partition is an upper bound on the time spent waiting for a response. Whenever this upper bound is exceeded, the system chooses C over A or A over C. Also, the partition may be perceived only by two nodes of a system as opposed to all of them. This means that partitions are a local occurrence.
+
+## Handling Partitions
+Once a partition has happened, it has to be handled explicitly. The designer has to decide which operations will be functional during partitions. The partitioned nodes will continue their attempts at communication. When the nodes are able to establish communication, the system has to take steps to recover from the partitions. 
+
+### Partition mode functionality
+When at least one side of the system has entered into partition mode, the system has to decide which functionality to support. Deciding this depends on the invariants that the system must maintain. Depending on the nature of problem, the designer may choose to compromise on certain invariants by allowing partitioned system to provide functionality which might violate them. This means the designer is choosing availability over consistency. Certain invariants may have to be maintained and operations that will violate them will either have to be modified or prohibited. This means the designer is choosing consistency over availability. 
+Deciding which operations to prohibit, modify or delay also depends on other factors such as the node. If the data is stored on the same node, then operations on that data can typically proceed on that node but not on other node.
+In any event, the bottomline is that if the designer wishes for the system to be available, certain operations have to be allowed. The node has to maintain a history of these operations so that it can be merged with the rest of the system when it is able to reconnect. 
+Since the operations can happen simultaneously on multiple disconnected nodes, all sides will maintain this history. One way to maintain this information is through version vectors.
+Another interesting problem is to communicate the progress of these operations to the user. Until the system gets out of partition mode, the operations cannot be committed completely. Till then, the user interface has to faithfully represent their incomplete or in-progress status to the user.
+
+### Partition Recovery
+When the partitioned nodes are able to communicate, they have to exchange information to maintain consistency. Both sides continued in their independent direction but now the delayed operations on either side have to be performed and violated invariants have to be fixed. Given the state and history of both sides, the system has to accomplish the following tasks.
+
+#### Consistency
+During recovery, the system has to reconcile the inconsistency in state of both nodes. This is relatively straightforward to accomplish. One approach is to start from the state at the time of partition and apply operations of both sides in an appropriate manner, ensuring that the invariants are maintained. Depending on operations allowed during the partition phase, this process may or may not be possible. The general problem of conflict resolution is not solvable but a restricted set of operations may ensure that the system can always always merge conflicts. For example, Google Docs limits operations to style and text editing. But source-code control systems such as Concurrent Versioning System (CVS) may encounter conflict which require manual resolution. Research has been done on techniques for automatic state convergence. Using commutative operations allows the system to sort the operations in a consistent global order and execute them. Though all operations can't be commutative, for example - addition with bounds checking is not commutative. Mark Shapiro and his colleagues at INRIA have developed *commutative replicated data types (CRDTs)* that provably converge as operations are performed. By implementing state through CRDTs, we can ensure Availability and automatic state convergence after partitions.
+
+#### Compensation
+During partition, its possible for both sides to perform a series of actions which are externalized, i.e. their effects are visible outside the system. To compensate for these actions, the partitioned nodes have to maintain a history.
+For example, consider a system in which both sides have executed the same order during a partition. During the recovery phase, the system has to detect this and distinguish it from two intentional orders. Once detected, the duplicate order has to be rolled back. If the order has been committed successfully then the problem has been externalized. The user will see twice the amount deducted from his account for a single purchase. Now, the system has to credit the appropriate amount to the user's account and possibly send an email explaining the entire debacle. All this depends on the system maintaining the history during partition. If the history is not present, then duplicate orders cannot be detected and the user will have to catch the mistake and ask for compensation.
+It would have been great if the duplicate order was not issued by the system in the first place. But the requirement to maintain system availability trumps consistency. Mistakes in such cases cannot always be corrected internally. But by admitting them and compensating for them, the system arguably exhibits equivalent behavior.
 
 ### What's the right pH for my distributed solution?
 
-Whether an application chooses to an *ACID*ic or *BASE*ic service depends on the domain. An application developer has to consider the consistency-availability tradeoff on a case by case basis. *ACID*ic databases provide a very simple and strong consistency model making application development easy for domains where data inconsistency cannot be tolerated. *BASE*ic databases provide a very loose consistency model, placing more burden on the application developer to understand the limitations of the database and work around that, retaining sane application behavior. 
+Whether an application chooses to be an *ACID*ic or *BASE*ic service depends on the domain. An application developer has to consider the consistency-availability tradeoff on a case by case basis. *ACID*ic databases provide a very simple and strong consistency model making application development easy for domains where data inconsistency cannot be tolerated. *BASE*ic systems provide a very loose consistency model, placing more burden on the application developer to understand the invariants and manage them carefully during partitions by appropriately limiting or modifying the operations.
 
 ## References
 
