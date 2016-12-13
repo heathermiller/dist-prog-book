@@ -76,17 +76,38 @@ Many a analytics workloads like K-means, logistic regression, graph processing a
 FlumeJava {%cite chambers2010flumejava --file big-data %}was introduced to make it easy to develop, test, and run efficient data-parallel pipelines. FlumeJava represents each dataset as an object and transformation is invoked by applying methods on these objects. It constructs an efficient internal execution plan from a pipeline of MapReduce jobs, uses deferred evaluation and optimizes based on plan structures. The debugging ability allows programmers to run on the local machine first and then deploy to large clusters.
 
 *Core Abstraction*  
-- `PCollection<T>`, a immutable bag of elements of type `T`
+- `PCollection<T>`, a immutable bag of elements of type `T`, it can be created from in-memory Java `Collection<T>` or from reading a file with encoding specified by `recordOf`.
 - `recordOf(...)`, specifies the encoding of the instance
 - `PTable<K, V>`, a subclass of `PCollection<Pair<K,V>>`, a immutable multi-map with keys of type `K` and values of type `V`
 - `parallelDo()`, can be expressed both the map and reduce parts of MapReduce
 - `groupByKey()`, same as shuffle step of MapReduce
 - `combineValues()`, semantically a special case of `parallelDo()`, a combination of a MapReduce combiner and a MapReduce reducer, which is more efficient than doing all the combining in the reducer.
+- `flatten`, takes a list of `PCollection<T>`s and returns a single logic `PCollection<T>`.
+
+For example: `todo: explain the code`
+```!Java
+PTable<String,Integer> wordsWithOnes =
+  words.parallelDo(
+      new DoFn<String, Pair<String,Integer>>() {
+    void process(String word,
+                 EmitFn<Pair<String,Integer>> emitFn) {
+      emitFn.emit(Pair.of(word, 1));
+    }
+  }, tableOf(strings(), ints()));
+PTable<String,Collection<Integer>>
+  groupedWordsWithOnes = wordsWithOnes.groupByKey();
+PTable<String,Integer> wordCounts =
+  groupedWordsWithOnes.combineValues(SUM_INTS);
+```
 
 *Deferred Evaluation & Optimizer*  
-The state of each `PCollection` object is either *deferred* (not yet computed) and *materialized* (computed). When the program invokes a parallel operation, it does not actually run the operation. Instead, it performs the operation only when needed. FlumeJava also provides some optimization practices:
-1) parallelDo Fusion: f(g(x)) => f o g(x) to reduce steps;
-2) MapShuffleCombineReduce (MSCR) Operation that generalizes MapReduce jobs to accept multiple inputs and multiple outputs. And for this, FlumeJava does another MSCR fusion.  
+One of the merits of using FlumeJava to pipeline MapReduce jobs is that it enables optimization automatically, by executing parallel operations lazily using *deferred evaluation*. The state of each `PCollection` object is either *deferred* (not yet computed) and *materialized* (computed). When the program invokes a *parallelDo()*, it creates an operation pointer to the actual deferred operation object. These operations form a directed acyclic graph called execution plan. The execution plan doesn't get evaluated until *run()* is called. This will cause optimization of the execution plan and evaluation in forward topological order. These optimization for transferring the modular execution plan into an efficient one include:
+- parallelDo Fusion: $$f(g(x)) => f \circ g(x)$$. This can reduce steps
+- MapShuffleCombineReduce (MSCR) Operation: combination of ParallelDo, GroupByKey, CombineValues and Flatten into one MapReduce job. This extends MapReduce to accept multiple inputs and multiple outputs. `todo: example of Figure 3`
+  <figure class="main-container">
+  <img src="{{ site.baseurl }}/resources/img/mscr.png" alt="A MapShuffleCombineReduce operation with 3 input channels" />
+</figure>
+
 
 
 ### 1.1.3 Dryad
