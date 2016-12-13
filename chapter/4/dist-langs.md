@@ -323,6 +323,13 @@ Because they are built on top of RDD's, RDG's inherit immutability.
 When a tranformation is performed, a new graph is created.
 In this way, fault tolerance in GraphX can be executed the same way as it is in vanilla Spark; when a fault happens, the series of computations is remembered and re-executed.
 
+A key feature of GraphX is that it is a DSL library built on top of a GPL library.
+Because it uses the general purpose computing framework of Spark, arbitrary MapReduce jobs may be performed in the same program as more specific graph operations.
+In other graph-processing frameworks, results from a graph query would have to be written to disk to be used as input to a general purpose MapReduce job.
+
+With GraphX, if you can structure your application logic as a series of graph operations, an implementation may be created on top of RDD's.
+Because many real-world applications, like social media "connections," are naturally expressed as graphs, GraphX can be used to create a highly scalable, fault-tolerant implementation.
+
 ### Which is best? Why?
 
 MR vs Actors: depends on problem, solution
