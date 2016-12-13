@@ -42,19 +42,38 @@ In other systems, like Argus, objects are reconstructed from state that is autom
 
 ### Consistency (Concurrency)
 
-* Local
-  * enforce consistency with locks
-  * state located under one resource manager (partial local crash)
+If computing on shared data can be avoided, parallel computations would not be bottlenecked by serialized accesses.
+Unfortunately, there are many instances where operating on shared data is necessary.
+While problems with shared data can be dealt with fairly simply in the local case, distribution introduces problems that make consistency more complex.
 
-* Distributed
-  * preserve state in instance of failure
-  * concurrent method invocations / messages
-  * operations on replicated objects (for scalability)
- 
-* Methods
-  * sequencer
-  * message queues
-  * read only vs. write ops
+In local computing, enforcing consistency is fast and straightforward.
+Traditionally, a piece of data is protected by another piece of data called a *lock*.
+To operate on the data, a concurrent process *acquires* the lock, makes its changes, then *releases* the lock.
+Because the data is either located in on-board memory or an on-chip cache, passing the shared data around is relatively fast.
+As in the case of partial failure, a central resource manager (the OS) is present and can respond to a failed process that has obtained a lock.
+
+In a distributed environment, coordination and locking is more difficult.
+First, because of the lack of a central resource manager, there needs to be a way of preserving or recovering the state of shared data in the case of failure.
+The problem of acquiring locks also becomes harder due to partial failure and higher latency.
+Synchronization protocols must expect and be able to handle failure.
+
+To deal with operations on shared data, there are a few standard techniques.
+A *sequencer* can be used to serialize requests to a shared piece of data.
+When a process on a machine wants to write to shared data, it sends a request to a logically central process called a sequencer.
+The sequencer takes all incoming requests and serializes them, and sends the serialized operations (in order) to all machines with a copy of the data.
+The shared data will then undergo the same sequence of transformations on each machine, and therefore be consistent.
+A similar method for dealing with consistency is the message queue.
+In the actor model, pieces of an application are represented as actors which respond to requests.
+Actors may use *message queues* which behave similarly to sequencers.
+Incoming method calls or requests are serialized in a queue which the actor can use to process requests one at a time.
+Finally, some systems take advantage of the semantics of operations on shared data, distinguishing between read-only operations and write operations.
+If an operation is determined to be read-only, the shared data can be distributed and accessed locally.
+If an operation writes to shared data, further synchronization is required.
+
+Unfortunately, none of these techniques can survive a network partition.
+Consistency requires communication, and a partitioned network will prevent updates to state on one machine from propagating.
+Distributed systems therefore may be forced by other requirements to loosen their requirement of consistency.
+Below, the CAP theorem formalizes this idea.
 
 ### Latency
 
