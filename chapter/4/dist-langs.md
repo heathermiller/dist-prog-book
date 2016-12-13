@@ -33,7 +33,7 @@ If all reply "yes," the action is *committed*.
 Otherwise, as in the case of partial failure, no changes are committed.
 Two phase commit ensures that state is not changed in a partial manner.
 Another solution to partial failure is redundancy, or replication.
-If one replica of a computation failes, the others may survive and continue.
+If one replica of a computation fails, the others may survive and continue.
 Replication can also be used to improve performance, as in MapReduce and Spark Streaming.
 Checkpoint and restore has also been implemented as a way to recover from partial failure.
 By serializing a recent "snapshot" of state to stable storage, recomputing current state is made cheap.
