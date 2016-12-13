@@ -77,30 +77,49 @@ Below, the CAP theorem formalizes this idea.
 
 ### Latency
 
-* Local
-  * operations are relatively fast
-  * topology doesn't change
+Latency is another major problem that is unique to distributed computing.
+Unlike the other problems discussed in this section, latency does not necessarily affect program correctness.
+Rather, it is a problem that impacts application performance, and can be a source of nondeterminism.
 
-* Distributed
-  * Network failures and recovery
-  * changing topology
-  * efficiency
+In the case of local computing, latency is minimal and fairly constant.
+Although their may be subtle timing differences that arise from contention from concurrent processes, these fluctuations are relatively small.
+As well, machine hardware is constant.
+There are no changes to the latency of communication channels on a single machine.
 
-* Methods
-  * process locality (static, dynamic analysis)
-  * minimize communication
-  * data replication (Orca)
-  * pipe-lining (HTTP)
-  * asynchronous callbacks
-  
+Distribution introduces network topology.
+This topology significantly (orders of magnitude) increases the latency of communication, as well as introduces a source of nondeterminism.
+At any time, routing protocols or hardware changes (or both) may cause the latency between two machines to change.
+Therefore, distributed applications may not rely on specific timings of communication in order to function.
+Distributed processes may also be more restricted.
+Because communication across the network is costly, applications may necessarily be designed to minimize communication.
+
+A more subtle (and sinister) problem with increased latency and the network is the inability of a program to distinguish between a slow message and a failed message.
+This situation is analogous to the halting problem, and forces distributed applications to make decisions about when a message, link, or node has "failed."
+
+Several methods have been developed to cope with the latency of communication.
+Static and dynamic analysis may be performed on communication patterns so that entities that communicate frequently are more proximate than those that communicate infrequently.
+Another approach that has been used is data replication.
+If physically separate entities all need to perform reads on a piece of data, that data can be replicated and read from local hardware.
+Another approach is pipelining; a common example of this is in some flavors of the HTTP protocol.
+Pipelining requests allows a process to continue with other work, or issue more requests without blocking for the response of each request.
+Pipelining lends itself to an asynchronous style of programming, where a callback can be assigned to handle the results of a request.
+*Futures* and *promises* have built on this programming style, allowing computations to be queued, and performed when the value of a future or promise is resolved.
+
 ### The CAP Theorem
 
-Indeed, these three issues of distributed computing are not disjoint.
-A solution designed to solve one problem may exacerbate another.
+Indeed, the three problems outlined above are not independent, and a solution for one may come at the cost of *amplifying* the effects of another.
+For example, let's suppose when a request to our system arrives, a response should be issued as soon as possible.
+Here, we want to minimize latency.
+Unfortunately, this may come at the cost of consistency.
+We are forced to either (1) honor latency and send a possibly inconsistent result, or (2) honor consistency and wait for the distributed system to synchronize before replying.
 
-* Consistency
-* Availability
-* Partitioning
+The CAP theorem { // TODO cite CAP } formalizes this notion.
+CAP stands for Consistency, Availability, and tolerance to Partitioning.
+The theorem states that a distributed system may only have two of these three properties.
+
+Since its introduction, experience suggests this theorem is not as rigid as was originally proposed { // TODO cite 12 years later }.
+In practice, for example, rareness of network partitioning makes satisfaction of all three easier.
+As well, advancements in consistency models, such as CRDT's { // TODO cite CRDT's paper }, make balancing consistency and availability flexible to the requirements of the system.
 
 ## Three Major Approaches to Distributed Languages
 
