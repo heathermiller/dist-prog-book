@@ -414,17 +414,34 @@ Actors:
 
 * Message-passing chapter
 
-## Support for Distribution
+## Thoughts on System Design
 
 ### Intro
 
-* What is a DSL?
+The definition of a domain-specific language is a hot topic and there have been several attempts to concretely define what exactly *it* is.
+
+Here is the definition as given by { // TODO cite when and how }:
 
 > Domain-specific languages are languages tailored to a specific application domain.
 
-Another definition:
+Another definition is offered (and commonly cited) by { // TODO cite annotated bib }:
 
 > A domain-specific language is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
+
+Generally, I would refer to a domain-specific language (DSL) as a *system*, be it a standalone language, compiler extension, library, set of macros, etc., that is designed for common operations in a problem domain to be easily expressed.
+
+For example, the python twitter library is designed for easily expressing operations that manage a twitter account.
+
+The problem in defining this term (I believe) is the the vagueness of the components *domain* and *language*.
+Depending on the classification, a set of problems designated in a certain domain may span a "wide" or "narrow" scope.
+For example, does "tweeting" qualify as a domain (within the twitter library)?
+Would "social media sharing" qualify as a domain (containing the twitter library)?
+For my purposes I will accept the definition of a domain as a "well-defined, highly cohesive set of operations."
+
+It is also difficult to come up with a definition for a language.
+A language may be qualified if it has its own compiler.
+An orthogonal definition qualifies a language by its style, as in the case of sets of macros.
+This confusion is why I adopt the even more vague term of *system* in my own definition.
 
 ### Where is it in the stack?
 
