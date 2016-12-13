@@ -10,10 +10,10 @@ As human beings we have an ability to multitask ie. we can walk, talk and eat at
 
 
 The processor can either handle blocking calls in two ways:
-- **Synchronous method**: As a part of running task in synchronous method, processor continues to wait for the blocking call to complete the task and return the result. After this processor will resume processing next task. Problem with this kind of method is CPU time not utilized in an ideal manner.
-- **Asynchronous method**: When you add asynchrony, you can utilize the time of CPU to work on some other task using one of the preemptive time sharing algorithm. Now when the asynchronous call returns the result, processor can again switch back to the previous process using preemption and resume the process from the point where it’d left off.
+- **Synchronously**: As a part of running task in synchronous method, processor continues to wait for the blocking call to complete the task and return the result. After this processor will resume processing next task. Problem with this kind of method is CPU time not utilized in an ideal manner. Also, there is a possiblity of deadlocks here, which can be tricky to recover from.
+- **Asynchronously**: When you add asynchrony, you can utilize the time of CPU to work on some other task using one of the preemptive time sharing algorithm. Now when the asynchronous call returns the result, processor can again switch back to the previous process using preemption and resume the process from the point where it’d left off.
 
-In the world of asynchronous communications many terminologies were defined to help programmers reach the ideal level of resource utilization. As a part of this article we will talk about motivation behind rise of Promises and Futures, we will explain programming model associated with it and discuss evolution of this programming construct, finally we will end this discussion with how this construct helps us today in different general purpose programming languages.
+In the world of asynchronous communications many programming models were introduced to help programmers wrangle with dependencies between processes optimally. As a part of this article we will talk about motivation behind rise of Promises and Futures, we will explain programming model associated with it and discuss evolution of this programming construct, finally we will end this discussion with how this construct helps us today in different general purpose programming languages.
 
 
 <figure class="main-container">
@@ -53,7 +53,7 @@ Promises and javascript have an interesting history. In 2007 inspired by Python�
 #Different Definitions
 
 
-Future, promise, Delay or Deferred generally refer to same synchronisation mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed. The definitions have changed a little over the years but the idea remained the same.
+Future, promise, Delay or Deferred generally refer to same synchronisation mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed. 
 
 
 In some languages however, there is a subtle difference between what is a Future and a Promise. 
