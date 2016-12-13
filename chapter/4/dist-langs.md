@@ -311,8 +311,17 @@ In the reduce phase, the list of 1's is summed to compute a wordcount for each w
 ![Alt text] (./MR.png "MapReduce Workflow")
 (http://www.milanor.net/blog/an-example-of-mapreduce-with-rmr2/)
 
-#### DryadLINQ ()
 #### Discretized Streams (2012)
+
+#### GraphX (2013)
+
+Many real world problems are expressed using graphs.
+GraphX is a system built on top of the Spark MapReduce framework { // TODO cite RDD } that exposes traditional graph operations while internally representing a graph as a collection of RDD's.
+GraphX exposes these operations through what it calls a Resilient Distributed Graph (RDG).
+Internally, an RDG is a collection of RDD's that define a vertex split of a graph { // TODO CITE powergraph }.
+Because they are built on top of RDD's, RDG's inherit immutability.
+When a tranformation is performed, a new graph is created.
+In this way, fault tolerance in GraphX can be executed the same way as it is in vanilla Spark; when a fault happens, the series of computations is remembered and re-executed.
 
 ### Which is best? Why?
 
