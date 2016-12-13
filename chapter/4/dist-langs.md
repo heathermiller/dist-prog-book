@@ -14,21 +14,31 @@ In this section, we present an overview of these three problems and their impact
 ### Partial Failure
 
 In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
-If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge about the failure.
-For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about the failed process' state state, etc.
+If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge.
+For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about the failed process' state, etc.
 
-* Failure in a distributed setting
-  * 2 sources, network and host
-  * no central manager (no knowledge)
-  * non-determinism
-  * consistency (leave until next section)
-  * control is not returned to the caller, message or response may "vanish"
-  
-* Impact, methods of dealing with partial failure
-  * recompute, duplicate computation (MR, RDD, Hadoop)
-  * 2-phase commit (Argus)
-  * redundancy (MR (spark's duplicate master), Orleans, Argus)
-  * checkpoint-restore (Naiad, Hadoop)
+Because failure in a distributed setting involves another player, the network, it is impossible in most cases to determine the cause of failure.
+In a distributed environment, there is no (reliable) central manager that can report on the state of all components.
+Further, due to the inherent concurrency in a distributed system, nondeterminism is a problem that must be considered when designing distributed models, languages, and systems.
+Communication is perhaps the most obvious example of this; messages may be lost or arrive out-of-order.
+Finally, unlike in a local environment where failure returns control to the caller, failure may not be reported or the response may simply vanish.
+Because of this, distributed communication must be designed expecting partial failure, and be able to "fail gracefully."
+
+Several methods have been developed to deal with the problem of partial failure.
+One method, made popular with batch processing and MapReduce style frameworks, is to remember the series of computations needed to obtain a result and recompute the result in the case of failure.
+Systems such as MapReduce, Spark, GraphX, and Spark Streaming use this model, as well as implement optimizations to make it fast.
+Another method of dealing with partial failure is the two phase commit.
+To perform a change of state across many components, first a logically central "leader" checks to see if all components are ready to perform and action.
+If all reply "yes," the action is *committed*.
+Otherwise, as in the case of partial failure, no changes are committed.
+Two phase commit ensures that state is not changed in a partial manner.
+Another solution to partial failure is redundancy, or replication.
+If one replica of a computation failes, the others may survive and continue.
+Replication can also be used to improve performance, as in MapReduce and Spark Streaming.
+Checkpoint and restore has also been implemented as a way to recover from partial failure.
+By serializing a recent "snapshot" of state to stable storage, recomputing current state is made cheap.
+This is the primary method of partial failure in RDD-based systems.
+In other systems, like Argus, objects are reconstructed from state that is automatically or manually serialized to disk.
 
 ### Consistency (Concurrency)
 
