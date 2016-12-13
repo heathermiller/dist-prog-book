@@ -265,7 +265,7 @@ High throughput is achieved by spawning many activations of an actor for handlin
 For example, suppose there is an actor that represents a specific YouTube video.
 This actor will have data fields like `title`, `content`, `num_views`, etc.
 Suppose their are concurrent requests (in turn, transactions) for viewing the video.
-In the relevent transaction, the `num_views` field is incremented.
+In the relevant transaction, the `num_views` field is incremented.
 Therefore, in order to run the view requests concurrently, two activations (or copies) of the actor are created.
 
 Because there is concurrency within individual actors, Orleans also supports means of state reconciliation.
@@ -281,12 +281,12 @@ In the dataflow model, programs are expressed as transformations on data.
 Given a set of input data, programs are constructed as a series of transformations and reductions.
 Computation is data-centric, and expressed easily as a directed acyclic graph (DAG).
 Unlike the DSM and actor models, processes are not exposed to the programmer.
-Rather, the programmer designs the data transformations, and a system is responsible for initializing processes and distributing work accross a system.
+Rather, the programmer designs the data transformations, and a system is responsible for initializing processes and distributing work across a system.
 
 #### MapReduce (2004)
 
 MapReduce is a model and system for writing distributed programs that is data-centric.
-Distributed programs are structed as series of *Map* and *Reduce* data transformations.
+Distributed programs are structured as series of *Map* and *Reduce* data transformations.
 These two primitives are borrowed from traditional functional languages, and can be used to express a wide range of logic.
 The key strength of this approach is that computations can be reasoned about and expressed easily while an underlying system takes care of the "dirty" aspects of distributed computing such as communication, fault-tolerance, and efficiency.
 
@@ -313,14 +313,14 @@ In the reduce phase, the list of 1's is summed to compute a wordcount for each w
 
 #### Discretized Streams (2012)
 
-Discretized Streams is a model for processing streams data in realtime based on the traditional dataflow paradigm.
+Discretized Streams is a model for processing streams data in real-time based on the traditional dataflow paradigm.
 Streams of data are "chunked" discretely based on a time interval.
 These chunks are then operated on as normal inputs to DAG-style computations.
 Because this model is implemented on top of the MapReduce framework Spark, streaming computations can be flexibly combined with static MapReduce computations as well as live queries.
 
 Discretized Streams (D-Streams) are represented as a series of RDD's, each spanning a certain time interval.
 Like traditional RDD's, D-Streams offer stateless operations such as *map*, *reduce*, *groupByKey*, etc., which can be performed regardless of previous inputs and outputs.
-Unlike traditional RDD's, D-Streams offer *statefull* operations.
+Unlike traditional RDD's, D-Streams offer *stateful* operations.
 These stateful operations, such as *runningReduce*, are necessary for producing aggregate results for a *possibly never-ending* stream of input data.
 
 Because the inputs are not known *a priori*, fault tolerance in streaming systems must behave slightly differently.
@@ -337,7 +337,7 @@ GraphX is a system built on top of the Spark MapReduce framework { // TODO cite 
 GraphX exposes these operations through what it calls a Resilient Distributed Graph (RDG).
 Internally, an RDG is a collection of RDD's that define a vertex split of a graph { // TODO CITE powergraph }.
 Because they are built on top of RDD's, RDG's inherit immutability.
-When a tranformation is performed, a new graph is created.
+When a transformation is performed, a new graph is created.
 In this way, fault tolerance in GraphX can be executed the same way as it is in vanilla Spark; when a fault happens, the series of computations is remembered and re-executed.
 
 A key feature of GraphX is that it is a DSL library built on top of a GPL library.
