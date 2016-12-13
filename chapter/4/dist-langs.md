@@ -313,6 +313,23 @@ In the reduce phase, the list of 1's is summed to compute a wordcount for each w
 
 #### Discretized Streams (2012)
 
+Discretized Streams is a model for processing streams data in realtime based on the traditional dataflow paradigm.
+Streams of data are "chunked" discretely based on a time interval.
+These chunks are then operated on as normal inputs to DAG-style computations.
+Because this model is implemented on top of the MapReduce framework Spark, streaming computations can be flexibly combined with static MapReduce computations as well as live queries.
+
+Discretized Streams (D-Streams) are represented as a series of RDD's, each spanning a certain time interval.
+Like traditional RDD's, D-Streams offer stateless operations such as *map*, *reduce*, *groupByKey*, etc., which can be performed regardless of previous inputs and outputs.
+Unlike traditional RDD's, D-Streams offer *statefull* operations.
+These stateful operations, such as *runningReduce*, are necessary for producing aggregate results for a *possibly never-ending* stream of input data.
+
+Because the inputs are not known *a priori*, fault tolerance in streaming systems must behave slightly differently.
+For efficiency, the system periodically creates a checkpoint of intermediate data.
+When a node fails, the computations performed since the last checkpoint are remembered, and a new node is assigned to recompute the lost partitions from the previous checkpoint.
+Two other approaches to fault tolerance in streaming systems are replication and upstream backup.
+Replication is not cost effective as every process must be duplicated, and does not cover the case of all replicas failing.
+Upstream backup is slow as the system must wait for a backup node to recompute everything in order to recover state.
+
 #### GraphX (2013)
 
 Many real world problems are expressed using graphs.
