@@ -441,7 +441,7 @@ For my purposes I will accept the definition of a domain as a "well-defined, coh
 It is also difficult to come up with a definition for a language.
 A language may be qualified if it has its own compiler.
 An orthogonal definition qualifies a language by its style, as in the case of sets of macros.
-This confusion is why I adopt the even more vague term of *system* in my own definition.
+This confusion is why I adopt the even more vague term *system* in my own definition.
 
 ### Where is it in the stack?
 
