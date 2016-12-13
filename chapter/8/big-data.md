@@ -101,13 +101,21 @@ PTable<String,Integer> wordCounts =
 ```
 
 *Deferred Evaluation & Optimizer*  
-One of the merits of using FlumeJava to pipeline MapReduce jobs is that it enables optimization automatically, by executing parallel operations lazily using *deferred evaluation*. The state of each `PCollection` object is either *deferred* (not yet computed) and *materialized* (computed). When the program invokes a *parallelDo()*, it creates an operation pointer to the actual deferred operation object. These operations form a directed acyclic graph called execution plan. The execution plan doesn't get evaluated until *run()* is called. This will cause optimization of the execution plan and evaluation in forward topological order. These optimization for transferring the modular execution plan into an efficient one include:
-- parallelDo Fusion: $$f(g(x)) => f \circ g(x)$$. This can reduce steps
-- MapShuffleCombineReduce (MSCR) Operation: combination of ParallelDo, GroupByKey, CombineValues and Flatten into one MapReduce job. This extends MapReduce to accept multiple inputs and multiple outputs. `todo: example of Figure 3`
+One of the merits of using FlumeJava to pipeline MapReduce jobs is that it enables optimization automatically, by executing parallel operations lazily using *deferred evaluation*. The state of each `PCollection` object is either *deferred* (not yet computed) and *materialized* (computed). When the program invokes a *parallelDo()*, it creates an operation pointer to the actual deferred operation object. These operations form a directed acyclic graph called execution plan. The execution plan doesn't get evaluated until *run()* is called. This will cause optimization of the execution plan and evaluation in forward topological order. These optimization strategies for transferring the modular execution plan into an efficient one include:
+- Fusion: $$f(g(x)) => g \circ f(x)$$, which is essentially function composition. This usually help reduce steps.
+- MapShuffleCombineReduce (MSCR) Operation: combination of ParallelDo, GroupByKey, CombineValues and Flatten into one MapReduce job. This extends MapReduce to accept multiple inputs and multiple outputs. Following figure illustrates the case a MSCR operation with 3 input channels, 2 grouping(GroupByKey) output channels and 1 pass-through output channel.
   <figure class="main-container">
   <img src="{{ site.baseurl }}/resources/img/mscr.png" alt="A MapShuffleCombineReduce operation with 3 input channels" />
-</figure>
+  </figure>
 
+A overall optimizer strategy involves a sequences of optimization actions with the ultimate goal to produce the fewest, most efficient MSCR operations:
+1. Sink Flatten: $$h(f(a)+g(b)) \rightarrow h(f(a)) + h(g(b))$$
+2. Lift combineValues operations: If *CombineValues* operation immediately follows a *GroupByKey* operation, the GroupByKey records the fact and original *CombineValues* is left in place, which can be treated as normal *ParallelDo* operation and subject to ParallelDo fusions.
+3. Insert fusion blocks:
+4. Fuse ParallelDos
+5. Fuse MSCRs: create MSCR opertions, and convert any remaining unfused ParallelDo operations into trivial MSCRs.
+
+The SiteData example{%cite chambers2010flumejava --file big-data %} shows that a 16 data-parallel operations can be optimized into two MSCR opertions in the final execution plan (refer to Figure 5 in the original paper). One limitation of the optimizer is that all these optimizations are based on the structures of the execution plan, FluemJava doesn't analyze user-defined functions.
 
 
 ### 1.1.3 Dryad
