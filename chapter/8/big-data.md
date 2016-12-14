@@ -164,9 +164,10 @@ Also, in DSM, any failure requires the whole program to be restored. In case of 
 RDDs are immutable and hence a straggler (slow node) can be replaced with a backup copy as in Map reduce. This is hard to implement in DSM as two copies point to the same location and can interfere in each other’s update.
 
 
+
 ***Challenges in Spark***
 
-- `Functional API semantics` : The GroupByKey operator is costly in terms of performance. In that it returns a distributed collection of (key, list of value) pairs to a single machine and then an aggregation on individual keys is performed on the same machine resulting in computation overhead. Spark does provide reduceByKey operator which does a partial aggregation on invidual worker nodes before returning the distributed collection. However, developers who are not aware of such a functionality can unintentionally choose groupByKey.
+- `Functional API semantics` : The GroupByKey operator is costly in terms of performance. In that it returns a distributed collection of (key, list of value) pairs to a single machine and then an aggregation on individual keys is performed on the same machine resulting in computation overhead. Spark does provide reduceByKey operator which does a partial aggregation on invidual worker nodes before returning the distributed collection. However, developers who are not aware of such a functionality can unintentionally choose groupByKey. The reason being functional programmers (Scala developers) tend to think more declaratively about the problem and only see the end result of the groupByKey operator. They may not be necessarily trained on how groupByKey is implemented atop of the cluster. Therefore, to use Spark, unlike functional programming languages, one needs to understand how the underlying cluster is going to execute the code. The burden of saving performance is then left to the programmer, who's expected to understand the underlying execution model of Spark, and who should know when to use reduceByKey over groupByKey.
 
 - `Debugging and profiling` : There is no availability of debugging tools and developers find it hard to realize if a computation is happening more on a single machine or if the data-structure they used were inefficient.
 
@@ -265,7 +266,10 @@ Some of the Dataframe operations include projection (select), filter(where), joi
 Illustrated below is an example of relational operations on employees data frame to compute the number of female employees in each department.
 
 ```
-employees.join(dept, employees("deptId") === dept("id")) .where(employees("gender") === "female") .groupBy(dept("id"), dept("name")) .agg(count("name"))
+employees.join(dept, employees("deptId") === dept("id")) 
+         .where(employees("gender") === "female") 
+         .groupBy(dept("id"), dept("name")) 
+         .agg(count("name"))
 ```
 Several of these operators like  === for equality test, > for greater than, a rithmetic ones (+, -, etc) and aggregators transforms to a abstract syntax tree of the expression which can be passed to Catalyst for optimization.
 A cache() operation on the data frame helps Spark SQL store the data in memory so it can be used in iterative algorithms and for interactive queries. In case of Spark SQL, memory footprint is considerably less as it applies columnar compression schemes like dictionary encoding / run-length encoding.
@@ -273,6 +277,9 @@ A cache() operation on the data frame helps Spark SQL store the data in memory s
 The DataFrame API also supports inline UDF definitions without complicated packaging and registration. Because UDFs and queries are both expressed in the same general purpose language (Python or Scala), users can use standard debugging tools.
 
 However, a DataFrame lacks type safety. In the above example, attributes are referred to by string names. Hence, it is not possible for the compiler to catch any errors. If attribute names are incorrect then the error will only detected at runtime, when the query plan is created.
+
+Also, Dataframe is both very brittle and very verbose as well, because the user has to cast each row and column to specific types before they can do anything on them. Naturally this is very error-prone because one could accidentally choose the wrong index for a row/column and end up with a ```ClassCastException```.
+
 Spark introduced a extension to Dataframe called ***Dataset*** to provide this compile type safety. It embraces object oriented style for programming and has an additional feature termed Encoders. Encoders translate between JVM representations (objects) and Spark’s internal binary format. Spark has built-in encoders which are very advanced in that they generate byte code to interact with off-heap data and provide on-demand access to individual attributes without having to de-serialize an entire object
 
 
