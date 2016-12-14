@@ -116,7 +116,51 @@ The SiteData example{%cite chambers2010flumejava --file big-data %} shows that a
 
 
 ### 1.1.3 Dryad
-Dryad is a more general and flexible execution engine than MapReduce? that execute subroutines at a specified graph vertices. Developers can specify an arbitrary directed acyclic graph to combine computational "vertices" with communication channels (file, TCP pipe, shared-memory FIFO) and  build a dataflow graph. Compared with MapReduce, Dryad can specify an arbitrary DAG that have multiple number of inputs/outputs and support multiple stages. Also it can have more channels and boost the performance when using TCP pipes and shared-memory. But like writing a pipeline of MapReduce jobs, Dryad is a low-level programming model and hard for users to program, thus a more declarative model - DryadLINQ  {%cite yu2008dryadlinq --file big-data %} was created to fill in the gap. It exploits LINQ, a query language in .NET and automatically translates the data-parallel part into execution plan and passed to the Dryad execution engine. Like MR, writing raw Dryad is hard, programmers need to understand system resources and other lower-level details. This motivates a more declarative programming model: DryadLINQ - a querying language.
+Dryad is a general-purpose data-parallel execution engine that allows developers to *explicitly* specify an arbitrary directed acyclic graph (DAG) for computations, where each vertex is a computation task and the edges represent communication channels(file, TCP pipe, or shared-memory FIFI) between tasks.
+A Dryad job is a logic computation graph that is automatically mapped to physical resources at runtime. From programmers' point of view, the channels produce or consume heap objects and the type of data channel makes no difference to read or write these objects. In Dryad system, a process called "job manager" connects to the cluster network and is responsible for scheduling jobs by consulting the name server (NS) and delegating commands to the daemon (D) running on each computer in the cluster.
+
+*Writing program*
+
+The Dryad library is written in C++ and it uses a mixture of method calls and operator overloading. It describes a Dryad graph as $$G=\langle V_G, E_G, I_G, O_G \rangle$$, where $$V_G$$ is a sequences of vertices, $$E_G$$ is a set of directed edges, $$I_G$$ and $$O_G$$ represent vertices for *inputs* and *outputs*.
+
+- *Creating new vertices* The library calls static program factory to create a graph vertex and it also provides $$^$$ operator to clone a graph and $$\otimes$$ to concatenate sequences.
+- *Adding graph edges* $$C=A\circ B$$ creates a new graph $$C=\langle V_A \otimes V_B, E_A \cup E_B \cup E_{new}, I_A, O_B \rangle$$. The composition of set of edges are defined by two types:  
+    1) $$A>=B$$ pointwise composition  
+    2) and $$A>>B$$ complete bipartite graph between $$O_A$$ and $$I_B$$.  
+- *Merging two graphs* $$C=A \mid\mid B$$ creates a new graph $$C=\langle V_A \otimes^* V_B, E_A \cup E_B, I_A \cup^* I_B, O_A\cup^* O_B \rangle$$.
+
+Following is an example graph builder program.
+```!c
+GraphBuilder XSet = moduleX^N;
+GraphBuilder DSet = moduleD^N;
+GraphBuilder MSet = moduleM^(N*4);  
+GraphBuilder SSet = moduleS^(N*4);
+GraphBuilder YSet = moduleY^N;
+GraphBuilder HSet = moduleH^1;
+
+GraphBuilder XInputs = (ugriz1 >= XSet) || (neighbor >= XSet);
+GraphBuilder YInputs = ugriz2 >= YSet;
+
+GraphBuilder XToY = XSet >= DSet >> MSet >= SSet;
+
+for (i = 0; i < N*4; ++i)
+{
+  XToY = XToY || (SSet.GetVertex(i) >= YSet.GetVertex(i/4));
+}
+GraphBuilder YToH = YSet >= HSet;
+GraphBuilder HOutputs = HSet >= output;
+
+GraphBuilder final = XInputs || YInputs || XToY || YToH || HOutputs;
+```
+
+*Fault tolerance policy*  
+The communication graph is acyclic, so if given immutable inputs, the computation result should remain same regardless of the sequence of failures. When a vertex fails, the job manager will either get notified or receive a heartbeat timeout and then the job manager will immediately schedule to re-execute the vertex.
+
+*Comparison with FlumeJava*  
+Both support multiple inputs/outputs for the computation nodes. The big difference is that FlumeJava still exploits the MapReduce approach to read from/write to disks between stages, where Dryad has option to do in-memory transmission. This leaves Dryad a good position to do optimization like re-using in-memory data. In the other hand, Dryad has no optimizations on the graph itself.  
+
+*Compared with MapReduce, Dryad can specify an arbitrary DAG that have multiple number of inputs/outputs and support multiple stages. Also it can have more channels and boost the performance when using TCP pipes and shared-memory.
+But like writing a pipeline of MapReduce jobs, Dryad is a low-level programming model and hard for users to program, thus a more declarative model - DryadLINQ  {%cite yu2008dryadlinq --file big-data %} was created to fill in the gap. It exploits LINQ, a query language in .NET and automatically translates the data-parallel part into execution plan and passed to the Dryad execution engine.*
 
 ### 1.1.4 Spark
 
@@ -265,9 +309,9 @@ Some of the Dataframe operations include projection (select), filter(where), joi
 Illustrated below is an example of relational operations on employees data frame to compute the number of female employees in each department.
 
 ```
-employees.join(dept, employees("deptId") === dept("id")) 
-         .where(employees("gender") === "female") 
-         .groupBy(dept("id"), dept("name")) 
+employees.join(dept, employees("deptId") === dept("id"))
+         .where(employees("gender") === "female")
+         .groupBy(dept("id"), dept("name"))
          .agg(count("name"))
 ```
 Several of these operators like  === for equality test, > for greater than, a rithmetic ones (+, -, etc) and aggregators transforms to a abstract syntax tree of the expression which can be passed to Catalyst for optimization.
