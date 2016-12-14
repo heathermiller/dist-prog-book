@@ -397,15 +397,29 @@ Because many real-world applications, like social media "connections," are natur
 
 ## Comparing Design
 
-* level of implementation
-    * OS
-    * compiler (language)
-    * library
-* granularity
+Here, we present a taxonomy which can be used to classify each of the examples.
+Among these distributed systems appear to be three major defining characteristics: level of implementation, granularity, and level of abstraction.
+Importantly, these characteristics are orthogonal and each present an opportunity for a design decision.
+
+### Level of Implementation
+
+The programming model exposed by each of the examples is implemented at some level in the computer system.
+In Mirage, the memory management needed to enable DSM is implemented within the operating system.
+Mirage's model of DSM lends itself to an OS implementation because data is shared by address.
+In other systems, such as Orca, Argus, and Erlang, the implementation is at the compiler level.
+These are languages that support distribution through syntax and programming style.
+Finally, some systems are implemented as libraries (e.g. Linda, MapReduce).
+In such cases, the underlying language is powerfull enough to support desired operations.
+The library is used to ease programmer burden and supply domain-specific syntax.
+
+### granularity
+
     * logic, state
         * course (batch)
         * fine (actors)
-* abstractions
+
+### Level of Abstraction
+
     * location
     * scalability
     * fault tolerance
