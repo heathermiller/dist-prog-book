@@ -395,28 +395,24 @@ In other graph-processing frameworks, results from a graph query would have to b
 With GraphX, if you can structure your application logic as a series of graph operations, an implementation may be created on top of RDD's.
 Because many real-world applications, like social media "connections," are naturally expressed as graphs, GraphX can be used to create a highly scalable, fault-tolerant implementation.
 
-### Which is best? Why?
+## Comparing Design
 
-MR vs Actors: depends on problem, solution
-
-How fine grain is your data and logic? (MR job can be built from actor model)
-Does your algorithm map to a batch processing job?
-
-MR:
-
-* MR is DSL for distribution? (wouldn't use it to develop single-machine app (probably))
-* Dataflow / MapReduce fundamentally changed the programming style for distributed systems
-* Other models (Actor, DSM) tried to mask distribution
-* By changing the style, programs need necessarily consider communication patterns (disk, network)
-* Although, system may still handle fault tolerance
-
-Actors:
-
-* Message-passing chapter
+* level of implementation
+    * OS
+    * compiler (language)
+    * library
+* granularity
+    * logic, state
+        * course (batch)
+        * fine (actors)
+* abstractions
+    * location
+    * scalability
+    * fault tolerance
 
 ## Thoughts on System Design
 
-### Intro
+### Domain-Specific Languages
 
 The definition of a domain-specific language is a hot topic and there have been several attempts to concretely define what exactly *it* is.
 
@@ -443,22 +439,26 @@ A language may be qualified if it has its own compiler.
 An orthogonal definition qualifies a language by its style, as in the case of sets of macros.
 This confusion is why I adopt the even more vague term *system* in my own definition.
 
-### Where is it in the stack?
+### Distribution as a Domain
 
-* Libraries:
-* Compiler Extension
-* Compiler / Runtime:
-* Hardware
+Given the examples of models and systems, I think it is reasonable to qualify distribution as a domain.
+Distributed computing has a unique set of problems, such as fault-tolerance, nondeterminism, network partitioning, and consistency that make it unique from parallel computing on a single machine.
+The languages, systems, and models presented here all are built to assist the developer in dealing with these problems.
 
-### Why DSL's as Libraries?
+### DSL's as Libraries
 
-Reasons for moving to GPL's as base for DSL's
+The examples given above demonstrate a trend.
+At first, systems designed to tackle the distribution domain were implemented as stand-alone languages.
+Later, these systems appear as libraries built on top of existing general-purpose languages.
+For many reasons, this style of system development is superior.
 
-* problem of domain-composition
-* problem of abstraction
-* problem of ecosystem
-* problem of tumultuous architecture
-* "any gpl + library can act as a dsl" - mernik"
+
+#### problem of domain-composition
+    * domains may be orthogonal -> can be composed
+#### problem of abstraction
+#### problem of ecosystem
+#### problem of tumultuous architecture
+#### "any gpl + library can act as a dsl" - mernik"
 
 ## References
 
