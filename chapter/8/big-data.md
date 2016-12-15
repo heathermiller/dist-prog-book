@@ -463,7 +463,8 @@ GraphX {%cite xin2013graphx --file big-data%} is a new computation system which 
 How does GraphX improve over the existing graph-parallel and data flow models?
 Similar to the data flow model, GraphX moves away from the vertex centric view and adopts transformations on graphs yielding a new graph. The RDGs in GraphX provides a set of elegant and expressive computational primitives to support graph transformations as well as for many a graph parallel systems like Pregel, PowerGraph to be easily expressed with minimal lines of code changes to Spark. GraphX simplifies the process of graph ETL and analysis through new operations like filter, view etc. It minimizes communication and storage overhead across the system by adopting vertex-cuts for effective partitioning.
 
-GraphX 
+**GraphX**
+
 GraphX models graphs as property graphs where vertices and edges can have properties. Property graphs are directed multigraph having multiple parallel edges with same source and destination to realize scenarios where multiple relationships could exists between two vertices. For example, in a social graph where every vertex represents a person, there could be a scenario where two people are both co-workers and a friend at the same time. A vertex is keyed by a unique 64 bit long ideatefier (Vertex ID) while edges contain the corresponding source and destination vertex identifiers.
 
 GraphX API provides the below primitives for graph transformations :
@@ -476,6 +477,9 @@ GraphX API provides the below primitives for graph transformations :
 - `leftJoin` - given a collection of vertices and a graph, returns a new graph which incorporates the property of matching vertices from the given collection into the given graph without changing the underlying graph structure.
 - `subgraph` - Applies predicates to return a subgraph of the original graph by filtering all the vertices and edges that don’t satisfy the vertices and edges predicates respectively.
 - `mrTriplets (MapReduce triplet)` - logical composition of triplets followed by map and reduceByKey. It is the building block of graph-parallel algorithms.
+- `filterVertices(f: (Id, V)=>Bool): Graph[V, E]` - Filter the vertices by applying the predicate function f to return a new graph post filtering.
+- `filterEdges(f: Edge[V, E]=>Bool): Graph[V, E]` - Filter the edges by applying the predicate function f to return a new graph post filtering.
+- `aggregateNeighbors(mapFunc: (Id, Edge[V, E]) => A, reduceFunc: (A, A) => A): RDD[(Id, A)]` : NEED TO WRITE
 
 ***Why partitioning is important in graph computation systems ?***
 Graph-parallel computation requires every vertex or edge to be processed in the context of its neighborhood. Each transformation depends on the result of distributed joins between vertices and edges. This means that graph computation systems rely on graph partitioning (edge-cuts in most of the systems) and efficient storage to minimize communication and storage overhead and ensure balanced computation.
@@ -497,24 +501,15 @@ Edge-cuts for partitioning requires random assignment of vertices and edges acro
 
 ***Vertex-cuts - GraphX’s solution to effective partitioning*** : An alternative approach which does the opposite of edge-cut — evenly assign edges to machines, but allow vertices to span multiple machines. The communication and storage overhead of a vertex-cut is directly proportional to the sum of the number of machines spanned by each vertex. Therefore, we can reduce communication overhead and ensure balanced computation by evenly assigning edges to machines in way that minimizes the number of machines spanned by each vertex.
 
+***Implementation of Vertex-cut***
+
 The GraphX RDG structure implements a vertex-cut representation of a graph using three unordered horizontally partitioned RDD tables. These three tables are as follows:
 
 - `EdgeTable(pid, src, dst, data)`: Stores adjacency structure and edge data.
 -  `VertexDataTable(id, data)`: Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
 - `VertexMap(id, pid)`: Maps from vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
 
-A three-way relational join is used to bring together source vertex data, edge data, and target vertex data. The join is straightforward, and takes advantage of a partitioner to ensure the join site is local to the edge table. This means GraphX only has to shuffle vertex data.
 
-***Operators in GraphX***
-Other than standard data-parallel operators like filter, map, leftJoin, and reduceByKey, GraphX supports following graph-parallel operators:
-
-- graph - constructs property graph given a collection of edges and vertices.
-- vertices, edges - decompose the graph into a collection of vertices or edges by extracting vertex or edge RDDs.
-- mapV, mapE - transform the vertex or edge collection.
-- triplets -returns collection of form ((i, j), (PV(i), PE(i, j), PV(j))). The operator essentially requires a multiway join between vertex and edge RDD. This operation is optimized by shifting the site of joins to edges, using the routing table, so that only vertex data needs to be shuffled.
-- leftJoin - given a collection of vertices and a graph, returns a new graph which incorporates the property of matching vertices from the given collection into the given graph without changing the underlying graph structure.
-- subgraph - Applies predicates to return a subgraph of the original graph by filtering all the vertices and edges that don't satisfy the vertices and edges predicates respectively.
-- mrTriplets (MapReduce triplet) - logical composition of triplets followed by map and reduceByKey. It is the building block of graph-parallel algorithms.
 
 ## 2 Execution Models
 There are many possible implementations for those programming models. In this section, we will discuss about a few different execution models, how the above programming interfaces exploit them, the benefits and limitations of each design and so on. MapReduce, its variants and Spark all use the master/workers model (section 2.1), where the master is responsible for managing data and dynamically scheduling tasks to workers. The master monitors workers' status, and when failure happens, master will reschedule the task to another idle worker. The fault-tolerance is guaranteed by persistence of data in MapReduce versus lineage(for recomputation) in Spark.
