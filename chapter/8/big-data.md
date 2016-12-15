@@ -301,7 +301,9 @@ Sawzall {% cite pike2005interpreting --file big-data%} is a programming language
 Apart from Sawzall, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite thusoo2009hive --file big-data %} are the other major components that sit on top of Hadoop framework for processing large data sets without the users having to write Java based MapReduce code. Both support more complex operations than Sawzall: e.g. database join.
 
 Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.  
+
 - *Word count implementation in Hive*   
+
   ```
   CREATE TABLE docs (line STRING);
   LOAD DATA INPATH 'docs' OVERWRITE INTO TABLE docs;
@@ -313,7 +315,9 @@ Hive is built by Facebook to organize dataset in structured formats and still ut
   ```
 
 Pig Latin by Yahoo aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. Unlike Hive, Pig Latin does not persist metadata, instead it has better interoperability to work with other applications in Yahoo's data ecosystem.  
+
 - *Word count implementation in PIG*  
+
   ```
   lines = LOAD 'input_fule.txt' AS (line:chararray);
   words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;
@@ -323,8 +327,10 @@ Pig Latin by Yahoo aims at a sweet spot between declarative and procedural progr
   ```
 
 SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.  
+
 - *Word count example in SparkSQL*  
-  ```scala
+
+  ```
   val ds = sqlContext.read.text("input_file").as[String]
   val result = ds
     .flatMap(_.split(" "))              
