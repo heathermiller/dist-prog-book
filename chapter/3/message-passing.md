@@ -12,7 +12,7 @@ In the field of message passing programming models, it is not only important to 
 
 In this chapter I describe the four primary variants of the actor model: classic actors, process-based actors, communicating event-loops, and active objects. I attempt to highlight historic and modern languages that exemplify these models, as well as the philosophies and tradeoffs that programmers need to be aware of to understand and best make use of these models.
 
-Despite the actor model's originating as far back as the 1970s, it is still being developed and being incorporated into the programming languages of today, as many recently published papers and systems in the field demonstrate. There are a few robust industrial-strength actor systems that are being used to power massive scalable distributed systems. There are a couple of different approaches to building actor frameworks that are detailed later in the chapter.
+Despite the actor model's originating as far back as the 1970s, it is still being developed and being incorporated into the programming languages of today, as many recently published papers and systems in the field demonstrate. There are a few robust industrial-strength actor systems that are being used to power massive scalable distributed systems; for example Akka has been used to serve PayPal's billions of transactions, {% cite PayPalAkka --file message-passing %} Erlang has been used to send messages for WhatsApp's hundreds of millions of users, {% cite ErlangWhatsAppTalk --file message-passing %} and Orleans has been used to serve Halo 4's millions of players. {% cite OrleansHalo4Talk --file message-passing %} There are a couple of different approaches to building industrial actor frameworks around monitoring, handling fault-tolerance, and managing actor lifecycles which are detailed later in the chapter.
 
 An important framing for the actor models presented is in the question "Why message passing, and specifically why the actor model?" Given the vast number of distributed programming models out there, one might ask, why this one was so important when it was initially proposed? Why has it facilitated advanced languages, systems, and libraries that are widely used today? As we'll see throughout this chapter, some of the broadest advantages of the actor model include isolation of state managed by the given actor, scalability, and simplifying the programmer's ability to reason about their system.
 
@@ -77,8 +77,6 @@ If you squint a little, this actor definition sounds similar to Alan Kay’s ori
 <p>The big idea is "messaging" -- that is what the kernal [sic] of Smalltalk/Squeak is all about (and it's something that was never quite completed in our Xerox PARC phase). The Japanese have a small word -- ma -- for "that which is in between" -- perhaps the nearest English equivalent is "interstitial". The key in making great and growable systems is much more to design how its modules communicate rather than what their internal properties and behaviors should be.</p>
 <footer>Alan Kay</footer>
 </blockquote>
-
-TODO: transition
 
 ## Concurrent Object-Oriented Programming (1990)
 
@@ -307,13 +305,29 @@ These attributes give us a good basis for analyzing whether an actor system can 
 
 ## Actors as a framework
 
-One trend that seems common among the actor systems we see in production is extensive environments and tooling. Akka, Erlang, and Orleans are the primary actor systems that see real production use, and the reason for this is that they essentially act as frameworks where many of the common problems of actors are taken care of for you. This allows the programmer to focus on the problems within their domain, rather than the common problems of monitoring, deployment, and composition.
+One trend that seems common among the actor systems we see in production is extensive environments and tooling. Akka, Erlang, and Orleans are the primary actor systems that see real production use, and the reason for this is that they essentially act as frameworks where many of the common problems of actors are taken care of for you. They offer support for managing and monitoring the deployment of actors as well as patterns or modules to handle problems like fault-tolerance and load balancing which every distributed actor system has to address. This allows the programmer to focus on the problems within their domain, rather than the common problems of monitoring, deployment, and composition.
 
-Akka and Erlang provide modules that you can piece together to build various pieces of functionality into your system. Akka provides a huge number of modules and extensions to configure and monitor a distributed system built using actors. They provide a number of utilities to meet common use-case and deployment scenarios, and these are thoroughly listed and documented. Additionally they provide support for Akka Extensions, which are a mechanism for adding your own features to Akka. These are powerful enough that some core features of Akka like Typed Actors or Serialization are implemented as Akka Extensions.
+Akka and Erlang provide modules that you can piece together to build various pieces of functionality into your system. Akka provides a huge number of modules and extensions to configure and monitor a distributed system built using actors. They provide a number of utilities to meet common use-case and deployment scenarios, and these are thoroughly listed and documented. For example Akka includes modules to deal with the following common issues (and more):
 
-Erlang provides the Open Telecom Platform (OTP), which is a framework comprised of a set of modules and standards designed to help build applications. OTP takes the generic patterns and components of Erlang, and provides them as libraries that enable code reuse and best practices when developing new systems. Cloud Haskell also provides something analogous to Erlang's OTP called the Cloud Haskell Platform.
+* Fault Tolerance via supervision hierarchies
+* Routing to balance load across actors
+* Persistence to save and recover actor state across failures and restarts
+* A testing framework specifically for actors
+* Cluster management to group and distribute actors across physical machines
 
-Orleans is different from these as it is built from the ground up with a more declarative style and runtime. This does a lot of the work of distributing and scaling actors for you, but it is still definitely a framework which handles a lot of the common problems of distribution so that programmers can focus on building the logic of their system.
+Additionally they provide support for Akka Extensions, which are a mechanism for adding your own features to Akka. These are powerful enough that some core features of Akka like Typed Actors or Serialization are implemented as Akka Extensions.
+
+Erlang provides the Open Telecom Platform (OTP), which is a framework comprised of a set of modules and standards designed to help build applications. OTP takes the generic patterns and components of Erlang, and provides them as libraries that enable code reuse and best practices when developing new systems. Some examples of OTP libraries are:
+
+* A real-time distributed database
+* An interface to relational databases
+* A monitoring framework for machine resource usage
+* Support for interfacing with other communication protocols like SSH
+* A test framework
+
+Cloud Haskell also provides something analogous to Erlang's OTP called the Cloud Haskell Platform.
+
+Orleans is different from these as it is built from the ground up with a more declarative style and runtime. This does a lot of the work of distributing and scaling actors for you, but it is still definitely a framework which handles a lot of the common problems of distribution so that programmers can focus on building the logic of their system. Orleans takes care of the distribution of actors across machines, as well as creating new actor instances to handle increased load. Additionally, Orleans also deals with reconciliation of consistency issues across actor instantiations, as well as persistence of actor data to durable storage. These are common issues that the other industrial actor frameworks also address in some capacity using modules and extensions.
 
 ## Module vs. managed runtime approaches
 
