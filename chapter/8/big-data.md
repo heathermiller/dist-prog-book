@@ -298,7 +298,7 @@ Sawzall {% cite pike2005interpreting --file big-data%} is a programming language
   emit total <- x;
   ```
 
-Apart from Sawzall, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite thusoo2009hive --file big-data %} are the other major components that sit on top of Hadoop framework for processing large data sets without the users having to write Java based MapReduce code. Both support more complex operations than Sawzall: e.g. database join. 
+Apart from Sawzall, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite thusoo2009hive --file big-data %} are the other major components that sit on top of Hadoop framework for processing large data sets without the users having to write Java based MapReduce code. Both support more complex operations than Sawzall: e.g. database join.
 
 Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.  
 - *Word count implementation in Hive*   
@@ -368,9 +368,7 @@ Hive implements the LazySerDe as the default SerDe interface. A SerDe is a combi
 
 
 ### 1.2.2 Pig Latin
-Pig Latin {% cite olston2008pig --file big-data%} is a programming model built on top of MapReduce to provide declarative description. Different from Hive, whom has SQL-like syntax, the goal of Pig Latin is to attract experienced programmers to perform ad-hoc analysis on big data. Parallel database products provide a simple SQL query interface, which is good for non-programmers and simple tasks, but not in a style where experienced programmers would approach. Instead such programmers prefer to specify single steps and operate as a sequence.
-
-For example, suppose we have a table urls: `(url, category, pagerank)`. The following is a simple SQL query that finds, for each suciently large category, the average pagerank of high-pagerank urls in that category.
+Pig Latin {% cite olston2008pig --file big-data%} is a programming model built on top of MapReduce to provide declarative description. Different from Hive, who has SQL-like syntax, the goal of Pig Latin is to attract experienced programmers to perform ad-hoc analysis on big data and allow programmers to write execution logic by a sequence of steps. For example, suppose we have a table urls: `(url, category, pagerank)`. The following is a simple SQL query that finds, for each suciently large category, the average pagerank of high-pagerank urls in that category.
 
 ```
 SELECT category, AVG(pagerank)  
@@ -378,7 +376,7 @@ FROM urls WHERE pagerank > 0.2
 GROUP BY category HAVING COUNT(*) > 106  
 ```
 
-And Pig Latin provides an alternative to carry out the same operations in the way programmers prefer:
+And Pig Latin provides an alternative to carry out the same operations in the way programmers can reason more easily:
 
 ```
 good_urls = FILTER urls BY pagerank > 0.2;
