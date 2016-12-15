@@ -328,6 +328,17 @@ This query uses mapper.py for transforming inputdata into (word, count) pair, di
 ***Serialization/Deserialization***
 Hive implements the LazySerDe as the default SerDe interface. A SerDe is a combination of serialization and deserialization which helps developers instruct Hive on how their records should be processed. The Deserializer interface translates rows into internal objects lazily so that the cost of Deserialization of a column is incurred only when it is needed. The Serializer, however, converts a Java object into a format that Hive can write to HDFS or another supported system. Hive also provides a RegexSerDe which allows the use of regular expressions to parse columns out from a row.
 
+*Word count implementation in Hive*
+```
+CREATE TABLE docs (line STRING);
+LOAD DATA INPATH 'docs' OVERWRITE INTO TABLE docs;
+CREATE TABLE word_counts AS
+SELECT word, count(1) AS count FROM
+(SELECT explode(split(line, '\\s')) AS word FROM docs) w
+GROUP BY word
+ORDER BY word;
+```
+
 ### 1.2.2 Pig Latin
 The goal of Pig Latin {% cite olston2008pig --file big-data%} is to attract experienced programmers to perform ad-hoc analysis on big data. Parallel database products provide a simple SQL query interface, which is good for non-programmers and simple tasks, but not in a style where experienced programmers would approach. Instead such programmers prefer to specify single steps and operate as a sequence.
 
@@ -356,6 +367,18 @@ output = FOREACH big_groups GENERATE
 *UDFs as First-Class Citizens* Pig Latin supports user-defined functions (UDFs) to support customized tasks for grouping, filtering, or per-tuple processing.  
 
 *Debugging Environment* Pig Latin has a novel interactive debugging environment that can generate a concise example data table to illustrate output of each step.
+
+*Word count implementation in PIG*
+
+```
+Ignore the below
+ lines = LOAD 'input_fule.txt' AS (line:chararray);
+words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;
+grouped = GROUP words BY word;
+wordcount = FOREACH grouped GENERATE group, COUNT(words);
+DUMP wordcount;
+```
+
 
 ### 1.2.3 SparkSQL  :
 
