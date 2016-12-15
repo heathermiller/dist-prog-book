@@ -104,7 +104,7 @@ This flexibility turns out to be a highly discussed advantage which continues to
 
 Rosette was both a language for concurrent object-oriented programming of actors, as well as a runtime system for managing the usage of and access to resources by those actors. Rosette {% cite Tomlinson:1988:ROC:67387.67410 --file message-passing %} is mentioned throughout Agha's _Concurrent Object-Oriented Programming_, {% cite Agha:1990:COP:83880.84528 --file message-passing %} and the code examples given in the paper are written in Rosette. Agha is even an author on the Rosette paper, so its clear that Rosette is foundational to the classic actor model. It seems to be a language which almost defines what the classic actor model looks like in the context of concurrent object-oriented programming.
 
-The motivation behind Rosette was to provide strategies for dealing with problems like search, where the programmer needs a means to control how resources are allocated to sub-computations to optimize performance in the face of combinatorial explosion. This supports the use of concurrency in solving computationally intensive problems whose structure is not statically defined, but rather depends on some heuristic to return results. Rosette has an architecture which uses actors in two distinct ways. They describe two different layers with different responsibilities:
+The motivation behind Rosette was to provide strategies for dealing with problems like search, where the programmer needs a means to control how resources are allocated to sub-computations to optimize performance in the face of combinatorial explosion. For example in a search problem, you might first compute an initial set of results that you want to further refine. It would be too computationally expensive to exhaustively refine every result, so you want to choose the best ones based on some metric and only proceed with those. Rosette supports the use of concurrency in solving computationally intensive problems whose structure is not statically defined, but rather depends on some heuristic to return results. Rosette has an architecture which uses actors in two distinct ways. They describe two different layers with different responsibilities:
 
 * _Interface layer_: This implements mechanisms for monitoring and control of resources. The system resources and hardware are viewed as actors.
 * _System environment_: This is comprised of actors who actually describe the behavior of concurrent applications and implement resource management policies based on the interface layer.
@@ -123,7 +123,7 @@ These classes represent a concrete object-oriented abstraction to organize actor
 
 Akka is an actively developed project built out of the work on [Scala Actors](#scala-actors) in Scala to provide the actor model of programming as a framework to Java and Scala. It is an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors. There are a few notable changes from Scala Actors that make Akka worth mentioning, especially as it is being actively developed while Scala Actors is not. Some important changes are detailed in _On the Integration of the Actor Model in Mainstream Technologies: The Scala Perspective_. {% cite Haller:2012:IAM:2414639.2414641 --file message-passing %}
 
-Akka provides a programming interface with both Java and Scala bindings for actors which looks similar to Scala Actors, but has different semantics in how it processes messages. Akka's `receive` operation defines a global message handler which doesn't block on the receipt of no matching messages, and is instead only triggered when a matching message can be processed. It also will not leave a message in an actor's mailbox if there is no matching pattern to handle the message. The message will simply be discarded and an event will be published to the system. Akka's interface also provides stronger encapsulation to avoid exposing direct references to actors. To some degree this fixes problems in Scala Actors where public methods could be called on actors, breaking many of the guarantees programmers expect from message-passing. This system is not perfect, but in most cases it limits the programmer to simply sending messages to an actor using a limited interface.
+Akka provides a programming interface with both Java and Scala bindings for actors which looks similar to Scala Actors, but has different semantics in how it processes messages. Akka's `receive` operation defines a global message handler which doesn't block on the receipt of no matching messages, and is instead only triggered when a matching message can be processed. It also will not leave a message in an actor's mailbox if there is no matching pattern to handle the message. The message will simply be discarded and an event will be published to the system. Akka's interface also provides stronger encapsulation to avoid exposing direct references to actors. Akka actors have a limited `ActorRef` interface which only provides methods to send or forward messages to its actor, additionally checks are done to ensure that no direct reference to an instance of an `Actor` subclass is accessible after an actor is created. To some degree this fixes problems in Scala Actors where public methods could be called on actors, breaking many of the guarantees programmers expect from message-passing. This system is not perfect, but in most cases it limits the programmer to simply sending messages to an actor using a limited interface.
 
 The Akka runtime also provides performance advantages over Scala Actors. The runtime uses a single continuation closure for many or all messages an actor processes, and provides methods to change this global continuation. This can be implemented more efficiently on the JVM, as opposed to Scala Actors' continuation model which uses control-flow exceptions which cause additional overhead. Additionally, nonblocking message insert and task schedule operations are used for extra performance.
 
@@ -159,11 +159,13 @@ Erlang also seeks to build failure into the programming model, as one of the cor
 
 These primitives can be used to construct complex hierarchies of supervision that can be used to handle failure in isolation, rather than failures impacting your entire system. Supervision hierarchies are notably almost the only scheme for fault-tolerance that exists in the world of actors. Almost every actor system that is used to build distributed systems takes a similar approach, and it seems to work. Erlang's philosophies used to build a reliable fault-tolerant telephone exchange seem to be broadly applicable to the fault-tolerance problems of distributed systems.
 
+It is worth mentioning that Erlang achieves all of this through the Erlang Virtual Machine (BEAM), which runs as a single OS process and OS thread per core. These single OS processes then manage many lightweight Erlang processes. The Erlang VM implements all of the concurrency, monitoring, and garbage collection for Erlang processes within this VM, which almost acts like an operating system itself. This is unlike any other language or actor system described here.
+
 ## Scala Actors
 
 Scala Actors is an example of taking and enhancing the Erlang model while bringing it to a new platform. Scala Actors brings lightweight Erlang-style message-passing concurrency to the JVM and integrates it with the heavyweight thread/process concurrency models. This is stated well in the original paper about Scala Actors as "an impedance mismatch between message-passing concurrency and virtual machines such as the JVM." VMs usually map threads to heavyweight processes, but that a lightweight process abstraction reduces programmer burden and leads to more natural abstractions. The authors claim that “The user experience gained so far indicates that the library makes concurrent programming in a JVM-based system much more accessible than previous techniques.”
 
-The realization of this model depends on efficiently multiplexing actors to threads. This technique was originally developed in Scala actors, and later was adopted by Akka. This integration allows for Actors to invoke methods that block the underlying thread in a way that doesn't prevent actors from making process. This is important to consider in an event-driven system where handlers are executed on a thread pool, because the underlying event-handlers can't block threads without risking thread pool starvation. The end result here is that Scala Actors enabled a new lightweight concurrency primitive on the JVM, with enhancements over Erlang's model. In addition to the more natural abstraction, the Erlang model was further enhanced with Scala's type system and advanced pattern-matching capabilities.
+The realization of this model depends on efficiently multiplexing actors to threads. This technique was originally developed in Scala actors, and later was adopted by Akka. This integration allows for Actors to invoke methods that block the underlying thread in a way that doesn't prevent actors from making process. This is important to consider in an event-driven system where handlers are executed on a thread pool, because the underlying event-handlers can't block threads without risking thread pool starvation. The end result here is that Scala Actors enabled a new lightweight concurrency primitive on the JVM, with enhancements over Erlang's model. The Erlang model was further enhanced with Scala's pattern-matching capabilities which enable more advanced pattern-matching on messages compared to Erlang's tuple value matching. Scala Actors are of the type `Any => Unit`, which means that they are essentially untyped. They can receive literally any type and match on it with potential side effects. This behavior could be problematic and systems like Cloud Haskell and Akka aim to improve on it.
 
 ## Cloud Haskell
 
@@ -179,12 +181,49 @@ The communicating event-loop model was introduced in the E language, and is one 
 
 The E language implements a model which is closer to imperative object-oriented programming. Within a single actor-like node of computation called a "vat" many objects are contained. This vat contains not just objects, but a mailbox for all of the objects inside, as well as a call stack for methods on those objects. There is a shared message queue and event-loop that acts as one abstraction barrier for computation across actors. The actual references to objects within a vat are used for addressing communication and computation across actors and operate at a different level of abstraction.
 
-When handing out references at a different level of granularity than actor-global, how do you ensure the benefits of isolation that the actor model provides? After all, by referencing objects inside of an actor from many places it sounds like we're just reinventing shared-memory problems. The answer is that E's reference-states define many of the isolation guarantees around computation that we expect from actors. Two different ways to reference objects are defined:
+This immediately raises other concerns. When handing out references at a different level of granularity than actor-global, how do you ensure the benefits of isolation that the actor model provides? After all, by referencing objects inside of an actor from many places it sounds like we're just reinventing shared-memory problems. This is answered by two different modes of execution: immediate and eventual calls.
+
+<figure class="main-container">
+  <img src="./E_vat.png" alt="An E vat" />
+  <footer>{% cite Miller:2005:CSP:1986262.1986274 --file message-passing %}</footer>
+</figure>
+
+This diagram shows an E vat, which consists of a heap of objects and a thread of control for executing methods on those objects. The stack and queue represent messages in the two different modes of execution that are used when operating on objects in E. The stack is used for immediate execution, while the queue is used for eventual execution. Immediate calls are processed first, and new immediate calls are added to the top of the stack. Eventual calls are then processed from the queue afterwards. These different modes of message passing are highlighted in communication across vats below.
+
+<figure class="main-container">
+  <img src="./E_account_spreadsheet_vats.png" alt="Communication between E vats" />
+  <footer>{% cite Miller:2005:CSP:1986262.1986274 --file message-passing %}</footer>
+</figure>
+
+From this diagram we can see that local calls among objects within a vat are handled on the immediate stack. Then when a call needs to be made across vats, it is handled on the eventual queue, and delivered to the appropriate object within the vat at some point in the future.
+
+E's reference-states define many of the isolation guarantees around computation that we expect from actors. Two different ways to reference objects are defined:
 
 * _Near reference_: This is a reference only possible between two objects in the same vat. These expose both synchronous immediate-calls and asynchronous eventual-sends.
 * _Eventual reference_: This is a reference which crosses vat boundaries, and only exposes asynchronous eventual-sends, not synchronous immediate-calls.
 
 The difference in semantics between the two types of references means that only objects within the same vat are granted synchronous access to one another. The most an eventual reference can do is asynchronously send and queue a message for processing at some unspecified point in the future. This means that within the execution of a vat, a degree of temporal isolation can be defined between the objects and communications within the vat, and the communications to and from other vats.
+
+TODO: explain this code example in the context of the above diagram or come up with a new one?
+
+```
+def makeStatusHolder(var myStatus) {
+  def myListeners := [].diverge()
+  def statusHolder {
+    to addListener(newListener) {
+      myListeners.push(newListener)
+    }
+    to getStatus() { return myStatus }
+    to setStatus(newStatus) {
+      myStatus := newStatus
+      for listener in myListeners {
+        listener.statusChanged(newStatus)
+      }
+    }
+  }
+  return statusHolder
+}
+```
 
 The motivation for this referencing model comes from wanting to work at a finer-grained level of references than a traditional actor exposes. The simplest example is that you want to ensure that another actor in your system can read a value, but can't write to it. How do you do that within another actor model? You might imagine creating a read-only variant of an actor which doesn't expose a write message type, or proxies only `read` messages to another actor which supports both `read` and `write` operations. In E because you are handing out object references, you would simply only pass around references to a `read` method, and you don't have to worry about other actors in your system being able to write values. These finer-grained references make reasoning about state guarantees easier because you are no longer exposing references to an entire actor, but instead the granular capabilities of the actor.
 
