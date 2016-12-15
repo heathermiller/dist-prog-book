@@ -288,7 +288,7 @@ SQL already provides several operations like join, group by, sort which can be m
 SQL also lessens the amount of code (code examples can be seen in individual model’s section) and significantly reduces the development time.
 Most importantly, as you will read further in this section, frameworks like Pig, Hive, Spark SQL take advantage of these declarative queries by realizing them as a DAG upon which the compiler can apply transformation if an optimization rule is satisfied. Spark which does provide high level abstraction unlike map reduce, lacks this very optimization resulting in several human errors as discussed in the Spark’s data-parallel section.
 
-Sawzall {% cite pike2005interpreting --file big-data%} is a programming language built on top of MapReduce. It consists of a *filter* phase (map) and an *aggregation* phase (reduce). User program can specify the filter function, and emit the intermediate pairs to external pre-built aggregators. This largely reduces efforts programmers put into having to write reducers, just the following example shows, programmers can use built-in reducer supports.
+Sawzall {% cite pike2005interpreting --file big-data%} is a programming language built on top of MapReduce. It consists of a *filter* phase (map) and an *aggregation* phase (reduce). User program only need to specify the filter function, and emit the intermediate pairs to external pre-built aggregators. This largely eliminates the trouble for programmers put into having to write reducers, just the following example shows, programmers can use built-in reducer supports to do the a reducing job. The serialization of the data uses Google's *protocol buffers*, which can produce *meta-data* file for the declared scheme, but the scheme is not used for any optimization purpose per se. Sawzall is good for most of the straightforward processing on large dataset, but it does not support more complex and still common operations like *join*.  The pre-built aggregators are limited and it is non-trivial to add more supports.
 - *Word count implementation in Sawzall*
   ```
   result: table sum of int;
@@ -298,10 +298,10 @@ Sawzall {% cite pike2005interpreting --file big-data%} is a programming language
   emit total <- x;
   ```
 
-Apart from Sawzal, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite thusoo2009hive --file big-data %} are the other major components that sit on top of Hadoop framework for processing large data sets without the users having to write Java based MapReduce code.
+Apart from Sawzall, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite thusoo2009hive --file big-data %} are the other major components that sit on top of Hadoop framework for processing large data sets without the users having to write Java based MapReduce code. Both support more complex operations than Sawzall: e.g. database join. 
 
 Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.  
-- *Word count implementation in Hive*
+- *Word count implementation in Hive*   
   ```
   CREATE TABLE docs (line STRING);
   LOAD DATA INPATH 'docs' OVERWRITE INTO TABLE docs;
@@ -313,11 +313,9 @@ Hive is built by Facebook to organize dataset in structured formats and still ut
   ```
 
 Pig Latin by Yahoo aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. Unlike Hive, Pig Latin does not persist metadata, instead it has better interoperability to work with other applications in Yahoo's data ecosystem.  
-- *Word count implementation in PIG*
-
+- *Word count implementation in PIG*  
   ```
-  Ignore the below
-   lines = LOAD 'input_fule.txt' AS (line:chararray);
+  lines = LOAD 'input_fule.txt' AS (line:chararray);
   words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;
   grouped = GROUP words BY word;
   wordcount = FOREACH grouped GENERATE group, COUNT(words);
@@ -325,8 +323,7 @@ Pig Latin by Yahoo aims at a sweet spot between declarative and procedural progr
   ```
 
 SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.  
-- *Word count example in SparkSQL*
-
+- *Word count example in SparkSQL*  
   ```
   val ds = sqlContext.read.text("input_file").as[String]
   val result = ds
@@ -371,7 +368,7 @@ Hive implements the LazySerDe as the default SerDe interface. A SerDe is a combi
 
 
 ### 1.2.2 Pig Latin
-The goal of Pig Latin {% cite olston2008pig --file big-data%} is to attract experienced programmers to perform ad-hoc analysis on big data. Parallel database products provide a simple SQL query interface, which is good for non-programmers and simple tasks, but not in a style where experienced programmers would approach. Instead such programmers prefer to specify single steps and operate as a sequence.
+Pig Latin {% cite olston2008pig --file big-data%} is a programming model built on top of MapReduce to provide declarative description. Different from Hive, whom has SQL-like syntax, the goal of Pig Latin is to attract experienced programmers to perform ad-hoc analysis on big data. Parallel database products provide a simple SQL query interface, which is good for non-programmers and simple tasks, but not in a style where experienced programmers would approach. Instead such programmers prefer to specify single steps and operate as a sequence.
 
 For example, suppose we have a table urls: `(url, category, pagerank)`. The following is a simple SQL query that finds, for each suciently large category, the average pagerank of high-pagerank urls in that category.
 
