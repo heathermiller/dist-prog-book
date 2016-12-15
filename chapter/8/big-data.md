@@ -460,10 +460,22 @@ A notable feature of the model is the complete control on data through communica
 The graph-parallel abstractions allow users to succinctly describe graph algorithms, and provide a runtime engine to execute these algorithms in a distributed nature. They simplify the design, implementation, and application of sophisticated graph algorithms to large-scale real-world problems. Each of these frameworks presents a different view of graph computation, tailored to an originating domain or family of graph algorithms. However, these frameworks fail to address the problems of data preprocessing and construction, favor snapshot recovery over fault tolerance and lack support from distributed data flow frameworks. The data-parallel systems are well suited to the task of graph construction, and are highly scalable. However, suffer from the very problems mentioned before for which the graph-parallel systems came into existence.
 GraphX {%cite xin2013graphx --file big-data%} is a new computation system which builds upon the Spark’s Resilient Distributed Dataset (RDD) to form a new abstraction Resilient Distributed Graph (RDG) to represent records and their relations as vertices and edges respectively. RDG’s leverage the RDD’s fault tolerance mechanism and expressivity.
 
-How does GraphX improve over the existing graph-parallel and data flow models ?
-The RDGs in GraphX provides a set of elegant and expressive computational primitives through which  many a graph parallel systems like Pregel, PowerGraph can be easily expressed with minimal lines of code. GraphX simplifies the process of graph ETL and analysis through new operations like filter, view and graph transformations. It minimizes communication and storage overhead.
+How does GraphX improve over the existing graph-parallel and data flow models?
+Similar to the data flow model, GraphX moves away from the vertex centric view and adopts transformations on graphs yielding a new graph. The RDGs in GraphX provides a set of elegant and expressive computational primitives to support graph transformations as well as for many a graph parallel systems like Pregel, PowerGraph to be easily expressed with minimal lines of code changes to Spark. GraphX simplifies the process of graph ETL and analysis through new operations like filter, view etc. It minimizes communication and storage overhead across the system by adopting vertex-cuts for effective partitioning.
 
-Similar to the data flow model, it GraphX away from the vertex centric view and adopts transformations on graphs yielding a new graph.
+GraphX 
+GraphX models graphs as property graphs where vertices and edges can have properties. Property graphs are directed multigraph having multiple parallel edges with same source and destination to realize scenarios where multiple relationships could exists between two vertices. For example, in a social graph where every vertex represents a person, there could be a scenario where two people are both co-workers and a friend at the same time. A vertex is keyed by a unique 64 bit long ideatefier (Vertex ID) while edges contain the corresponding source and destination vertex identifiers.
+
+GraphX API provides the below primitives for graph transformations :
+
+- `graph` - constructs property graph given a collection of edges and vertices.
+- `vertices : VertexRDD[VD]`, `edges : EdgeRDD[ED]`- decompose the graph into a collection of vertices or edges by extracting vertex or edge RDDs.
+-	`mapVertices(map: (Id,V)=>(Id,V2)) => Graph[V2, E]`-  transform the vertex collection.
+- `mapEdges(map: (Id, Id, E)=>(Id, Id, E2))` -  transform the edge collection.
+- `triplets RDD[EdgeTriplet[VD, ED]]` -returns collection of form ((i, j), (PV(i), PE(i, j), PV(j))). The operator essentially requires a multiway join between vertex and edge RDD. This operation is optimized by shifting the site of joins to edges, using the routing table, so that only vertex data needs to be shuffled.
+- `leftJoin` - given a collection of vertices and a graph, returns a new graph which incorporates the property of matching vertices from the given collection into the given graph without changing the underlying graph structure.
+- `subgraph` - Applies predicates to return a subgraph of the original graph by filtering all the vertices and edges that don’t satisfy the vertices and edges predicates respectively.
+- `mrTriplets (MapReduce triplet)` - logical composition of triplets followed by map and reduceByKey. It is the building block of graph-parallel algorithms.
 
 ***Why partitioning is important in graph computation systems ?***
 Graph-parallel computation requires every vertex or edge to be processed in the context of its neighborhood. Each transformation depends on the result of distributed joins between vertices and edges. This means that graph computation systems rely on graph partitioning (edge-cuts in most of the systems) and efficient storage to minimize communication and storage overhead and ensure balanced computation.
@@ -471,6 +483,7 @@ Graph-parallel computation requires every vertex or edge to be processed in the 
 <figure class="main-container">
   <img src="./edge-cuts.png" alt="edge cuts" />
 </figure>
+
 *Figure from {%cite xin2013graphx --file big-data%}*
 
 ***Why Edge-cuts are expensive ?***
@@ -479,6 +492,7 @@ Edge-cuts for partitioning requires random assignment of vertices and edges acro
 <figure class="main-container">
   <img src="./vertex-cuts.png" alt="Vertex cuts" />
 </figure>
+
 *Figure from {%cite xin2013graphx --file big-data%}*
 
 ***Vertex-cuts - GraphX’s solution to effective partitioning*** : An alternative approach which does the opposite of edge-cut — evenly assign edges to machines, but allow vertices to span multiple machines. The communication and storage overhead of a vertex-cut is directly proportional to the sum of the number of machines spanned by each vertex. Therefore, we can reduce communication overhead and ensure balanced computation by evenly assigning edges to machines in way that minimizes the number of machines spanned by each vertex.
