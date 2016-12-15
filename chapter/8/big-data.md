@@ -83,30 +83,30 @@ import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 
-public class WordCount 
+public class WordCount
 {
-   public static class Map extends Mapper<LongWritable, Text, Text,  IntWritable> 
+   public static class Map extends Mapper<LongWritable, Text, Text,  IntWritable>
    {
     private final static IntWritable one = new IntWritable(1);
     private Text word = new Text();
 
-    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException 
+    public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException
     {
      String line = value.toString();
      StringTokenizer tokenizer = new StringTokenizer(line);
-     while (tokenizer.hasMoreTokens()) 
+     while (tokenizer.hasMoreTokens())
      {
         word.set(tokenizer.nextToken());
         context.write(word, one);
      }
   }
 
-  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable> 
+  public static class Reduce extends Reducer<Text, IntWritable, Text, IntWritable>
   {
-   public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException 
+   public void reduce(Text key, Iterable<IntWritable> values, Context context) throws IOException, InterruptedException
    {
      int sum = 0;
-     for (IntWritable val : values) 
+     for (IntWritable val : values)
      {
        sum += val.get();
      }
@@ -114,7 +114,7 @@ public class WordCount
    }
   }
 
-  public static void main(String[] args) throws Exception 
+  public static void main(String[] args) throws Exception
   {
     Configuration conf = new Configuration();
     Job job = new Job(conf, "wordcount");
@@ -284,7 +284,7 @@ MapReduce takes care of all the processing over a cluster, failure and recovery,
 
 *Why SQL over map reduce ?*
 
-SQL already provides several operations like join, group by, sort which can be mapped to the above mentioned map reduce operations. Also, by leveraging SQL like interface, it becomes easy for non map reduce experts/non-programmers like data scientists to focus more on logic than hand coding complex operations {% cite scaling-spark-in-real-world --file big-data%}. Such an high level declarative language can easily express their task while leaving all of the execution optimization details to the backend engine. 
+SQL already provides several operations like join, group by, sort which can be mapped to the above mentioned map reduce operations. Also, by leveraging SQL like interface, it becomes easy for non map reduce experts/non-programmers like data scientists to focus more on logic than hand coding complex operations {% cite scaling-spark-in-real-world --file big-data%}. Such an high level declarative language can easily express their task while leaving all of the execution optimization details to the backend engine.
 SQL also lessens the amount of code (code examples can be seen in individual model’s section) and significantly reduces the development time.
 Most importantly, as you will read further in this section, frameworks like Pig, Hive, Spark SQL take advantage of these declarative queries by realizing them as a DAG upon which the compiler can apply transformation if an optimization rule is satisfied. Spark which does provide high level abstraction unlike map reduce, lacks this very optimization resulting in several human errors as discussed in the Spark’s data-parallel section.
 
@@ -294,7 +294,7 @@ Apart from Sawzal, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite
 
 Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.
 
-Pig Latin aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive.
+Pig Latin by Yahoo aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. Unlike Hive, Pig Latin does not persist metadata, instead it has better interoperability to work with other applications in Yahoo's data ecosystem.
 
 SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.
 
@@ -350,7 +350,7 @@ FROM urls WHERE pagerank > 0.2
 GROUP BY category HAVING COUNT(*) > 106  
 ```
 
-And Pig Latin would address in following way:
+And Pig Latin provides an alternative to carry out the same operations in the way programmers prefer:
 
 ```
 good_urls = FILTER urls BY pagerank > 0.2;
@@ -359,14 +359,6 @@ big_groups = FILTER groups BY COUNT(good_urls)>106;
 output = FOREACH big_groups GENERATE
             category, AVG(good_urls.pagerank);
 ```
-
-*Interoperability* Pig Latin is designed to support ad-hoc data analysis, which means the input only requires a function to parse the content of files into tuples. This saves the time-consuming import step. While as for the output, Pig provides freedom to convert tuples into byte sequence where the format can be defined by users.  
-
-*Nested Data Model* Pig Latin has a flexible, fully nested data model, and allows complex, non-atomic data types such as set, map, and tuple to occur as fields of a table. The benefits include: closer to how programmer think; data can be stored in the same nested fashion to save recombining time; can have algebraic language; allow rich user defined functions.  
-
-*UDFs as First-Class Citizens* Pig Latin supports user-defined functions (UDFs) to support customized tasks for grouping, filtering, or per-tuple processing.  
-
-*Debugging Environment* Pig Latin has a novel interactive debugging environment that can generate a concise example data table to illustrate output of each step.
 
 *Word count implementation in PIG*
 
@@ -378,6 +370,17 @@ grouped = GROUP words BY word;
 wordcount = FOREACH grouped GENERATE group, COUNT(words);
 DUMP wordcount;
 ```
+
+*Interoperability* Pig Latin is designed to support ad-hoc data analysis, which means the input only requires a function to parse the content of files into tuples. This saves the time-consuming import step. While as for the output, Pig provides freedom to convert tuples into byte sequence where the format can be defined by users. This allows Pig to interoperate with other existing applications in Yahoo's ecosystem.   
+
+*Nested Data Model* Pig Latin has a flexible, fully nested data model, and allows complex, non-atomic data types such as set, map, and tuple to occur as fields of a table. The benefits include: closer to how programmer think; data can be stored in the same nested fashion to save recombining time; can have algebraic language; allow rich user defined functions.   
+
+*UDFs as First-Class Citizens* Pig Latin supports user-defined functions (UDFs) to support customized tasks for grouping, filtering, or per-tuple processing, which makes Pig Latin more declarative.
+
+*Debugging Environment* Pig Latin has a novel interactive debugging environment that can generate a concise example data table to illustrate output of each step.
+
+*Limitations* The procedural design gives users more control over execution, but at same time the data schema is not enforced explicitly, so it much harder to utilize database-style optimization. 
+
 
 
 ### 1.2.3 SparkSQL  :
