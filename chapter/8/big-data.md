@@ -512,11 +512,12 @@ The GraphX RDG structure implements a vertex-cut representation of a graph using
 
 
 ## 2 Execution Models
-There are many possible implementations for those programming models. In this section, we will discuss about a few different execution models, how the above programming interfaces exploit them, the benefits and limitations of each design and so on. MapReduce, its variants and Spark all use the master/workers model (section 2.1), where the master is responsible for managing data and dynamically scheduling tasks to workers. The master monitors workers' status, and when failure happens, master will reschedule the task to another idle worker. The fault-tolerance is guaranteed by persistence of data in MapReduce versus lineage(for recomputation) in Spark.
+There are many possible implementations for those programming models. In this section, we will discuss about a few different execution models, how the above programming interfaces exploit them, the benefits and limitations of each design and so on. At a very high level, MapReduce, its variants and Spark all adopt the master/workers model, where the master(or driver in Spark) is responsible for managing data and dynamically scheduling tasks to workers. The master monitors workers' status, and when failure happens, master will reschedule the task to another idle worker. However, data in MapReduce(section 2.1) is distributed over clusters and needs to be moved in and out of the disk, and Spark(section 2.2) takes the in-memory processing approach. This practice saves significant I/O operations and thus is much faster than MapReduce. As for fault tolerance, MapReduce uses data persistence and Spark achieves it by using lineage(recomputation for failed task).
+
+As for more declarative querying models, the execution engine needs to take care of query compilation and in the meantime has opportunity of optimizations. For example, Hive(section 2.3) not only needs a driver as the way MapReduce and Spark do, but also has to manage the metastore as well as to take advantage of optimization gain from traditional database like design. SparkSQL(section 2.4) adopts Catalyst framework for SQL optimization: rule-based and cost-based.
 
 
-
-### 2.1 Master/Worker model
+### 2.1 MapReduce execution model
 The original MapReduce model is implemented and deployed in Google infrastructure. As described in section 1.1.1, user program defines map and reduce functions and the underlying system manages data partition and schedules jobs across different nodes. Figure 2.1.1 shows the overall flow when the user program calls MapReduce function:
 1. Split data. The input files are split into *M* pieces;
 2. Copy processes. The user program create a master process and the workers. The master picks idle workers to do either map or reduce task;
@@ -532,10 +533,6 @@ The original MapReduce model is implemented and deployed in Google infrastructur
 <p>Figure 2.1.1 Execution overview<label for="sn-proprietary-monotype-bembo" class="margin-toggle sidenote-number"></label><input type="checkbox" id="sn-proprietary-monotype-bembo" class="margin-toggle"/><span class="sidenote">from original MapReduce paper {%cite dean2008mapreduce --file big-data%}</span></p>
 
 At step 4 and 5, the intermediate dataset is written to the disk by map worker and then read from the disk by reduce worker. Transferring big data chunks over network is expensive, so the data is stored on local disks of the cluster and the master tries to schedule the map task on the machine that contains the dataset or a nearby machine to minimize the network operation.
-
-There are some practices in this paper that make the model work very well in Google, one of them is **backup tasks**: when a MapReduce operation is close to completion, the master schedules backup executions of the remaining in-progress tasks ("straggler"). The task is marked as completed whenever either the primary or the backup execution completes.
-In the paper, the authors measure the performance of MapReduce on two computations running on a large cluster of machines. One computation *grep* through approximately 1TB of data. The other computation *sort* approximately 1TB of data. Both computations take in the order of a hundred seconds. In addition, the backup tasks do help largely reduce execution time. In the experiment where 200 out of 1746 tasks were intentionally killed, the scheduler was able to recover quickly and finish the whole computation for just a 5% increased time.  
-Overall, the performance is very good for conceptually unrelated computations.
 
 
 ### 2.2 Spark execution model
