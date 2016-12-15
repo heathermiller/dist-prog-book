@@ -427,8 +427,7 @@ These units of logic communicate through RPC or message-passing.
 The benefit to using the actor or DSM model is the ability to wrap unique, cohesive logic in modules.
 Unfortunately, this means that the application or library developer is responsible for handling problems such as scaling and process location.
 
-The dataflow model can be considered course grain because the logic of every worker is defined by a single module.
-A program is written as a single set of logic that transforms a dataset.
+The dataflow model can be considered course grain because the logic of every worker is defined by a single set of instructions.
 Workers proceed by receiving a partition of the data and the program, and executing the transformation.
 Crucially, each worker operates under the same logic.
 
