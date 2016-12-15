@@ -435,9 +435,24 @@ To borrow an idea from traditional parallel programming, the actor/DSM model imp
 
 ### Level of Abstraction
 
-    * location
-    * scalability
-    * fault tolerance
+Each of the examples of systems for distributed computing offer different levels of abstraction from problems like partial-failure.
+Depending on the requirements of the application, it may be sufficient to let the system handle these problems.
+In other cases, it may be necessary to be able to define custom logic.
+
+In some systems, like Emerald, it is possible to specify the location of processes.
+When the communication patterns of the application are known, this can allow for optimizations on a per-application basis.
+In other systems, the system handles the resource allocation of processes.
+While this may ease development, the developer must trust the system to make the decision.
+
+The actor and DSM models require the application developer to create and destroy individual processes.
+This means that either the application must contain logic for scaling, or a library must be developed to handle scaling.
+Systems that implement the dataflow model handle scaling automatically.
+An exception to this rule is Orleans, which follows the actor model but handles scaling automatically.
+
+Final, fault tolerance is abstracted to varying degrees in these systems.
+Argus exposes fault tolerance to the programmer; object data members are labeled as volatile or stable.
+Periodically, these stable members are serialized to disk and can be used for object reconstruction.
+Other systems, especially those based on dataflow, fully abstract the problem of partial failure.
 
 ## Thoughts on System Design
 
@@ -481,13 +496,21 @@ At first, systems designed to tackle the distribution domain were implemented as
 Later, these systems appear as libraries built on top of existing general-purpose languages.
 For many reasons, this style of system development is superior.
 
+#### Domain Composition
 
-#### problem of domain-composition
-    * domains may be orthogonal -> can be composed
-#### problem of abstraction
-#### problem of ecosystem
-#### problem of tumultuous architecture
-#### "any gpl + library can act as a dsl" - mernik"
+Systems like GraphX and Spark Streaming demonstrate a key benefit of developing DSL's as libraries: composition.
+When DSL's are implemented on top of a common language, they may be composed.
+For example, a C++ math library may be used along with MapReduce to perform complex transformations on individual records.
+If the math library and MapReduce were individual languages with separate compilers, composition would be difficult or impossible.
+Further, the GraphX system demonstrates that domains exist at varying degrees of generality, and that building the library for one domain on top of another may result in unique and efficient solutions.
+DSL's that are implemented as full languages with unique compilers are unattractive because existing libraries that handle common tasks must be re-written for the new language.
+
+#### Ecosystem
+
+Another problem that drives DSL development towards libraries is ecosystem.
+In order for a DSL to be adopted, there must be a body of developers that can incorporate the DSL into existing systems.
+If either (1) the DSL does not incorporate well with existing code bases or (2) the DSL requires significant investment to learn, adoption will be less likely.
+
 
 ## References
 
