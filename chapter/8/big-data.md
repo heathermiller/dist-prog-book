@@ -230,13 +230,6 @@ Apart from Sawzal, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite
 
 Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.
 
-Relational interface to big data is good, however, it doesn’t cater to users who want to perform
-
-- ETL to and from various semi or unstructured data sources.
-- advanced analytics like machine learning or graph processing.
-
-These user actions require best of both the worlds - relational queries and procedural algorithms. Pig Latin {% cite olston2008pig --file big-data%}  and Spark SQL {% cite armbrust2015spark --file big-data%}  bridges this gap by letting users to seamlessly intermix both relational and procedural API. Both the frameworks free the programmer from worrying about internal execution model by providing implicit optimization on the user input DAG of transformations.
-
 Pig Latin aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive.
 
 SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.
