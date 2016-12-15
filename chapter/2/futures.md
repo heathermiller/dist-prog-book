@@ -17,7 +17,7 @@ In the world of asynchronous communications many terminologies were defined to h
 
 
 <figure>
-  <img src="./1.png" alt="timeline" />
+  <img src="./images/1.png" alt="timeline" />
 </figure>
 
 # Motivation
@@ -50,11 +50,10 @@ Among the modern languages, Python was perhaps the first to come up with somethi
 Promises and javascript have an interesting history. In 2007 inspired by Python’s twisted, dojo came up with it’s own implementation of of dojo.Deferred. This inspired Kris Zyp to then come up with the CommonJS Promises/A spec in 2009. Ryan Dahl introduced the world to NodeJS in the same year. In it’s early versions, Node used promises for the non-blocking API. When NodeJS moved away from promises to its now familiar error-first callback API, it left a void for a promises API.  Q.js was an implementation of Promises/A spec by Kris Kowal around this time. FuturesJS library by AJ ONeal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 first introduced Promises to its wider and ever-growing audience. The API for JQuery was subtly different than the Promises/A spec. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces. A+ promises aimed to solve this problem. From this point on, leading from widespread adoption of A+ spec, promises was finally made a part of ECMAScript® 2015 Language Specification. Still, a lack of backward compatibility and additional features provided means that libraries like BlueBird and Q.js still have a place in the javascript ecosystem.
 
 
-#Different Definitions
+# Different Definitions
 
 
-Future, promise, Delay or Deferred generally refer to same synchronisation mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed. The definitions have changed a little over the years but the idea remained the same.
-
+Future, promise, Delay or Deferred generally refer to same synchronisation mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed.
 
 In some languages however, there is a subtle difference between what is a Future and a Promise.
 “A ‘Future’ is a read-only reference to a yet-to-be-computed value”.
@@ -79,7 +78,7 @@ In Java 8, the Future<T> interface has methods to check if the computation is co
 
 # Semantics of Execution
 
-Over the years promises and futures have been implemented in different programming languages and created a buzz in parallel computing world. We will take a look at some of the programming languages who designed frameworks to enhance performance of applications using Promises and futures.
+Over the years promises and futures have been implemented in different programming languages. Different languages chose to implement  futures/promises in a different way. In this section, we try to introduce some different ways in which futures and promises actually get executed and resolved underneath their APIs.
 
 ## Thread Pools
 
@@ -164,11 +163,52 @@ Each message has a callback function which is fired when the message is processe
 
 Separating when a message is queued from when it is executed means the single thread doesn’t have to wait for an action to complete before moving on to another. We attach a callback to the action we want to do, and when the time comes, the callback is run with the result of our action. Callbacks work good in isolation, but they force us into a continuation passing style of execution, what is otherwise known as Callback hell.
 
-<figure>
-  <img src="./4.png" alt="timeline" />
-</figure>
 
-**Programs must be written for people to read, and only incidentally for machines to execute.**   - *Harold Abelson and Gerald Jay Sussman*
+```javascript
+
+getData = function(param, callback){
+  $.get('http://example.com/get/'+param,
+    function(responseText){
+      callback(responseText);
+    });
+}
+
+getData(0, function(a){  
+    getData(a, function(b){
+        getData(b, function(c){
+            getData(c, function(d){
+                getData(d, function(e){
+
+                });
+            });
+        });
+    });
+});
+
+```
+
+<center><h4> VS </h4></center>
+
+```javascript
+
+getData = function(param, callback){
+  return new Promise(function(resolve, reject) {
+    $.get('http://example.com/get/'+param,
+    function(responseText){
+      resolve(responseText);
+    });
+  });
+}
+
+getData(0).then(getData)
+  .then(getData).
+    then(getData).
+      then(getData);
+
+
+```
+
+> **Programs must be written for people to read, and only incidentally for machines to execute.** - *Harold Abelson and Gerald Jay Sussman*
 
 Promises are an abstraction which make working with async operations in javascript much more fun. Moving on from a continuation passing style, where you specify what needs to be done once the action is done, the callee simply returns a Promise object. This inverts the chain of responsibility, as now the caller is responsible for handling the result of the promise when it is settled.
 
@@ -180,25 +220,25 @@ Suppose we execute a function, here g() which in turn, calls function f(). Funct
 
 
 <figure>
-  <img src="./5.png" alt="timeline" />
+  <img src="./images/5.png" alt="timeline" />
 </figure>
 
 Now, javascript’s runtime is single threaded. This statement is true, and not true. The thread which executes the user code is single threaded. It executes what is on top of the stack, runs it to completion, and then moves onto what is next on the stack. But, there are also a number of helper threads which handle things like network or timer/settimeout type events. This timing thread handles the counter for setTimeout.
 
 <figure>
-  <img src="./6.png" alt="timeline" />
+  <img src="./images/6.png" alt="timeline" />
 </figure>
 
 Once the timer expires, the timer thread puts a message on the message queue. The queued up messages are then handled by the event loop. The event loop as described above, is simply an infinite loop which checks if a message is ready to be processed, picks it up and puts it on the stack for it’s callback to be executed.
 
 <figure>
-  <img src="./7.png" alt="timeline" />
+  <img src="./images/7.png" alt="timeline" />
 </figure>
 
 Here, since the future is resolved with a value of true, we are alerted with a value true when the callback is picked up for execution.
 
 <figure>
-  <img src="./8.png" alt="timeline" />
+  <img src="./images/8.png" alt="timeline" />
 </figure>
 
 Some finer details :
@@ -239,7 +279,7 @@ Implicit futures were introduced originally by Friedman and Wise in a paper in 1
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
 
 <figure>
-  <img src="./9.png" alt="timeline" />
+  <img src="./images/9.png" alt="timeline" />
 </figure>
 
 Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason.
@@ -319,14 +359,38 @@ promise.then(function (data) {
 In Javascript, Promises have a catch method, which help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler.
 
 
-<figure>
-  <img src="./13.png" alt="timeline" />
-</figure>
+```javascript
+function work(data) {
+    return Promise.resolve(data+"1");
+}
+
+function error(data) {
+    return Promise.reject(data+"2");
+}
+
+function handleError(error) {
+    return error +"3";
+}
+
+
+work("")
+.then(work)
+.then(error)
+.then(work) // this will be skipped
+.then(work, handleError)
+.then(check);
+
+function check(data) {
+    console.log(data == "1123");
+    return Promise.resolve();
+}
+
+```
 
 The same behavior can be written using catch block.
 
 
-```scala
+```javascript
 
 work("")
 .then(work)
@@ -342,27 +406,27 @@ function check(data) {
 
 ```
 
-#Futures and Promises in Action
+# Futures and Promises in Action
 
 
-##Twitter Finagle
+## Twitter Finagle
 
 
 Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any JVM-hosted language. It uses idea of Futures to encapsulate concurrent tasks and are analogous to threads, but even more lightweight.
 
 
-##Correctables
+## Correctables
 Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adrian Seredinschi at OSDI ‘16, in a paper titled Incremental Consistency Guarantees for Replicated Objects. As the title suggests, Correctables aim to solve the problems with consistency in  replicated objects. They provide incremental consistency guarantees by capturing successive changes to the value of a replicated object. Applications can opt to receive a fast but possibly inconsistent result if eventual consistency is acceptable, or to wait for a strongly consistent result. Correctables API draws inspiration from, and builds on the API of Promises.  Promises have a two state model to represent an asynchronous task, it starts in blocked state and proceeds to a ready state when the value is available. This cannot represent the incremental nature of correctables. Instead, Correctables have a updating state when it starts. From there on, it remains in updating state during intermediate updates, and when the final result is available, it transitions to final state. If an error occurs in between, it moves into an error state. Each state change triggers a callback.
 
 <figure>
-  <img src="./15.png" alt="timeline" />
+  <img src="./images/15.png" alt="timeline" />
 </figure>
 
-##Folly Futures
+## Folly Futures
 Folly is a library by Facebook for asynchronous C++ inspired by the implementation of Futures by Twitter for Scala. It builds upon the Futures in the C++11 Standard. Like Scala’s futures, they also allow for implementing a custom executor which provides different ways of running a Future (thread pool, event loop etc).
 
 
-##NodeJS Fiber
+## NodeJS Fiber
 Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for nodejs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
 
 ## References
