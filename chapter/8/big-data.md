@@ -282,21 +282,61 @@ RDDs are immutable and hence a straggler (slow node) can be replaced with a back
 ### 1.2 Querying: declarative interfaces
 MapReduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like equi-joins and theta-joins [http://www.ccs.neu.edu/home/mirek/papers/2011-SIGMOD-ParallelJoins.pdf] which could be highly complex depending on the data, require programmers to implement by hand. Hence, map reduce lacks many such high level abstractions  requiring programmers to be well versed with several of the design patterns like map-side joins, reduce-side equi-join etc. Also, java based code ( like in Hadoop framework) in map-reduce can sometimes become repetitive when the programmer wants to implement most common operations like projection, filtering etc. A simple word count program as shown in Figure X, can span up to 63 lines.
 
-*Why SQL over map reduce ?*
+*Why SQL over MapReduce ?*
 
 SQL already provides several operations like join, group by, sort which can be mapped to the above mentioned map reduce operations. Also, by leveraging SQL like interface, it becomes easy for non map reduce experts/non-programmers like data scientists to focus more on logic than hand coding complex operations {% cite scaling-spark-in-real-world --file big-data%}. Such an high level declarative language can easily express their task while leaving all of the execution optimization details to the backend engine.
 SQL also lessens the amount of code (code examples can be seen in individual model’s section) and significantly reduces the development time.
 Most importantly, as you will read further in this section, frameworks like Pig, Hive, Spark SQL take advantage of these declarative queries by realizing them as a DAG upon which the compiler can apply transformation if an optimization rule is satisfied. Spark which does provide high level abstraction unlike map reduce, lacks this very optimization resulting in several human errors as discussed in the Spark’s data-parallel section.
 
-Sawzall {% cite pike2005interpreting --file big-data%} is a programming language built on top of MapReduce. It consists of a *filter* phase (map) and an *aggregation* phase (reduce). User program can specify the filter function, and emit the intermediate pairs to external pre-built aggregators.
+Sawzall {% cite pike2005interpreting --file big-data%} is a programming language built on top of MapReduce. It consists of a *filter* phase (map) and an *aggregation* phase (reduce). User program can specify the filter function, and emit the intermediate pairs to external pre-built aggregators. This largely reduces efforts programmers put into having to write reducers, just the following example shows, programmers can use built-in reducer supports.
+- *Word count implementation in Sawzall*
+  ```
+  result: table sum of int;
+  total: table sum of float;
+  x: float = input;
+  emit count <- 1;
+  emit total <- x;
+  ```
 
 Apart from Sawzal, Pig  {%cite olston2008pig --file big-data %} and Hive  {%cite thusoo2009hive --file big-data %} are the other major components that sit on top of Hadoop framework for processing large data sets without the users having to write Java based MapReduce code.
 
-Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.
+Hive is built by Facebook to organize dataset in structured formats and still utilize the benefit of MapReduce framework. It has its own SQL-like language: HiveQL  {%cite thusoo2010hive --file big-data %} which is easy for anyone who understands SQL. Hive reduces code complexity and eliminates lots of boiler plate that would otherwise be an overhead with Java based MapReduce approach.  
+- *Word count implementation in Hive*
+  ```
+  CREATE TABLE docs (line STRING);
+  LOAD DATA INPATH 'docs' OVERWRITE INTO TABLE docs;
+  CREATE TABLE word_counts AS
+  SELECT word, count(1) AS count FROM
+  (SELECT explode(split(line, '\\s')) AS word FROM docs) w
+  GROUP BY word
+  ORDER BY word;
+  ```
 
-Pig Latin by Yahoo aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. Unlike Hive, Pig Latin does not persist metadata, instead it has better interoperability to work with other applications in Yahoo's data ecosystem.
+Pig Latin by Yahoo aims at a sweet spot between declarative and procedural programming. For advanced programmers, SQL is unnatural to implement program logic and Pig Latin wants to dissemble the set of data transformation into a sequence of steps. This makes Pig more verbose than Hive. Unlike Hive, Pig Latin does not persist metadata, instead it has better interoperability to work with other applications in Yahoo's data ecosystem.  
+- *Word count implementation in PIG*
 
-SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.
+  ```
+  Ignore the below
+   lines = LOAD 'input_fule.txt' AS (line:chararray);
+  words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;
+  grouped = GROUP words BY word;
+  wordcount = FOREACH grouped GENERATE group, COUNT(words);
+  DUMP wordcount;
+  ```
+
+SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.  
+- *Word count example in SparkSQL*
+
+  ```
+  val ds = sqlContext.read.text("input_file").as[String]
+  val result = ds
+    .flatMap(_.split(" "))              
+    .filter(_ != "")                    
+    .toDF()                             
+    .groupBy($"value")                 
+    .agg(count("*") as "count")
+    .orderBy($"count" desc)   
+  ```
 
 The following subsections will discuss Hive, Pig Latin, SparkSQL in details.
 
@@ -305,7 +345,7 @@ The following subsections will discuss Hive, Pig Latin, SparkSQL in details.
 
 Hive is a data-warehousing infrastructure built on top of the map reduce framework - Hadoop. The primary responsibility of Hive is to provide data summarization, query and analysis. It  supports analysis of large datasets stored in Hadoop’s HDFS {% cite shvachko2010hadoop --file big-data%}. It supports SQL-Like access to structured data which is known as HiveQL (or HQL) as well as big data analysis with the help of MapReduce. These SQL queries can be compiled into map reduce jobs that can be executed be executed on Hadoop. It drastically brings down the development time in writing and maintaining Hadoop jobs.
 
-Data in Hive is organized into three different formats :
+Data in Hive is organized into three different formats:
 
 `Tables`: Like RDBMS tables Hive contains rows and tables and every table can be mapped to HDFS directory. All the data in the table is serialized and stored in files under the corresponding directory. Hive is extensible to accept user defined data formats, custom serialize and de-serialize methods. It also supports external tables stored in other native file systems like HDFS, NFS or local directories.
 
@@ -328,16 +368,7 @@ This query uses mapper.py for transforming inputdata into (word, count) pair, di
 ***Serialization/Deserialization***
 Hive implements the LazySerDe as the default SerDe interface. A SerDe is a combination of serialization and deserialization which helps developers instruct Hive on how their records should be processed. The Deserializer interface translates rows into internal objects lazily so that the cost of Deserialization of a column is incurred only when it is needed. The Serializer, however, converts a Java object into a format that Hive can write to HDFS or another supported system. Hive also provides a RegexSerDe which allows the use of regular expressions to parse columns out from a row.
 
-*Word count implementation in Hive*
-```
-CREATE TABLE docs (line STRING);
-LOAD DATA INPATH 'docs' OVERWRITE INTO TABLE docs;
-CREATE TABLE word_counts AS
-SELECT word, count(1) AS count FROM
-(SELECT explode(split(line, '\\s')) AS word FROM docs) w
-GROUP BY word
-ORDER BY word;
-```
+
 
 ### 1.2.2 Pig Latin
 The goal of Pig Latin {% cite olston2008pig --file big-data%} is to attract experienced programmers to perform ad-hoc analysis on big data. Parallel database products provide a simple SQL query interface, which is good for non-programmers and simple tasks, but not in a style where experienced programmers would approach. Instead such programmers prefer to specify single steps and operate as a sequence.
@@ -371,16 +402,7 @@ output = FOREACH big_groups GENERATE
 
 *Limitations* The procedural design gives users more control over execution, but at same time the data schema is not enforced explicitly, so it much harder to utilize database-style optimization.
 
-*Word count implementation in PIG*
 
-```
-Ignore the below
- lines = LOAD 'input_fule.txt' AS (line:chararray);
-words = FOREACH lines GENERATE FLATTEN(TOKENIZE(line)) as word;
-grouped = GROUP words BY word;
-wordcount = FOREACH grouped GENERATE group, COUNT(words);
-DUMP wordcount;
-```
 
 
 ### 1.2.3 SparkSQL  :
@@ -421,18 +443,6 @@ Winding up - we can compare SQL vs Dataframe vs Dataset as below :
 *Figure from the website :* https://databricks.com/blog/2016/07/14/a-tale-of-three-apache-spark-apis-rdds-dataframes-and-datasets.html
 
 
-*Word count example in SparkSQL*
-
-```
-val ds = sqlContext.read.text("input_file").as[String]
-val result = ds
-  .flatMap(_.split(" "))              
-  .filter(_ != "")                    
-  .toDF()                             
-  .groupBy($"value")                 
-  .agg(count("*") as "count")
-  .orderBy($"count" desc)   
-```
 
 ### 1.3 Large-scale Parallelism on Graphs
 Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
