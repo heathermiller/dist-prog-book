@@ -46,7 +46,30 @@ The classic actor model was formalized as a unit of computation in Agha's _Concu
 
 As in the original actor model, classic actors communicate by asynchronous message passing. They are a primitive independent unit of computation which can be used to build higher-level abstractions for concurrent programming. Actors are uniquely addressable, and have their own independent mailboxes or message queues. State changes using the classic actor model are specified and aggregated using the `become` operation. Each time an actor processes a message it computes a behavior in response to the next type of message it expects to process. A `become` operation's argument is a named continuation, `b`, representing behavior that the actor should be updated with, along with some state that should be passed to `b`.
 
-For purely functional actors the new behavior would be identical to the original. For more complex actors however, this enables the aggregation of state changes at a higher level of granularity than something like a variable assignment. This enables flexibility in the behavior of an actor over time in response to the actions of other actors in the system. Additionally, this isolation changes the level at which one analyzes a system, freeing the programmer from worrying about interference during state changes.
+This continuation model is flexible. You could create a purely functional actor where the new behavior would be identical to the original and no state would be passed. An example of this is the `AddOne` actor below, which processes a message according to a single fixed behavior.
+
+```
+(define AddOne
+  [add-one [n]
+    (return (+ n 1))])
+```
+
+The model also enables the creation of stateful actors which change behavior and pass along an object representing some state. This state can be the result of many operations, which enables the aggregation of state changes at a higher level of granularity than something like variable assignment. An example of this is a `BankAccount` actor given in _Concurrent Object-Oriented Programming_. {% cite Agha:1990:COP:83880.84528 --file message-passing %}
+
+```
+(define BankAccount
+  (mutable [balance]
+    [withdraw-from [amount]
+      (become BankAccount (- balance amount))
+      (return 'withdrew amount)]
+    [deposit-to [amount]
+      (become BankAccount (+ balance amount))
+      (return 'deposited amount)]
+    [balance-query
+      (return 'balance-is balance)]))
+```
+
+Stateful continuations enable flexibility in the behavior of an actor over time in response to the actions of other actors in the system. Limiting state and behavior changes to `become` operations changes the level at which one analyzes a system, freeing the programmer from worrying about interference during state changes. In the example above, the programmer only has to worry about changes to the account's balance during `become` statements in response to a sequential queue of well-defined message types.
 
 If you squint a little, this actor definition sounds similar to Alan Kay’s original definition of Object Oriented programming. This definition describes a system where objects have a behavior, their own memory, and communicate by sending and receiving messages that may contain other objects or simply trigger actions. Kay's ideas sound closer to what we consider the actor model today, and less like what we consider object-oriented programming. That is, Kay's focus in this description is on designing the messaging and communications that dictate how objects interact.
 
