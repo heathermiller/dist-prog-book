@@ -414,7 +414,7 @@ The library is used to ease programmer burden and supply domain-specific syntax.
 
 The pros and cons of different implementation stategies is discussed further under *DSL's as Libraries*.
 
-### Granularity
+### Granularity of Logic and State
 
 The granularity of logic and state is another major characteristic of these systems.
 Generally, the actor and DSM models can be considered fine grain while the dataflow model is course grain.
