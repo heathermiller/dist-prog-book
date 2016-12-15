@@ -4,7 +4,7 @@ title:  "Futures"
 by: "Kisalaya Prasad and Avanti Patil"
 ---
 
-#Introduction
+# Introduction
 
 As human beings we have an ability to multitask ie. we can walk, talk and eat at the same time except when you sneeze. Sneeze is like a blocking activity from the normal course of action, because it forces you to stop what you’re doing for a brief moment and then you resume where you left off. Activities like multitasking are called multithreading in computer lingo. In contrast to this behaviour, computer processors are single threaded. So when we say that a computer system has multi-threaded environment, it is actually just an illusion created by processor where processor’s time is shared between multiple processes. Sometimes processor gets blocked when some tasks are hindered from normal execution due to blocking calls. Such blocking calls can range from IO operations like read/write to disk or sending/receiving packets to/from network. Blocking calls can take disproportionate amount of time compared to the processor’s task execution i.e. iterating over a list.
 
@@ -16,11 +16,11 @@ The processor can either handle blocking calls in two ways:
 In the world of asynchronous communications many terminologies were defined to help programmers reach the ideal level of resource utilization. As a part of this article we will talk about motivation behind rise of Promises and Futures, we will explain programming model associated with it and discuss evolution of this programming construct, finally we will end this discussion with how this construct helps us today in different general purpose programming languages.
 
 
-<figure class="main-container">
+<figure>
   <img src="./1.png" alt="timeline" />
 </figure>
 
-#Motivation
+# Motivation
 
 
 A “Promise” object represents a value that may not be available yet. A Promise is an object that represents a task with two possible outcomes, success or failure and holds callbacks that fire when one outcome or the other has occurred.
@@ -81,7 +81,7 @@ In Java 8, the Future<T> interface has methods to check if the computation is co
 
 Over the years promises and futures have been implemented in different programming languages and created a buzz in parallel computing world. We will take a look at some of the programming languages who designed frameworks to enhance performance of applications using Promises and futures.
 
-## Fork-Join
+## Thread Pools
 
 Doing things in parallel is usually an effective way of doing things in modern systems. The systems are getting more and more capable of running more than one things at once, and the latency associated with doing things in a distributed environment is not going away anytime soon. Inside the JVM, threads are a basic unit of concurrency. Threads are independent, heap-sharing execution contexts. Threads are generally considered to be lightweight when compared to a process, and can share both code and data. The cost of context switching between threads is cheap. But, even if we claim that threads are lightweight, the cost of creation and destruction of threads in a long running threads can add up to something significant. A practical way is address this problem is to manage a pool of worker threads.
 
@@ -164,7 +164,7 @@ Each message has a callback function which is fired when the message is processe
 
 Separating when a message is queued from when it is executed means the single thread doesn’t have to wait for an action to complete before moving on to another. We attach a callback to the action we want to do, and when the time comes, the callback is run with the result of our action. Callbacks work good in isolation, but they force us into a continuation passing style of execution, what is otherwise known as Callback hell.
 
-<figure class="main-container">
+<figure>
   <img src="./4.png" alt="timeline" />
 </figure>
 
@@ -179,25 +179,25 @@ Let’s take an example to understand the promise resolution workflow as it happ
 Suppose we execute a function, here g() which in turn, calls function f(). Function f returns a promise, which, after counting down for 1000 ms, resolves the promise with a single value, true. Once f gets resolved, a value true or false is alerted based on the value of the promise.
 
 
-<figure class="main-container">
+<figure>
   <img src="./5.png" alt="timeline" />
 </figure>
 
 Now, javascript’s runtime is single threaded. This statement is true, and not true. The thread which executes the user code is single threaded. It executes what is on top of the stack, runs it to completion, and then moves onto what is next on the stack. But, there are also a number of helper threads which handle things like network or timer/settimeout type events. This timing thread handles the counter for setTimeout.
 
-<figure class="main-container">
+<figure>
   <img src="./6.png" alt="timeline" />
 </figure>
 
 Once the timer expires, the timer thread puts a message on the message queue. The queued up messages are then handled by the event loop. The event loop as described above, is simply an infinite loop which checks if a message is ready to be processed, picks it up and puts it on the stack for it’s callback to be executed.
 
-<figure class="main-container">
+<figure>
   <img src="./7.png" alt="timeline" />
 </figure>
 
 Here, since the future is resolved with a value of true, we are alerted with a value true when the callback is picked up for execution.
 
-<figure class="main-container">
+<figure>
   <img src="./8.png" alt="timeline" />
 </figure>
 
@@ -211,7 +211,7 @@ We haven’t talked about error handling, but it gets handled the same exact way
 Event loops have proven to be surprisingly performant. When network servers are designed around multithreading, as soon as you end up with a few hundred concurrent connections, the CPU spends so much of its time task switching that you start to lose overall performance. Switching from one thread to another has overhead which can add up significantly at scale. Apache used to choke even as low as a few hundred concurrent users when using a thread per connection while Node can scale up to a 100,000 concurrent connections based on event loops and asynchronous IO.
 
 
-##Thread Model
+## Thread Model
 
 
 Oz programming language introduced an idea of dataflow concurrency model. In Oz, whenever the program comes across an unbound variable, it waits for it to be resolved. This dataflow property of variables helps us write threads in Oz that communicate through streams in a producer-consumer pattern. The major benefit of dataflow based concurrency model is that it’s deterministic - same operation called with same parameters always produces the same result. It makes it a lot easier to reason about concurrent programs, if the code is side-effect free.
@@ -225,7 +225,7 @@ Any expression in Alice can be evaluated in it's own thread using spawn keyword.
 
 Alice also allows for lazy evaluation of expressions. Expressions preceded with the lazy keyword are evaluated to a lazy future. The lazy future is evaluated when it is needed. If the computation associated with a concurrent or lazy future ends with an exception, it results in a failed future. Requesting a failed future does not block, it simply raises the exception that was the cause of the failure.
 
-#Implicit vs. Explicit Promises
+# Implicit vs. Explicit Promises
 
 
 We define Implicit promises as ones where we don’t have to manually trigger the computation vs Explicit promises where we have to trigger the resolution of future manually, either by calling a start function or by requiring the value. This distinction can be understood in terms of what triggers the calculation : With Implicit promises, the creation of a promise also triggers the computation, while with Explicit futures, one needs to triggers the resolution of a promise. This trigger can in turn be explicit, like calling a start method, or implicit, like lazy evaluation where the first use of a promise’s value triggers its evaluation.
@@ -238,7 +238,7 @@ Implicit futures were introduced originally by Friedman and Wise in a paper in 1
 # Promise Pipelining
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
 
-<figure class="main-container">
+<figure>
   <img src="./9.png" alt="timeline" />
 </figure>
 
@@ -264,8 +264,8 @@ try{
     do something3;
     ...
 } catch ( exception ){
-    HandleException; 
-} 
+    HandleException;
+}
 
 ```
 
@@ -281,7 +281,7 @@ try{
     // This doesn’t work as the error might not have been thrown yet
 } catch ( exception ){
     handleException;
-} 
+}
 
 
 ```
@@ -293,14 +293,33 @@ Although most of the earlier papers did not talk about error handling, the Promi
 
 In modern languages, Promises generally come with two callbacks. One to handle  the success case and other to handle the failure.
 
-<figure class="main-container">
-  <img src="./12.png" alt="timeline" />
-</figure>
 
-In Javascript, Promises also have a catch method, which help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler.
+#### In Scala
+```scala
+
+f onComplete {
+   case Success(data) => handleSuccess(data)
+   case Failure(e) => handleFailure(e)
+}
+```
+
+#### In Javascript
+```javascript
+
+promise.then(function (data) {
+    // success callback
+    console.log(data);
+}, function (error) {
+   // failure callback
+   console.error(error);
+});
+
+```
+
+In Javascript, Promises have a catch method, which help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler.
 
 
-<figure class="main-container">
+<figure>
   <img src="./13.png" alt="timeline" />
 </figure>
 
@@ -315,7 +334,7 @@ work("")
 .then(work)
 .catch(handleError)
 .then(check);
-     
+
 function check(data) {
     console.log(data == "1123");
     return Promise.resolve();
@@ -335,7 +354,7 @@ Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes i
 ##Correctables
 Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adrian Seredinschi at OSDI ‘16, in a paper titled Incremental Consistency Guarantees for Replicated Objects. As the title suggests, Correctables aim to solve the problems with consistency in  replicated objects. They provide incremental consistency guarantees by capturing successive changes to the value of a replicated object. Applications can opt to receive a fast but possibly inconsistent result if eventual consistency is acceptable, or to wait for a strongly consistent result. Correctables API draws inspiration from, and builds on the API of Promises.  Promises have a two state model to represent an asynchronous task, it starts in blocked state and proceeds to a ready state when the value is available. This cannot represent the incremental nature of correctables. Instead, Correctables have a updating state when it starts. From there on, it remains in updating state during intermediate updates, and when the final result is available, it transitions to final state. If an error occurs in between, it moves into an error state. Each state change triggers a callback.
 
-<figure class="main-container">
+<figure>
   <img src="./15.png" alt="timeline" />
 </figure>
 
