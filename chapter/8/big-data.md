@@ -71,7 +71,7 @@ Many a analytics workloads like K-means, logistic regression, graph processing a
 
 *Complete code for Word count in Hadoop (Java based implementation of map reduce)*
 
-```
+```java
 import java.io.IOException;
 import java.util.*;
 import org.apache.hadoop.fs.Path;
@@ -146,7 +146,7 @@ FlumeJava {%cite chambers2010flumejava --file big-data %}was introduced to make 
 - `flatten`, takes a list of `PCollection<T>`s and returns a single logic `PCollection<T>`.
 
 For example: `todo: explain the code`
-```!Java
+```java
 PTable<String,Integer> wordsWithOnes =
   words.parallelDo(
       new DoFn<String, Pair<String,Integer>>() {
@@ -194,7 +194,7 @@ The Dryad library is written in C++ and it uses a mixture of method calls and op
 - *Merging two graphs* $$C=A \mid\mid B$$ creates a new graph $$C=\langle V_A \otimes^* V_B, E_A \cup E_B, I_A \cup^* I_B, O_A\cup^* O_B \rangle$$.
 
 Following is an example graph builder program.
-```!c
+```c
 GraphBuilder XSet = moduleX^N;
 GraphBuilder DSet = moduleD^N;
 GraphBuilder MSet = moduleM^(N*4);  
@@ -324,7 +324,7 @@ Pig Latin by Yahoo aims at a sweet spot between declarative and procedural progr
 
 SparkSQL though has the same goals as that of Pig, is better given the Spark exeuction engine, efficient fault tolerance mechanism of Spark and specialized data structure called Dataset.  
 - *Word count example in SparkSQL*  
-  ```
+  ```scala
   val ds = sqlContext.read.text("input_file").as[String]
   val result = ds
     .flatMap(_.split(" "))              
@@ -395,12 +395,12 @@ output = FOREACH big_groups GENERATE
 
 *Debugging Environment* Pig Latin has a novel interactive debugging environment that can generate a concise example data table to illustrate output of each step.
 
-*Limitations* The procedural design gives users more control over execution, but at same time the data schema is not enforced explicitly, so it much harder to utilize database-style optimization.
+*Limitations* The procedural design gives users more control over execution, but at same time the data schema is not enforced explicitly, so it much harder to utilize database-style optimization. Pig Latin has no control structures like loop or conditions, if needed, one has to embed it in Java like JDBC style, but this can easily fail without static syntax checking. It is also not easy to debug.
 
 
 
 
-### 1.2.3 SparkSQL  :
+### 1.2.3 SparkSQL
 
 The major contributions of Spark SQL {% cite armbrust2015spark --file big-data%} are the Dataframe API and the Catalyst. Spark SQL intends to provide relational processing over native RDDs and on several external data sources, through a programmer friendly API, high performance through DBMS techniques, support semi-structured data and external databases, support for advanced analytical processing like machine learning algorithms and graph processing.
 
