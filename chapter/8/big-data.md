@@ -280,7 +280,7 @@ RDDs are immutable and hence a straggler (slow node) can be replaced with a back
 - `Debugging and profiling` : There is no availability of debugging tools and developers find it hard to realize if a computation is happening more on a single machine or if the data-structure they used were inefficient.
 
 ### 1.2 Querying: declarative interfaces
-MapReduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like equi-joins and theta-joins [http://www.ccs.neu.edu/home/mirek/papers/2011-SIGMOD-ParallelJoins.pdf] which could be highly complex depending on the data, require programmers to implement by hand. Hence, map reduce lacks many such high level abstractions  requiring programmers to be well versed with several of the design patterns like map-side joins, reduce-side equi-join etc. Also, java based code ( like in Hadoop framework) in map-reduce can sometimes become repetitive when the programmer wants to implement most common operations like projection, filtering etc. A simple word count program as shown in Figure X, can span up to 200 lines.
+MapReduce takes care of all the processing over a cluster, failure and recovery, data partitioning etc. However, the framework suffers from rigidity with respect to its one-input data format (key/value pair) and two-stage data flow. Several important patterns like equi-joins and theta-joins [http://www.ccs.neu.edu/home/mirek/papers/2011-SIGMOD-ParallelJoins.pdf] which could be highly complex depending on the data, require programmers to implement by hand. Hence, map reduce lacks many such high level abstractions  requiring programmers to be well versed with several of the design patterns like map-side joins, reduce-side equi-join etc. Also, java based code ( like in Hadoop framework) in map-reduce can sometimes become repetitive when the programmer wants to implement most common operations like projection, filtering etc. A simple word count program as shown in Figure X, can span up to 63 lines.
 
 *Why SQL over map reduce ?*
 
@@ -416,6 +416,20 @@ Winding up - we can compare SQL vs Dataframe vs Dataset as below :
   <img src="./sql-vs-dataframes-vs-datasets.png" alt="SQL vs Dataframe vs Dataset" />
 </figure>
 *Figure from the website :* https://databricks.com/blog/2016/07/14/a-tale-of-three-apache-spark-apis-rdds-dataframes-and-datasets.html
+
+
+*Word count example in SparkSQL*
+
+```
+val ds = sqlContext.read.text("input_file").as[String]
+val result = ds
+  .flatMap(_.split(" "))              
+  .filter(_ != "")                    
+  .toDF()                             
+  .groupBy($"value")                 
+  .agg(count("*") as "count")
+  .orderBy($"count" desc)   
+```
 
 ### 1.3 Large-scale Parallelism on Graphs
 Map Reduce doesn’t scale easily and is highly inefficient for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms requires programmer to explicitly handle the intermediate results (writing to disks). Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
