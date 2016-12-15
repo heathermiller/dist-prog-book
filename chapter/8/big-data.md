@@ -558,7 +558,17 @@ The Hive execution model composes of the below important components (and as show
 
 *Figure to depict the transformation flow during optimization, from:* {%cite thusoo2010hive --file big-data %}
 
- Some of the important opimization techniques are :
+- Execution Engine : Execution Engine finally executes the tasks in order of their dependencies. A MapReduce task first serializes its part of the plan into a plan.xml file. This file is then added to the job cache and mappers and reducers are spawned to execute relevant sections of the operator DAG. The final results are stored to a temporary location and then moved to the final destination (in the case of say INSERT INTO query).
+
+<figure class="main-container">
+  <img src="./Hive-architecture.png" alt="Hive architecture" />
+</figure>
+*Hive architecture diagram*
+
+Summarizing the flow - the query is first submitted via CLI/web UI/any other interface. The query undergoes all the compiler phases as explained above to form an optimized DAG of MapReduce and hdfs tasks which the execution engine executes in its correct order using Hadoop.
+
+
+Some of the important opimization techniques in Hive are :
 
   - Column Pruning - Consider only the required columns needed in the query processing for projection.
   - Predicate Pushdown - Filter the rows as early as possible by pushing down the predicates. Its important that unnecessary records are filtered first and transformations are applied on only the needed ones.
@@ -569,15 +579,6 @@ The Hive execution model composes of the below important components (and as show
   - Similar to combiners in Map reduce, hash based partial aggregations in the mappers can be performed reduce the data that is sent by the mappers to the reducers. This helps in reducing the amount of time spent in sorting and merging the resulting data.
 
 
-Execution Engine : Execution Engine finally executes the tasks in order of their dependencies. A MapReduce task first serializes its part of the plan into a plan.xml file. This file is then added to the job cache and mappers and reducers are spawned to execute relevant sections of the operator DAG. The final results are stored to a temporary location and then moved to the final destination (in the case of say INSERT INTO query).
-
-
-<figure class="main-container">
-  <img src="./Hive-architecture.png" alt="Hive architecture" />
-</figure>
-*Hive architecture diagram*
-
-Summarizing the flow - the query is first submitted via CLI/web UI/any other interface. The query undergoes all the compiler phases as explained above to form an optimized DAG of MapReduce and hdfs tasks which the execution engine executes in its correct order using Hadoop.
 
 ### 2.4 SparkSQL execution model
 
