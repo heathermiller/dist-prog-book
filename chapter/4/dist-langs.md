@@ -412,11 +412,27 @@ Finally, some systems are implemented as libraries (e.g. Linda, MapReduce).
 In such cases, the underlying language is powerfull enough to support desired operations.
 The library is used to ease programmer burden and supply domain-specific syntax.
 
-### granularity
+The pros and cons of different implementation stategies is discussed further under *DSL's as Libraries*.
 
-    * logic, state
-        * course (batch)
-        * fine (actors)
+### Granularity
+
+The granularity of logic and state is another major characteristic of these systems.
+Generally, the actor and DSM models can be considered fine grain while the dataflow model is course grain.
+
+The actor and DSM models can be considered fine grain because they can be used to define the logic and states of individual workers.
+Under the DSM model, an application may be composed of many separately compiled programs.
+Each of these programs captures a portion of the logic, communication being done through shared memory regions.
+Under the actor model, actors or objects may be used to wrap separate logic.
+These units of logic communicate through RPC or message-passing.
+The benefit to using the actor or DSM model is the ability to wrap unique, cohesive logic in modules.
+Unfortunately, this means that the application or library developer is responsible for handling problems such as scaling and process location.
+
+The dataflow model can be considered course grain because the logic of every worker is defined by a single module.
+A program is written as a single set of logic that transforms a dataset.
+Workers proceed by receiving a partition of the data and the program, and executing the transformation.
+Crucially, each worker operates under the same logic.
+
+To borrow an idea from traditional parallel programming, the actor/DSM model implements a *multiple instruction multiple data* (MIMD) architecture, whereas the dataflow model implements a *single instruction multiple data* (SIMD) architecture.
 
 ### Level of Abstraction
 
