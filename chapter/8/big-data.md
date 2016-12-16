@@ -588,7 +588,7 @@ The Hive execution model {% cite thusoo2010hive --file big-data%} composes of th
 </figure>
 
 
-The query is first submitted via CLI/the web UI/any other interface. The query undergoes all the compiler phases as explained above to form an optimized DAG of MapReduce and his tasks which the execution engine executes in its correct order using Hadoop.
+The query is first submitted via CLI/the web UI/any other interface. The query undergoes all the compiler phases as explained above to form an optimized DAG of MapReduce and its tasks which the execution engine executes in its correct order using Hadoop.
 
 
 Some of the important optimization techniques in Hive are:
@@ -606,7 +606,7 @@ Some of the important optimization techniques in Hive are:
 
 ### 2.4 SparkSQL execution model
 
-SparkSQL execution model leverages Catalyst framework for optimizing the SQL before submitting it to the Spark Core engine for scheduling the job.
+SparkSQL {% cite armbrust2015spark --file big-data%} execution model leverages Catalyst framework for optimizing the SQL before submitting it to the Spark Core engine for scheduling the job.
 A Catalyst is a query optimizer. Query optimizers for map reduce frameworks can greatly improve performance of the queries developers write and also significantly reduce the development time. A good query optimizer should be able to optimize user queries, extensible for user to provide information about the data and even dynamically include developer defined specific rules.
 
 Catalyst leverages the Scala’s functional language features like pattern matching and runtime meta programming to allow developers to concisely specify complex relational optimizations.
@@ -619,13 +619,13 @@ Hence, in Spark SQL, transformation of user queries happens in four phases :
 <figure class="main-container">
   <img src="./sparksql-data-flow.jpg" alt="SparkSQL optimization plan Overview" />
 </figure>
-*Figure from : {%cite zaharia2010spark --file big-data %}*
+*Figure from : {% cite armbrust2015spark --file big-data%}*
+
 ***Analyzing a logical plan to resolve references :*** In the analysis phase a relation either from the abstract syntax  tree (AST) returned by the SQL parser or from a DataFrame is analyzed to create a logical plan out of it, which is still unresolved (the columns referred may not exist or may be of wrong datatype). The logical plan is resolved using using the Catalyst’s Catalog object(tracks the table from all data sources) by mapping the named attributes to the input provided, looking up the relations by name from catalog, by propagating and coercing types through expressions.
 
 ***Logical plan optimization :*** In this phase, several of the rules like constant folding, predicate push down, projection pruning, null propagation, boolean expression simplification are applied on the logical plan.
 
 ***Physical planning :*** In this phase, Spark generates multiples physical plans out of the input logical plan and chooses the plan based on a cost model. The physical planner also performs rule-based physical optimizations, such as pipelining projections or filters into one Spark map operation. In addition, it can push operations from the logical plan into data sources that support predicate or projection pushdown.
-
 
 ***Code Generation :*** The final phase generates the Java byte code that should run on each machine.Catalyst transforms the Tree which is an expression in SQL to an AST for Scala code to evaluate, compile and run the generated code. A special scala feature namely quasiquotes aid in the construction of abstract syntax tree(AST).
 
