@@ -513,7 +513,7 @@ The GraphX RDG structure implements a vertex-cut representation of a graph using
 
 - `EdgeTable(pid, src, dst, data)`: Stores adjacency structure and edge data.
 -  `VertexDataTable(id, data)`: Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
-- `VertexMap(id, pid)`: Maps from vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
+- `VertexMap(id, pid)`: Maps vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
 
 
 
