@@ -34,7 +34,7 @@ A straightforward approach to implementing a new language is to start from scrat
 Another option is to use another language as a starting point and modify that language’s implementation for your own purposes. Think of it as forking a compiler and/or runtime and then making your own modifications. An advantage of this approach is the savings in implementation effort. If the computation models coincide then the language designer only has to implement the communication model and fault-tolerance strategy. Another plus is that users of the existing language may be more likely to consider trying or adopting the new language since it is only a step away from what they already know. A downside for maintaining any fork is keeping up to date with upstream changes.
 
 ### Library
-The final approach to consider is similar to extending a language, but this time doing so only by writing code in that language to create new abstractions implementing a language model. This strategy offers similar savings in implementation effort to extending a language (perhaps moreso). But a major benefit is that is significantly easier for users to use and adopt; the only new concepts they must learn are the specifics of the programming model, as opposed to other concerns such as syntax.
+The final approach to consider is similar to extending a language, but this time doing so only by writing code in that language to create new abstractions implementing a language model. This strategy offers similar savings in implementation effort to extending a language (perhaps more so). But a major benefit is that is significantly easier for users to use and adopt; the only new concepts they must learn are the specifics of the programming model, as opposed to other concerns such as syntax.
 
 ## Roadmap
 Language designers have explored a broad spectrum of designs for distributed programming models.
@@ -77,7 +77,7 @@ create more structured communication patterns. Both CloudHaskell and
 Akka, the successor to Scala Actors, provide *typed
   channels* between actors. For example, the type
 checker will reject a program where an actor expecting to receive
-numbers is instead sent a string. Anecodatally, typed actors in Akka are not commonly used. This might suggest that errors due to incorrect message types are not that serious of a concern for users.
+numbers is instead sent a string. Anecdotally, typed actors in Akka are not commonly used. This might suggest that errors due to incorrect message types are not that serious of a concern for users.
 
 One disadvantage of this approach of implementing the simple actor model of Erlang is that Erlang also provides an extensive support platform for creating and deploying distributed systems. Even after the Erlang model has been implemented in Scheme, it is a long road to feature-parity.
 
@@ -156,9 +156,9 @@ See Chapter 4 for a more extensive overview of the languages using an object-bas
 
 ### Batch Processing
 Another common extension is in the domain of batch processing
-large-scale data. MapReduce (and correspondingly Hadoop) is the landmark example of a programming model for distributed batch processing. Essentially, batch processing systems present a restricted programming model. For example, MapReduce programs must fit into the rigid model of two-step produce then aggregrate. A restricted model alllows the system to make more guarantees, such as for fault tolerance. Subsequently language designers have sought to increase the expressiveness of the programming models and to boost performance. Chapter 8 covers batch processing languages in more detail.
+large-scale data. MapReduce (and correspondingly Hadoop) is the landmark example of a programming model for distributed batch processing. Essentially, batch processing systems present a restricted programming model. For example, MapReduce programs must fit into the rigid model of two-step produce then aggregate. A restricted model alllows the system to make more guarantees, such as for fault tolerance. Subsequently language designers have sought to increase the expressiveness of the programming models and to boost performance. Chapter 8 covers batch processing languages in more detail.
 
-MBrace {% cite MBrace --file langs-extended-for-dist %} is an extension to the F# programming language for writing compuations for clusters. MBrace provides a *monadic* interface (point to something about monads here) which allows for building cluster jobs out of smaller jobs while still exploiting available parallelism. MBrace is a framework that features its own runtime for provisioning, scheduling, and monitoring nodes in a cluster.
+MBrace {% cite MBrace --file langs-extended-for-dist %} is an extension to the F# programming language for writing computations for clusters. MBrace provides a *monadic* interface (point to something about monads here) which allows for building cluster jobs out of smaller jobs while still exploiting available parallelism. MBrace is a framework that features its own runtime for provisioning, scheduling, and monitoring nodes in a cluster.
 
 Batch processing systems offer an interesting take on how to handle
 fault tolerance. The common approach taken is to use a central
@@ -221,7 +221,7 @@ and operations such that they are in correspondence with the forms and semantics
 A theme in the literature is presenting an idea as a language and
 implementing it as a library or extension to an existing language.
 Doing so allows the authors to analyze a minimal presentation of their
-idea, but enjoy the benefits of the library/extension appraoch. Both Linda and Lasp take this approach, for example.
+idea, but enjoy the benefits of the library/extension approach. Both Linda and Lasp take this approach, for example.
 
 Language models benefit from implementations {% cite Redex --file langs-extended-for-dist %}. The
 reasons to implement a new distributed language model on top of
@@ -245,11 +245,11 @@ existing work are abundant:
 
 These reasons form the foundation of an argument in favor of general-purpose programming languages that allow for the creation of rich abstractions. Such a language can be adapted for different models of computation. (Although, most general-purpose languages have a fixed computation model such as functional or object-oriented). When models are implemented as libraries in a common language, users can mix-and-match different models to get exactly the right behavior where it is needed by the application.
 
-One can argue that one reason the Linda model failed to catch on in iis that the primary implementations were extensions to C and Fortran. While general-purpose, C and Fortran suffer a paucity of options for creating abstractions.
+One can argue that one reason the Linda model failed to catch on in is that the primary implementations were extensions to C and Fortran. While general-purpose, C and Fortran suffer a paucity of options for creating abstractions.
 
 That being said, there are advantages to clean slate languages. A fresh start grants the designer full control over every part of the language. For some areas, such as novel type systems, this is almost a necessity. However, we have seen designs like ML5 that elegantly integrate with a base language's type system. Finally, a language designer can put their new ideas center stage, easily allowing people to see what is new and cool; in time those ideas may spread to other languages.
 
-Erik Meijer points out in {% cite salesman --file langs-extended-for-dist %} that programmers don't jump to new techonologies to access new features. Rather, in time those features make their way to old technologies. Examples abound, such as the arrival of λ in Java and of course all of Meijer's work in C# and Visual Basic.
+Erik Meijer points out in {% cite salesman --file langs-extended-for-dist %} that programmers don't jump to new technologies to access new features. Rather, in time those features make their way to old technologies. Examples abound, such as the arrival of λ in Java and of course all of Meijer's work in C# and Visual Basic.
 
 Ideas from distributed programming models have influenced more than just the languages used in practice. Microservices {% cite microservices --file langs-extended-for-dist %} are a popular technique for architecting large systems as a collection of manageable components. Microservices apply the lessons learned from organizing programs
 around actors to organizing the entire system. Actor programming uses
