@@ -12,12 +12,12 @@ Outline
 1. Programming Models
   - 1.1 Data parallelism: MapReduce, FluemJava, Dryad, Spark
   - 1.2 Querying: Hive/HiveQL, Pig Latin, SparkSQL
-  - 1.3 Large-scale parallelism on Graph: BSP, GraphX
+  - 1.3 Large-scale parallelism on Graph: BSP, GraphX  
 2. Execution Models
   - 2.1 MapReduce execution model
   - 2.2 Spark execution model
   - 2.3 Hive execution model
-  - 2.4 SparkSQL execution model
+  - 2.4 SparkSQL execution model   
 3. Big Data Ecosystem:
   - 3.1 Hadoop ecosystem
   - 3.2 Spark ecosystem
