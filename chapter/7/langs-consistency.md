@@ -33,7 +33,7 @@ This is an important moment. By thinking about our specific problem, we've reali
 Turns out there's a company out there called Amazon.com - and they've been having a similar problem. Amazon sells things on their website too, and users can add and remove things from their cart. Amazon has lots of servers spread out across the world. They also have quite a few customers. They need to ensure their customers' carts are robust: if/when servers fail or lose communication with one another, a "best-effort" should be made to display the customer's cart. Amazon acknowledges that failure, latency, or HyperLoop-traveling users can cause inconsistent cart data, depending on which server you ask. How does Amazon resolve these issues?
 
 ## Dynamo
-Amazon built DynamoDB, which is basically a big distributed hash table. In other words, it's a hashmap spread across multiple computers. A user's cart would be stored as a value under the user's username as the key. When a user adds a new item to her cart, the cart data is replicated across a multiple machines within the network. If the client changes locations and performs another write or a few machines fail and later recover, it's possible for different machines to have different opinions about the state of a given user's cart.
+Amazon built DynamoDB {% cite Dynamo --file langs-consistency %}, which is basically a big distributed hash table. In other words, it's a hashmap spread across multiple computers. A user's cart would be stored as a value under the user's username as the key. When a user adds a new item to her cart, the cart data is replicated across a multiple machines within the network. If the client changes locations and performs another write or a few machines fail and later recover, it's possible for different machines to have different opinions about the state of a given user's cart.
 
 Dynamo has a rather unique way of dealing with these types of conflicts. Since Dynamo always wants to be available for both writes and reads (add/removes, viewing/checkouts, resp) it must have a way of combining inconsistent data. Dynamo chooses to perform this resolution at read time. When a client performs a `get()` on the user's cart, Dynamo will take the multiple conflicting carts and push it all up to the application! Huh? I thought Dynamo resolves this for the programmer!? Actually, Dynamo is a generic key-value store. It detects inconsistencies in the data - but once it does, it simply tells the application (in this case the application is the shopping cart code) that there are some conflicts. The application (shopping cart, in this case) is free to resolve these inconsistencies as it pleases.
 
@@ -239,7 +239,7 @@ But where should these guarantees live? In the above Javascript example, the gua
 
 Databases such as PostgreSQL have issues like this as well, though they handle them quite differently, masters may need to ensure that write have occurred on every slave before the database becomes available for reading. A database system like this has pushed consistency concerns to the IO-level, completely out of the users control. They are enforced on system reads and system writes. This approach gives programmers no flexibility: as demonstrated with our shopping cart example, there's no need for these type of restrictions; we can tolerate inconsistency in order to maintain availability.
 
-Why not push the consistency guarantees in between the IO-level and the application-level? Is there any reason why you as the programmer couldn't program using tools that facilitate these types of monotonic programs? If you're familiar with formal systems -- why not construct a formal system (programming language / library) in which every theorem (program) is formally guarunteed to be monotonic? If it's *impossible* to express a non-monotonic program, the programmer needn't worry about maintaining a direct mapping between their code and their mental model.
+Why not push the consistency guarantees in between the IO-level and the application-level? {% cite ConsistencyWithoutBorders --file langs-consistency %} { Is there any reason why you as the programmer couldn't program using tools that facilitate these types of monotonic programs? If you're familiar with formal systems -- why not construct a formal system (programming language / library) in which every theorem (program) is formally guarunteed to be monotonic? If it's *impossible* to express a non-monotonic program, the programmer needn't worry about maintaining a direct mapping between their code and their mental model.
 
 Wouldn't it be great if tools like this existed?
 
@@ -335,7 +335,7 @@ end
 
 After this block/callback is called, the system automatically flushes & routes messages as described above.
 
-Bloom, a research language developed at UC Berkeley, has a similar programming model to the one described above. Execution is broken up into a series of "timesteps". In the above example, one "timestemp" would be the execution of one `on_five_second_interval` function. Bloom, like the theoretical system above, automatically flushes and populates the buffers before and after each timestep. In the above example, 5 seconds was an arbitrary amount of time. In Bloom, timesteps (rounds of evaluation) are logical tools - they may happen every second, 10 seconds, etc. Logically, it shouldn't affect how your program executes. In reality, Bud's timesteps correspond to evaluation iterations. Your code is evaluated, executed, and the process repeats.
+Bloom {% cite Bloom --file langs-consistency %}, a research language developed at UC Berkeley, has a similar programming model to the one described above. Execution is broken up into a series of "timesteps". In the above example, one "timestemp" would be the execution of one `on_five_second_interval` function. Bloom, like the theoretical system above, automatically flushes and populates the buffers before and after each timestep. In the above example, 5 seconds was an arbitrary amount of time. In Bloom, timesteps (rounds of evaluation) are logical tools - they may happen every second, 10 seconds, etc. Logically, it shouldn't affect how your program executes. In reality, Bud's timesteps correspond to evaluation iterations. Your code is evaluated, executed, and the process repeats.
 
 So what does a Bloom program look like? Bloom's prototypal implementation is called Bud and is implemented in Ruby. There are two main parts to a Bloom program:
 1. User defined buffers: rather than the four buffers I gave you above, Bloom users can define their own buffers. There are different types of buffers depending on the behavior you desire:
@@ -497,7 +497,7 @@ These semilattices (and many more!) can be used to program other types of distri
 
 Unfortunately, Bloom does not provide support for other CRDTs. In fact, you cannot define your own datatypes at all. You are bound by the collections described.
 
-Bloom<sup>L</sup>, an addendum to the Bloom language, provides support for these types of data structures. Specifically, Bloom<sup>L</sup> does two things:
+Bloom<sup>L</sup>{% cite BloomL --file langs-consistency %}, an addendum to the Bloom language, provides support for these types of data structures. Specifically, Bloom<sup>L</sup> does two things:
 * Adds a number of built-in lattices such as `lmax` (`integerMax`), `lmin`, etc.
 * Adds an "interface" for lattices: the user can define lattices that "implement" this interface.
 
@@ -539,8 +539,16 @@ Currently Bloom exists as a Ruby prototype: Bud. Hypothetically speaking, there'
 All in all, Bloom provides programmers with a new model for writing distributed programs. If the user desires monotonic data structures and operations, it's relatively easy to use and reason about. Rather than blindly destroying the properties of your system, you will know exactly when you introduce a possible point of order into your program. It's up to you to decide whether or not you need to introduce coordination.
 
 ### Lasp
-[ Introduce Lasp ]
-Instead of trying to do it all (and accepting danger), it tries to be embeddable (and truly restrictive.)
+Lasp {% cite Lasp --file langs-consistency %}is an Erlang library which aims to facilitate this type of "disorderly" programming.
+
+Lasp provides access to myriad of CRDTs. It does not allows user-defined CRDTs (lattices), but the programmer can have confidence that the CRDTs obey the lattice formal requirements.
+
+A Simple Lasp Program is defined as either a:
+* Single CRDT instance
+* A "Lasp process" with *m* inputs, all Simple Lasp Programs, and one output CRDT instance
+
+For those of you unfamiliar with Erlang: a *process* can be thought of as an independent piece of code executing asynchronously. Processes can receive messages and send messages to other processes. Process can also subscribe (I think) to other processes' messages.
+
 
 ### Utilization
 
@@ -548,7 +556,7 @@ Lasp is an Erlang library, and for good reason. Remember the initial discussion 
 
 PostgreSQL enforce very specific and restrictive IO-level consistency, and this was too much for our needs. But it's certainly not too much for *all* needs. There certainly are applications (take banking, for example) in which consistency is extremely important. You certainly are not allowed to double spend your money depending on how fast you can travel to a different server, so eventual consistency is not enough! All servers must coordinate.
 
-There's a key principle here, however: distributed programming models that attempt to accomdate everything end up doing nothing well; models that accept compromises and formalize certain properties end up being extremely useful for a subset of domains.
+There's a key principle here, however: distributed programming models that attempt to accomodate everything end up doing nothing well; models that accept compromises and formalize certain properties end up being extremely useful for a subset of domains.
 
 Most programming languages are "general-use". This works for single machine programming. As the world moves toward distributed programming, programmers must adopt models / languages / libraries that are built for their domain. It forces serious thought on the part of the programmer: what *exactly* am I trying to achieve, and what am I willing to sacrifice?
 
