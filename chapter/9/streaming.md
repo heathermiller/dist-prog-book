@@ -99,7 +99,7 @@ builder.setBolt("exclaim2", new ExclamationBolt(), 5)
   <img src="{{ site.baseurl }}/chapter/9/Topology.jpg" alt="The topology created by the example code" />
 </figure>
 
-Here is how we can build a simple topology which contains a spout and two bolts, where the spout emits words and each bolt would append exclamation '!' to its input. The nodes are arranged as shown in the graph. For example if the bolt emits the tuple ["Hi"], if it travels from exclaim1 to exclaim2, then exclaim2 would emit the words ["Hi!!"].
+Here is how we can build a simple topology which contains a spout and two bolts, where the spout emits words and each bolt would append exclamation '!' to its input. The exclaim1 bolt is connected to the spout while the exclaim2 bolt is connected to both the spout and exclaim2 specified by 'Grouping', and we will show what 'shuffle grouping' means in the next paragraph. The nodes are arranged as shown in the graph. For example if the bolt emits the tuple ["Hi"], if it travels from exclaim1 to exclaim2, then exclaim2 would emit the word ["Hi!!"].
 
 Since all the works are distributed, any given vertex is not necessarily running on a single machine, instead they can be spread on different workers in the cluster. The parameter 10, 3 and 5 in the example code actually specify the amount of parallelism the user wants. *Storm* also provides different *stream grouping* schemes for users to determine which vertex should be consuming the output stream from a given vertex. The grouping method can be shuffle grouping as shown in our example, where the tuples from the output stream will be randomly distributed across this bolt's consumers in a way such that each consumer is guaranteed to get an equal number of tuples. Another example would be fields grouping, where the tuples of the stream is partitioned by the fields specified in the grouping, the tuples with the same value in that field would always go to the same bolt.
 
@@ -164,7 +164,7 @@ Unlike other systems where users have to specify how to aggregate the records wh
 The *timely dataflow*, like topology described in *Storm*, contains stateful vertices that represent the nodes that would compute on the stream. Each graph contains input vertices and output vertices, which are responsible for consuming or producing messages from external sources. Every message being exchanged is associated with a timestamp called epoch, the external source is responsible of providing such epoch and notifying the input vertices the end of each epoch. The notion of epoch is powerful since it allows the producer to arbitrarily determine the start and the end of each batch by assigning different epoch number on tuples. For example, the way to divide the epochs can be time as in *spark streaming*, or it can be the start of some event.
 
 <figure class="fullwidth">
-  <img src="{{ site.baseurl }}/chapter/9/TimelyD.jpg" alt="A simple Timely Dataflow" />
+  <img src="{{ site.baseurl }}/chapter/9/Naiad.jpg" alt="A simple Timely Dataflow" />
 </figure>
 
 
@@ -178,7 +178,7 @@ counts.Remove(time);
 
 ```
 
-In this example, A, B ,C are different processing vertices and each of them has one message being processed. For A, the number 1 in its message (e1,1) indicates that this messages is generated in epoch 1, thus a counter would increase by 1 if it counts the number of messages in epoch 1. Such a counter can be implemented as shown, where *counts* would count the number of distinct messages received. Once the vertex get notified that one epoch has ended, the OnNotify function would be triggered, and a count for each distinct input record would then be sent to output.
+In this example, A, B are different processing vertices and each of them has one message being processed, and the OnNotify function is running on node B. For A, the number 2 in its message (e2,2) indicates that this messages is generated in epoch 2, thus a on B counter would increase by 1 if it is counting the number of messages in epoch 1. In the example code, *counts* would be the counter that counts the number of distinct messages received (i.e., in other functions). Once B gets notified that one epoch has ended, the OnNotify function would be triggered, and a count for each distinct input record would then be sent to output.
 
 
 *Naiad* can also execute cyclic dataflow program. If there is a loop in the data flow graph, for example where the message need to be processed with the processed result of previous message, then each message circulating in the group has another counter associated with it along with the epoch. This loop counter would increase by one whenever it complete a loop once. Thus the epoch and counter can work together for the system to track progress of the whole computation.
@@ -211,7 +211,7 @@ PCollection<KV<String, Integer>> output = input
 
 ```
 
-The above example code shows how to apply a trigger that repeatedly fires on one-minute period. The *accumulating* mode is also specified so that the *Sum* can be refined overtime.
+The above example code shows how to apply a trigger that repeatedly fires on one-minute period, where PCollection can be viewed as the data stream abstraction in *Google Dataflow*. The *accumulating* mode is also specified so that the *Sum* can be refined overtime.
 
 *Google Dataflow* also relies on MillWheel{% cite akidau2013millwheel --file streaming %} as the underlying execution engine to achieve exactly-once-delivery of the tuples. MillWheel is a framework for building low-latency data-processing applications used at Google. It achieves exactly-once-delivery by first checking the incoming record and discard duplicated ones, then pending the productions (i.e., produce records to any stream) until the senders are acknowledges, only then the pending productions are sent.
 
