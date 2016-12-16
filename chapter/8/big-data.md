@@ -4,7 +4,23 @@ title:  "Large Scale Parallel Data Processing"
 by: "Jingjing and Abhilash"
 ---
 ## Introduction
-The growth of Internet has generated the so-called big data(terabytes or petabytes). It is not possible to fit them into a single machine or process them with one single program. Often the computation has to be done fast enough to provide practical services. A common approach taken by tech giants like Google, Yahoo, Facebook is to process big data across clusters of commodity machines. Many of the computations are conceptually straightforward, and Google proposed the MapReduce model to abstract the logic and proved to be simple and powerful. From then on, the idea inspired lots of other programming models. In this chapter, we will present how programming models evolve over time, why their execution engines are designed in certain ways and underlying ecosystem that supports each developing thread.
+The growth of Internet has generated the so-called big data(terabytes or petabytes). It is not possible to fit them into a single machine or process them with one single program. Often the computation has to be done fast enough to provide practical services. A common approach taken by tech giants like Google, Yahoo, Facebook is to process big data across clusters of commodity machines. Many of the computations are conceptually straightforward, and Google proposed the MapReduce framework, which separates the programming logic and underlying execution details(data distribution, fault tolerance and scheduling). The model has been proved to be simple and powerful, and from then on, the idea inspired many other programming models.
+
+This chapter covers the original idea of MapReduce framework, split into two sections: programming model and execution model. For each section, we first introduce the original design for MapReduce and its limitations. Then we present follow-up models(e.g. FlumeJava) to either work around these limitations or other models (e.g. Dryad, Spark) that take alternative designs to circumvent inabilities of MapReduce. We also review declarative programming interfaces(Pig, Hive, SparkSQL) built on top of MapReduce frameworks to provide programming efficiency and optimization benefits. In the last section, we briefly outline the ecosystem of Hadoop and Spark. 
+
+Outline
+1. Programming Models
+- 1.1 Data parallelism: MapReduce, FluemJava, Dryad, Spark
+- 1.2 Querying: Hive/HiveQL, Pig Latin, SparkSQL
+- 1.3 Large-scale parallelism on Graph: BSP, GraphX
+2. Execution Models
+- 2.1 MapReduce execution model
+- 2.2 Spark execution model
+- 2.3 Hive execution model
+- 2.4 SparkSQL execution model
+3. Big Data Ecosystem:
+- 3.1 Hadoop ecosystem
+- 3.2 Spark ecosystem
 
 ## 1 Programming Models
 ### 1.1 Data parallelism
@@ -16,7 +32,7 @@ The growth of Internet has generated the so-called big data(terabytes or petabyt
 
 **MapReduce** {% cite dean2008mapreduce  --file big-data %} is a programming model proposed by Google to initially satisfy their demand of large-scale indexing for web search service. It provides a simple user program interface: *map* and *reduce* functions and automatically handles the parallelization and distribution.
 
-The MapReduce model is simple and powerful and quickly became very popular among developers. However, when developers start writing real-world applications, they often end up chaining together MapReduce stages. The pipeline of MapReduce forces programmers to write additional coordinating codes, i.e. the development style goes backward from simple logic computation abstraction to lower-level coordination management. In map reduce, programmers need to reason about data representation on disk or in storage services such as a database. Besides, developers need to clearly understand the map reduce execution model to do manual optimizations[ref]. **FlumeJava** {%cite chambers2010flumejava --file big-data%} library intends to provide support for developing data-parallel pipelines by abstracting away the complexity involved in data representation and implicitly handling the optimizations. It defers the evaluation, constructs an execution plan from parallel collections, optimizes the plan, and then executes underlying MR primitives. The optimized execution is comparable with hand-optimized pipelines, so there's no need to write raw MR programs directly.
+The MapReduce model is simple and powerful and quickly became very popular among developers. However, when developers start writing real-world applications, they often end up chaining together MapReduce stages. The pipeline of MapReduce forces programmers to write additional coordinating codes, i.e. the development style goes backward from simple logic computation abstraction to lower-level coordination management. In map reduce, programmers need to reason about data representation on disk or in storage services such as a database. Besides, developers need to clearly understand the map reduce execution model to do manual optimizations. **FlumeJava** {%cite chambers2010flumejava --file big-data%} library intends to provide support for developing data-parallel pipelines by abstracting away the complexity involved in data representation and implicitly handling the optimizations. It defers the evaluation, constructs an execution plan from parallel collections, optimizes the plan, and then executes underlying MR primitives. The optimized execution is comparable with hand-optimized pipelines, so there's no need to write raw MR programs directly.
 
 An alternative approach to data parallelism is to construct complex, multi-step directed acyclic graphs (DAGs) of work from the user instructions and execute those DAGs all at once. This eliminates the costly synchronization required by MapReduce and makes applications much easier to build and reason about. Dryad, a Microsoft Research project used internally at Microsoft was one such project which leveraged this model of computation.
 
@@ -451,7 +467,7 @@ Winding up - we can compare SQL vs Dataframe vs Dataset as below :
 
 
 
-### 1.3 Large-scale Parallelism on Graphs
+### 1.3 Large-scale parallelism on graphs
 Map Reduce doesn’t scale easily for iterative / graph algorithms like page rank and machine learning algorithms. Iterative algorithms require a programmer to explicitly handle the intermediate results (writing to disks) resulting in a lot of boilerplate code. Hence, every iteration requires reading the input file and writing the results to the disk resulting in high disk I/O which is a performance bottleneck for any batch processing system.
 
 Also, graph algorithms require an exchange of messages between vertices. In a case of PageRank, every vertex requires the contributions from all its adjacent nodes to calculate its score. Map reduce currently lacks this model of message passing which makes it complex to reason about graph algorithms. One model that is commonly employed for implementing distributed graph processing is the graph parallel model.
@@ -637,7 +653,7 @@ Hence, in Spark SQL, transformation of user queries happens in four phases :
 
 
 ## 3. Big Data Ecosystem
-*Hadoop Ecosystem*  
+*3.1 Hadoop ecosystem*  
 
 Apache Hadoop is an open-sourced framework that supports distributed processing of large dataset. It involves dozens of projects, all of which are listed [here](https://hadoopecosystemtable.github.io/). In this section, it is also important to understand the key players in the system, namely two parts: the Hadoop Distributed File System (HDFS) and the open-sourced implementation of MapReduce model - Hadoop.
 
@@ -652,7 +668,7 @@ HDFS forms the data management layer, which is a distributed file system designe
 To satisfy different needs, big companies like Facebook and Yahoo developed additional tools. Facebook's Hive, as a warehouse system, can provide more declarative programming interface and translate to Hadoop jobs. Yahoo's Pig platform is an ad-hoc analysis tool that can structurize HDFS objects and support operations like grouping, joining and filtering.   
 
 
-***Spark Ecosystem***
+*3.2 Spark ecosystem*
 
 Apache Spark's rich-ecosystem constitutes of third party libraries like Mesos{%cite hindman2011mesos --file big-data%}/Yarn{%cite vavilapalli2013apache --file big-data%} and several major components that have been already discussed in this article like Spark-core, SparkSQL, GraphX.
 In this section we will discuss the remaining yet very important components/libraries which help Spark deliver high performance.
