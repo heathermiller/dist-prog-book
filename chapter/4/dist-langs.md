@@ -13,7 +13,7 @@ In this section, we present an overview of these three problems and their impact
 
 ### Partial Failure
 
-In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. (// TODO cite "a note on dist. comp.)
+In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system {% cite waldo1997 --file dist-langs.bib %}
 If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge.
 For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about the failed process' state, etc.
 
@@ -113,13 +113,13 @@ Here, we want to minimize latency.
 Unfortunately, this may come at the cost of consistency.
 We are forced to either (1) honor latency and send a possibly inconsistent result, or (2) honor consistency and wait for the distributed system to synchronize before replying.
 
-The CAP theorem { // TODO cite CAP } formalizes this notion.
+The CAP theorem {% cite gilbert2002brewer --file dist-langs.bib %} formalizes this notion.
 CAP stands for Consistency, Availability, and tolerance to Partitioning.
 The theorem states that a distributed system may only have two of these three properties.
 
-Since its introduction, experience suggests this theorem is not as rigid as was originally proposed { // TODO cite 12 years later }.
+Since its introduction, experience suggests this theorem is not as rigid as was originally proposed {% cite brewer2012cap --file dist-langs.bib %}.
 In practice, for example, rareness of network partitioning makes satisfaction of all three easier.
-As well, advancements in consistency models, such as CRDT's { // TODO cite CRDT's paper }, make balancing consistency and availability flexible to the requirements of the system.
+As well, advancements in consistency models, such as CRDT's {% cite shapiro2011conflict --file dist-langs.bib %}, make balancing consistency and availability flexible to the requirements of the system.
 
 ## Three Major Approaches to Distributed Languages
 
@@ -356,8 +356,9 @@ Then, the map function transforms lines of the text file into key-value pairs in
 These intermediate pairs are aggregated by key: the word.
 In the reduce phase, the list of 1's is summed to compute a wordcount for each word.
 
-![Alt text] (./MR.png "MapReduce Workflow")
-(http://www.milanor.net/blog/an-example-of-mapreduce-with-rmr2/)
+<figure class="fullwidth">
+  <img src="{{ site.baseurl }}/chapter/4/MR.png" alt="A Sample MapReduce Program" />
+</figure>
 
 #### Discretized Streams (2012)
 
@@ -381,9 +382,9 @@ Upstream backup is slow as the system must wait for a backup node to recompute e
 #### GraphX (2013)
 
 Many real world problems are expressed using graphs.
-GraphX is a system built on top of the Spark MapReduce framework { // TODO cite RDD } that exposes traditional graph operations while internally representing a graph as a collection of RDD's.
+GraphX is a system built on top of the Spark MapReduce framework {% cite zaharia2012resilient --file dist-langs.bib %} that exposes traditional graph operations while internally representing a graph as a collection of RDD's.
 GraphX exposes these operations through what it calls a Resilient Distributed Graph (RDG).
-Internally, an RDG is a collection of RDD's that define a vertex split of a graph { // TODO CITE powergraph }.
+Internally, an RDG is a collection of RDD's that define a vertex split of a graph {% cite gonzalez2012powergraph --file dist-langs.bib %}.
 Because they are built on top of RDD's, RDG's inherit immutability.
 When a transformation is performed, a new graph is created.
 In this way, fault tolerance in GraphX can be executed the same way as it is in vanilla Spark; when a fault happens, the series of computations is remembered and re-executed.
@@ -460,11 +461,11 @@ Other systems, especially those based on dataflow, fully abstract the problem of
 
 The definition of a domain-specific language is a hot topic and there have been several attempts to concretely define what exactly *it* is.
 
-Here is the definition as given by { // TODO cite when and how }:
+Here is the definition as given by {% cite Mernik2005 --file dist-langs.bib %}:
 
 > Domain-specific languages are languages tailored to a specific application domain.
 
-Another definition is offered (and commonly cited) by { // TODO cite annotated bib }:
+Another definition is offered (and commonly cited) by {% cite Deursen2000 --file dist-langs.bib %}:
 
 > A domain-specific language is a programming language or executable specification language that offers, through appropriate notations and abstractions, expressive power focused on, and usually restricted to, a particular problem domain.
 
