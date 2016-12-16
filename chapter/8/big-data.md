@@ -615,9 +615,9 @@ The Hive execution model {% cite thusoo2010hive --file big-data%} composes of th
 
  - Optimization: Optimization forms the core of any declarative interface. In the case of Hive, optimization happens through chains of transformation of DAG. A transformation could include even a user defined optimization and it applies an action on the DAG only if a rule is satisfied. Every node in the DAG implements a special interface called as Node interface which makes it easy for the manipulation of the operator DAG using other interfaces like GraphWalker, Dispatcher, Rule, and Processor. Hence, by transformation, we mean walking through a DAG and for every Node we encounter we perform a Rule satisfiability check. If a Rule is satisfied, a corresponding processor is invoked. A Dispatcher maintains a list of Rule to Processor mappings.
 
-                    <figure class="main-container" align="center">
-                      <img src="./Hive-transformation.png" alt="Hive transformation" />
-                    </figure>
+      <figure class="main-container" align="center">
+      <img src="./Hive-transformation.png" alt="Hive transformation" />
+      </figure>
 
 *Figure to depict the transformation flow during optimization, from:* {%cite thusoo2010hive --file big-data %}
 
