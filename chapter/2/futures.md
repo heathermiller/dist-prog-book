@@ -25,7 +25,6 @@ In the world of asynchronous communications many terminologies were defined to h
 
 A “Promise” object represents a value that may not be available yet. A Promise is an object that represents a task with two possible outcomes, success or failure and holds callbacks that fire when one outcome or the other has occurred.
 
-
 The rise of promises and futures as a topic of relevance can be traced parallel to the rise of asynchronous or distributed systems. This seems natural, since futures represent a value available in Future which fits in very naturally with the latency which is inherent to these heterogeneous systems. The recent adoption of NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises.
 
 
@@ -47,7 +46,7 @@ E is an object-oriented programming language for secure distributed computing, c
 Among the modern languages, Python was perhaps the first to come up with something on the lines of E’s promises with the Twisted library. Coming out in 2002, it had a concept of Deferred objects, which were used to receive the result of an operation not yet completed. They were just like normal objects and could be passed along, but they didn’t have a value. They supported a callback which would get called once the result of the operation was complete.  
 
 
-Promises and javascript have an interesting history. In 2007 inspired by Python’s twisted, dojo came up with it’s own implementation of of dojo.Deferred. This inspired Kris Zyp to then come up with the CommonJS Promises/A spec in 2009. Ryan Dahl introduced the world to NodeJS in the same year. In it’s early versions, Node used promises for the non-blocking API. When NodeJS moved away from promises to its now familiar error-first callback API, it left a void for a promises API.  Q.js was an implementation of Promises/A spec by Kris Kowal around this time. FuturesJS library by AJ ONeal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 first introduced Promises to its wider and ever-growing audience. The API for JQuery was subtly different than the Promises/A spec. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces. A+ promises aimed to solve this problem. From this point on, leading from widespread adoption of A+ spec, promises was finally made a part of ECMAScript® 2015 Language Specification. Still, a lack of backward compatibility and additional features provided means that libraries like BlueBird and Q.js still have a place in the javascript ecosystem.
+Promises and javascript have an interesting history. In 2007 inspired by Python’s twisted, dojo came up with it’s own implementation of of dojo.Deferred. This inspired Kris Zyp to then come up with the CommonJS Promises/A spec in 2009. Ryan Dahl introduced the world to NodeJS in the same year. In it’s early versions, Node used promises for the non-blocking API. When NodeJS moved away from promises to its now familiar error-first callback API (the first argument for the callback should be an error object), it left a void for a promises API.  Q.js was an implementation of Promises/A spec by Kris Kowal around this time. FuturesJS library by AJ ONeal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 first introduced Promises to its wider and ever-growing audience. The API for JQuery was subtly different than the Promises/A spec. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces which added to the already infamous callback hell. A+ promises aimed to solve this problem. From this point on, leading from widespread adoption of A+ spec, promises was finally made a part of ECMAScript® 2015 Language Specification. Still, a lack of backward compatibility and additional features provided means that libraries like BlueBird and Q.js still have a place in the javascript ecosystem.
 
 
 # Different Definitions
@@ -60,21 +59,23 @@ In some languages however, there is a subtle difference between what is a Future
 “A ‘Promise’ is a pretty much the same except that you can write to it as well.”
 
 
-In other words, you can read from both Futures and Promises, but you can only write to Promises. You can get the Future associated with a Promise by calling the future method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you Promise something, you are responsible for keeping it, but if someone else makes a Promise to you, you expect them to honor it in Future.
+In other words, a future is a read-only window to a value written into a promise. You can get the Future associated with a Promise by calling the future method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you Promise something, you are responsible for keeping it, but if someone else makes a Promise to you, you expect them to honor it in Future.
 
 
 More technically, in Scala, “SIP-14 – Futures and Promises” defines them as follows:
 A future is as a placeholder object for a result that does not yet exist.
 A promise is a writable, single-assignment container, which completes a future. Promises can complete the future with a result to indicate success, or with an exception to indicate failure.
 
+An important difference between Scala and Java (6) futures is that Scala futures were asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced the Futures as the asynchronous construct which are more familiar in the distributed computing world.
 
-C# also makes the distinction between futures and promises. In C#, futures are implemented as Task<T> and in fact in earlier versions of the Task Parallel Library futures were implemented with a class Future<T> which later became Task<T>. The result of the future is available in the readonly property Task<T>.Result which returns T
+
+In Java 8, the Future<T> interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
 
 
 In Javascript world, Jquery introduces a notion of Deferred objects which are used to represent a unit of work which is not yet finished. Deferred object contains a promise object which represent the result of that unit of work. Promises are values returned by a function, while the deferred object can be canceled by its caller.
 
 
-In Java 8, the Future<T> interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
+C# also makes the distinction between futures and promises. In C#, futures are implemented as Task<T> and in fact in earlier versions of the Task Parallel Library futures were implemented with a class Future<T> which later became Task<T>. The result of the future is available in the readonly property Task<T>.Result which returns T. Tasks are asynchronous in C#.
 
 # Semantics of Execution
 
@@ -82,7 +83,7 @@ Over the years promises and futures have been implemented in different programmi
 
 ## Thread Pools
 
-Doing things in parallel is usually an effective way of doing things in modern systems. The systems are getting more and more capable of running more than one things at once, and the latency associated with doing things in a distributed environment is not going away anytime soon. Inside the JVM, threads are a basic unit of concurrency. Threads are independent, heap-sharing execution contexts. Threads are generally considered to be lightweight when compared to a process, and can share both code and data. The cost of context switching between threads is cheap. But, even if we claim that threads are lightweight, the cost of creation and destruction of threads in a long running threads can add up to something significant. A practical way is address this problem is to manage a pool of worker threads.
+Thread pools are a group of ready, idle threads which can be given work. They help with the overhead of worker creation, which can add up in a long running process. The actual implementation may vary everywhere, but what differentiates thread pools is the number of threads it uses. It can either be fixed, or dynamic. Advantage of having a fixed thread pool is that it degrades gracefully : the amount of load a system can handle is fixed, and using fixed thread pool, we can effectively limit the amount of load it is put under. Granularity of a thread pool is the number of threads it instantiates.
 
 
 In Java executor is an object which executes the Runnable tasks. Executors provides a way of abstracting out how the details of how a task will actually run. These details, like selecting a thread to run the task, how the task is scheduled are managed by the object implementing the Executor interface. Threads are an example of a Runnable in java. Executors can be used instead of creating a thread explicitly.
@@ -94,11 +95,9 @@ Similar to Executor, there is an ExecutionContext as part of scala.concurrent. T
 ExecutionContext.global is an execution context backed by a ForkJoinPool. ForkJoin is a thread pool implementation designed to take advantage of a multiprocessor environment. What makes fork join unique is that it implements a type of work-stealing algorithm : idle threads pick up work from still busy threads. ForkJoinPool manages a small number of threads, usually limited to the number of processor cores available. It is possible to increase the number of threads, if all of the available threads are busy and wrapped inside a blocking call, although such situation would typically come with a bad system design. ForkJoin framework work to avoid pool-induced deadlock and minimize the amount of time spent switching between the threads.
 
 
-Futures are generally a good way to reason about asynchronous code. A good way to call a webservice, add a block of code to do something when you get back the response, and move on without waiting for the response. They’re also a good framework to reason about concurrency as they can be executed in parallel, waited on, are composable, immutable once written and most importantly, are non blocking. in Scala, futures (and promises) are based on ExecutionContext.
+Futures are generally a good way to reason about asynchronous code. A good way to call a web service, add a block of code to do something when you get back the response, and move on without waiting for the response. They’re also a good framework to reason about concurrency as they can be executed in parallel, waited on, are composable, immutable once written and most importantly, are non blocking. in Scala, futures (and promises) are based on ExecutionContext.
 
-
-In Scala, futures are created using an ExecutionContext. This gives the users flexibility to implement their own ExecutionContext if they need a specific behavior, like blocking futures. The default ForkJoin pool works well in most of the scenarios. Futures in scala are placeholders for a yet unknown value. A promise then can be thought of as a way to provide that value. A promise p completes the future returned by p.future.
-
+Using ExecutionContext gives users flexibility to implement their own ExecutionContext if they need a specific behavior, like blocking futures. The default ForkJoin pool works well in most of the scenarios.
 
 Scala futures api expects an ExecutionContext to be passed along. This parameter is implicit, and usually ExecutionContext.global. An example :
 
@@ -210,7 +209,8 @@ getData(0).then(getData)
 
 > **Programs must be written for people to read, and only incidentally for machines to execute.** - *Harold Abelson and Gerald Jay Sussman*
 
-Promises are an abstraction which make working with async operations in javascript much more fun. Moving on from a continuation passing style, where you specify what needs to be done once the action is done, the callee simply returns a Promise object. This inverts the chain of responsibility, as now the caller is responsible for handling the result of the promise when it is settled.
+
+Promises are an abstraction which make working with async operations in javascript much more fun. Callbacks lead to inversion of control, which is difficult to reason about at scale. Moving on from a continuation passing style, where you specify what needs to be done once the action is done, the callee simply returns a Promise object. This inverts the chain of responsibility, as now the caller is responsible for handling the result of the promise when it is settled.
 
 The ES2015 spec specifies that “promises must not fire their resolution/rejection function on the same turn of the event loop that they are created on.” This is an important property because it ensures deterministic order of execution. Also, once a promise is fulfilled or failed, the promise’s value MUST not be changed. This ensures that a promise cannot be resolved more than once.
 
@@ -274,6 +274,7 @@ We define Implicit promises as ones where we don’t have to manually trigger th
 The idea for explicit futures were introduced in the Baker and Hewitt paper. They’re a little trickier to implement, and require some support from the underlying language, and as such they aren’t that common. The Baker and Hewitt paper talked about using futures as placeholders for arguments to a function, which get evaluated in parallel, but when they’re needed. Also, lazy futures in Alice ML have a similar explicit invocation mechanism, the first thread touching a future triggers its evaluation.
 
 Implicit futures were introduced originally by Friedman and Wise in a paper in 1978. The ideas presented in that paper inspired the design of promises in MultiLisp. Futures are also implicit in Scala and Javascript, where they’re supported as libraries on top of the core languages. Implicit futures can be implemented this way as they don’t require support from language itself. Alice ML’s concurrent futures are also an example of implicit invocation.
+
 
 # Promise Pipelining
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
@@ -427,7 +428,7 @@ Folly is a library by Facebook for asynchronous C++ inspired by the implementati
 
 
 ## NodeJS Fiber
-Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for nodejs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
+Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for NodeJs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
 
 ## References
 
