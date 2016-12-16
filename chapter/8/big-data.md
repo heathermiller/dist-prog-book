@@ -250,7 +250,7 @@ RDDs are immutable and can only be created through coarse-grained transformation
 
 
 
-***Challenges in Spark***
+***Challenges in Spark*** {% cite armbrust2015scaling --file big-data%}
 
 - *Functional API semantics* The `GroupByKey` operator is costly in terms of performance. In that it returns a distributed collection of (key, list of value) pairs to a single machine and then an aggregation on individual keys is performed on the same machine resulting in computation overhead. Spark does provide `reduceByKey` operator which does a partial aggregation on individual worker nodes before returning the distributed collection. However, developers who are not aware of such a functionality can unintentionally choose `groupByKey`. The reason being functional programmers (Scala developers) tend to think more declaratively about the problem and only see the end result of the `groupByKey` operator. They may not be necessarily trained on how `groupByKey` is implemented atop of the cluster. Therefore, to use Spark, unlike functional programming languages, one needs to understand how the underlying cluster is going to execute the code. The burden of saving performance is then left to the programmer, who is expected to understand the underlying execution model of Spark, and to know when to use `reduceByKey` over `groupByKey`.
 
@@ -324,7 +324,7 @@ public class WordCount
 
 *Why SQL over MapReduce ?*
 
-SQL already provides several operations like join, group by, sort which can be mapped to the above mentioned MapReduce operations. Also, by leveraging SQL like interface, it becomes easy for non MapReduce experts/non-programmers like data scientists to focus more on logic than hand coding complex operations {% cite scaling-spark-in-real-world --file big-data%}. Such an high level declarative language can easily express their task while leaving all of the execution optimization details to the backend engine.
+SQL already provides several operations like join, group by, sort which can be mapped to the above mentioned MapReduce operations. Also, by leveraging SQL like interface, it becomes easy for non MapReduce experts/non-programmers like data scientists to focus more on logic than hand coding complex operations {% cite armbrust2015scaling --file big-data%}. Such an high level declarative language can easily express their task while leaving all of the execution optimization details to the backend engine.
 SQL also lessens the amount of code (code examples can be seen in individual model’s section) and significantly reduces the development time.
 Most importantly, as you will read further in this section, frameworks like Pig, Hive, Spark SQL take advantage of these declarative queries by realizing them as a DAG upon which the compiler can apply transformation if an optimization rule is satisfied. Spark which does provide high level abstraction unlike MapReduce, lacks this very optimization resulting in several human errors as discussed in the Spark’s data-parallel section.
 
@@ -510,7 +510,7 @@ The graph-parallel abstractions allow users to succinctly describe graph algorit
 
 ***How does GraphX improve over the existing graph-parallel and data flow models?***
 
-Similar to the data flow model, GraphX moves away from the vertex-centric view and adopts transformations on graphs yielding a new graph. The RDGs in GraphX provides a set of elegant and expressive computational primitives to support graph transformations as well as enable many graph-parallel systems like Pregel, PowerGraph to be easily expressed with minimal lines of code changes to Spark. GraphX simplifies the process of graph ETL and analysis through new operations like filter, view etc. It minimizes communication and storage overhead across the system by adopting vertex-cuts for effective partitioning.
+Similar to the data flow model, GraphX moves away from the vertex-centric view and adopts transformations on graphs yielding a new graph. The RDGs in GraphX provides a set of elegant and expressive computational primitives to support graph transformations as well as enable many graph-parallel systems like Pregel {%cite malewicz2010pregel --file big-data%}, PowerGraph {%cite gonzalez2012powergraph --file big-data%} to be easily expressed with minimal lines of code changes to Spark. GraphX simplifies the process of graph ETL and analysis through new operations like filter, view etc. It minimizes communication and storage overhead across the system by adopting vertex-cuts for effective partitioning.
 
 **GraphX**
 
@@ -701,7 +701,7 @@ In this section we will discuss the remaining yet very important components/libr
 
 *Spark Streaming - A Spark component for streaming workloads*
 
-Spark achieves fault tolerant, high throughput data streaming workloads in real-time through a light weight Spark Streaming API. Spark streaming is based on Discretized Streams model{% cite d-streams --file big-data%}. Spark Streaming processes streaming workloads as a series of small batch workloads by leveraging the fast scheduling capacity of Apache Spark Core and fault tolerance capabilities of a RDD. A RDD in here represents each batch of streaming data and transformations are applied on the same. Data source in Spark Streaming could be from many a live streams like Twitter, Apache Kafka, Akka Actors, IoT Sensors, Amazon Kinesis, Apache Flume, etc. Spark streaming also enables unification of batch and streaming workloads and hence developers can use the same code for both batch and streaming workloads. It supports the integration of streaming data with historical data.
+Spark achieves fault tolerant, high throughput data streaming workloads in real-time through a light weight Spark Streaming API. Spark streaming is based on Discretized Streams model{% cite zaharia2012discretized --file big-data%}. Spark Streaming processes streaming workloads as a series of small batch workloads by leveraging the fast scheduling capacity of Apache Spark Core and fault tolerance capabilities of a RDD. A RDD in here represents each batch of streaming data and transformations are applied on the same. Data source in Spark Streaming could be from many a live streams like Twitter, Apache Kafka {% cite kreps2011kafka --file big-data%}, Akka Actors (http://doc.akka.io/docs/akka/2.4.1/scala/actors.html), IoT Sensors, Apache Flume(https://flume.apache.org/FlumeUserGuide.html), etc. Spark streaming also enables unification of batch and streaming workloads and hence developers can use the same code for both batch and streaming workloads. It supports the integration of streaming data with historical data.
 
 
 *Apache Mesos*
