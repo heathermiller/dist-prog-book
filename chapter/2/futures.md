@@ -275,6 +275,22 @@ The idea for explicit futures were introduced in the Baker and Hewitt paper. The
 
 Implicit futures were introduced originally by Friedman and Wise in a paper in 1978. The ideas presented in that paper inspired the design of promises in MultiLisp. Futures are also implicit in Scala and Javascript, where they’re supported as libraries on top of the core languages. Implicit futures can be implemented this way as they don’t require support from language itself. Alice ML’s concurrent futures are also an example of implicit invocation.
 
+In Scala, although the futures are implicit, Promises can be used to have an explicit-like behavior. This is useful in a scenario where we need to stack up some computations and then resolve the Promise.
+
+An Example :
+
+```scala
+
+val p = Promise[Foo]()
+
+p.future.map( ... ).filter( ... ) foreach println
+
+p.complete(new Foo)
+
+```
+
+Here, we create a Promise, and complete it later. In between we stack up a set of computations which get executed once the promise is completed.
+
 
 # Promise Pipelining
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
