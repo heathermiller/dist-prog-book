@@ -482,10 +482,10 @@ GraphX API provides the below primitives for graph transformations :
 - `triplets RDD[EdgeTriplet[VD, ED]]` -returns collection of form ((i, j), (PV(i), PE(i, j), PV(j))). The operator essentially requires a multiway join between vertex and edge RDD. This operation is optimized by shifting the site of joins to edges, using the routing table, so that only vertex data needs to be shuffled.
 - `leftJoin` - given a collection of vertices and a graph, returns a new graph which incorporates the property of matching vertices from the given collection into the given graph without changing the underlying graph structure.
 - `subgraph` - Applies predicates to return a subgraph of the original graph by filtering all the vertices and edges that don’t satisfy the vertices and edges predicates respectively.
-- `mrTriplets (MapReduce triplet)` - logical composition of triplets followed by map and reduceByKey. It is the building block of graph-parallel algorithms.
+- `aggregateMessages (previously mapReduceTriplets) ` - It takes two functions, sendMsg and mergeMsg. The sendMsg function maps over every edge triplet in the graph while the mergeMsg acts like a reduce function in map reduce to aggregate those messages at their destination vertex. This is an important function which supports analytics tasks and iterative graph algorithms (eg., PageRank, Shortest Path) where individual vertices rely upon the aggregated properties of their neighbors.
 - `filterVertices(f: (Id, V)=>Bool): Graph[V, E]` - Filter the vertices by applying the predicate function f to return a new graph post filtering.
 - `filterEdges(f: Edge[V, E]=>Bool): Graph[V, E]` - Filter the edges by applying the predicate function f to return a new graph post filtering.
-- `aggregateNeighbors(mapFunc: (Id, Edge[V, E]) => A, reduceFunc: (A, A) => A): RDD[(Id, A)]` : NEED TO WRITE
+
 
 ***Why partitioning is important in graph computation systems ?***
 Graph-parallel computation requires every vertex or edge to be processed in the context of its neighborhood. Each transformation depends on the result of distributed joins between vertices and edges. This means that graph computation systems rely on graph partitioning (edge-cuts in most of the systems) and efficient storage to minimize communication and storage overhead and ensure balanced computation.
