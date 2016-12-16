@@ -464,7 +464,7 @@ BSP model is a message passing synchronous model where -
 
 The graph-parallel abstractions allow users to succinctly describe graph algorithms, and provide a runtime engine to execute these algorithms in a distributed nature. They simplify the design, implementation, and application of sophisticated graph algorithms to large-scale real-world problems. Each of these frameworks presents a different view of graph computation, tailored to an originating domain or family of graph algorithms. However, these frameworks fail to address the problems of data preprocessing and construction, favor snapshot recovery over fault tolerance and lack support from distributed data flow frameworks. The data-parallel systems are well suited to the task of graph construction and are highly scalable. However, suffer from the very problems mentioned before for which the graph-parallel systems came into existence. GraphX {%cite xin2013graphx --file big-data%} is a new computation system which builds upon the Spark’s Resilient Distributed Dataset (RDD) to form a new abstraction Resilient Distributed Graph (RDG) to represent records and their relations as vertices and edges respectively. RDG’s leverage the RDD’s fault tolerance mechanism and expressivity.
 
-How does GraphX improve over the existing graph-parallel and data flow models? 
+***How does GraphX improve over the existing graph-parallel and data flow models?***
 
 Similar to the data flow model, GraphX moves away from the vertex-centric view and adopts transformations on graphs yielding a new graph. The RDGs in GraphX provides a set of elegant and expressive computational primitives to support graph transformations as well as enable many graph-parallel systems like Pregel, PowerGraph to be easily expressed with minimal lines of code changes to Spark. GraphX simplifies the process of graph ETL and analysis through new operations like filter, view etc. It minimizes communication and storage overhead across the system by adopting vertex-cuts for effective partitioning.
 
@@ -498,21 +498,21 @@ Graph-parallel computation requires every vertex or edge to be processed in the 
 ***Why Edge-cuts are expensive ?***
 Edge-cuts for partitioning requires random assignment of vertices and edges across all the machines. Thus the communication and storage overhead is proportional to the number of edges cut, and this makes balancing the number of cuts a priority. For most real-world graphs, constructing an optimal edge-cut is cost prohibitive, and most systems use random edge-cuts which achieve appropriate work balance, but nearly worst-case communication overhead.
 
-<figure class="main-container">
-  <img src="./vertex-cut.png" alt="Vertex cuts" />
-</figure>
-
-*Figure from {%cite xin2013graphx --file big-data%}*
-
 ***Vertex-cuts - GraphX’s solution to effective partitioning*** : An alternative approach which does the opposite of edge-cut — evenly assign edges to machines, but allow vertices to span multiple machines. The communication and storage overhead of a vertex-cut is directly proportional to the sum of the number of machines spanned by each vertex. Therefore, we can reduce communication overhead and ensure balanced computation by evenly assigning edges to machines in a way that minimizes the number of machines spanned by each vertex.
 
 ***Implementation of Vertex-cut***
+
+<figure class="main-container">
+  <img src="./vertex-cut-datastructure.png" alt="vertex-cut-implementation" />
+</figure>
+
+*Figure from the website : https://spark.apache.org/docs/2.0.0-preview/graphx-programming-guide.html*
 
 The GraphX RDG structure implements a vertex-cut representation of a graph using three unordered horizontally partitioned RDD tables. These three tables are as follows:
 
 - `EdgeTable(pid, src, dst, data)`: Stores adjacency structure and edge data.
 -  `VertexDataTable(id, data)`: Stores vertex data. Contains states associated with vertices that are changing in the course of graph computation
-- `VertexMap(id, pid)`: Maps vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
+- `VertexMap/Routing Table(id, pid)`: Maps vertex ids to the partitions that contain their adjacent edges. Remains static as long as the graph structure doesn’t change.
 
 
 
