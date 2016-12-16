@@ -119,13 +119,13 @@ These classes represent a concrete object-oriented abstraction to organize actor
 
 ## Akka
 
-Akka is an actively developed project built out of the work on [Scala Actors](#scala-actors) in Scala to provide the actor model of programming as a framework to Java and Scala. It is an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors. There are a few notable changes from Scala Actors that make Akka worth mentioning, especially as it is being actively developed while Scala Actors is not. Some important changes are detailed in _On the Integration of the Actor Model in Mainstream Technologies: The Scala Perspective_. {% cite Haller:2012:IAM:2414639.2414641 --file message-passing %}
+Akka is an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors. Akka was developed out of initial efforts of [Scala Actors](#scala-actors) to bring the actor model to the JVM. There are a few notable changes from Scala Actors that make Akka worth mentioning, especially as it is being actively developed while Scala Actors is not. Some important changes are detailed in _On the Integration of the Actor Model in Mainstream Technologies: The Scala Perspective_. {% cite Haller:2012:IAM:2414639.2414641 --file message-passing %}
 
 Akka provides a programming interface with both Java and Scala bindings for actors which looks similar to Scala Actors, but has different semantics in how it processes messages. Akka's `receive` operation defines a global message handler which doesn't block on the receipt of no matching messages, and is instead only triggered when a matching message can be processed. It also will not leave a message in an actor's mailbox if there is no matching pattern to handle the message. The message will simply be discarded and an event will be published to the system. Akka's interface also provides stronger encapsulation to avoid exposing direct references to actors. Akka actors have a limited `ActorRef` interface which only provides methods to send or forward messages to its actor, additionally checks are done to ensure that no direct reference to an instance of an `Actor` subclass is accessible after an actor is created. To some degree this fixes problems in Scala Actors where public methods could be called on actors, breaking many of the guarantees programmers expect from message-passing. This system is not perfect, but in most cases it limits the programmer to simply sending messages to an actor using a limited interface.
 
 The Akka runtime also provides performance advantages over Scala Actors. The runtime uses a single continuation closure for many or all messages an actor processes, and provides methods to change this global continuation. This can be implemented more efficiently on the JVM, as opposed to Scala Actors' continuation model which uses control-flow exceptions which cause additional overhead. Additionally, nonblocking message insert and task schedule operations are used for extra performance.
 
-Akka is the production-ready result of the classic actor model lineage. It is actively developed and actually used to build scalable systems. More detail about this is given when describing the production usage of actors.
+Akka is the production-ready result of the classic actor model lineage. It is actively developed and actually used to build scalable systems. The production usage of Akka is detailed later in this chapter. Akka has been successful enough that it has been ported to other languages/runtimes. There is an [Akka.NET](http://getakka.net/) project which brings the Akka programming model to .NET and Mono using C# and F#. Akka has even been ported to JavaScript as [Akka.js](https://github.com/unicredit/akka.js/), built on top of [Scala.js](http://www.scala-js.org/).
 
 # Process-based actors
 
@@ -133,7 +133,7 @@ The process-based actor model is essentially an actor modeled as a process that 
 
 Process-based actors are defined as a computation which runs from start to completion, rather than the classic actor model, which defines an actor almost as a state machine of behaviors and the logic to transition between those. Similar state-machine like behavior transitions are possible through recursion with process-based actors, but programming them feels fundamentally different than using the previously described `become` statement.
 
-These actors use a `receive` primitive to specify messages that an actor can receive during a given state/point in time. `receive` statements have some notion of defining acceptable messages, usually based on patterns, conditionals or types. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values.
+These actors use a `receive` primitive to specify messages that an actor can receive during a given state/point in time. `receive` statements have some notion of defining acceptable messages, usually based on patterns, conditionals or types. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. The semantics of this `receive` are different than the receive previously described in the section about Akka. Akka's `receive` is explicitly only triggered when an actor gets a message it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values.
 
 An example of these core concepts of a process with a defined lifecycle and use of the `receive` statement to match messages is a simple counter process written in Erlang. {% cite Armstrong:2010:ERL:1810891.1810910 --file message-passing %}
 
@@ -195,7 +195,7 @@ It is worth mentioning that Erlang achieves all of this through the Erlang Virtu
 
 Scala Actors is an example of taking and enhancing the Erlang model while bringing it to a new platform. Scala Actors brings lightweight Erlang-style message-passing concurrency to the JVM and integrates it with the heavyweight thread/process concurrency models. This is stated well in the original paper about Scala Actors as "an impedance mismatch between message-passing concurrency and virtual machines such as the JVM." VMs usually map threads to heavyweight processes, but that a lightweight process abstraction reduces programmer burden and leads to more natural abstractions. The authors claim that “The user experience gained so far indicates that the library makes concurrent programming in a JVM-based system much more accessible than previous techniques.”
 
-The realization of this model depends on efficiently multiplexing actors to threads. This technique was originally developed in Scala actors, and later was adopted by Akka. This integration allows for Actors to invoke methods that block the underlying thread in a way that doesn't prevent actors from making process. This is important to consider in an event-driven system where handlers are executed on a thread pool, because the underlying event-handlers can't block threads without risking thread pool starvation. The end result here is that Scala Actors enabled a new lightweight concurrency primitive on the JVM, with enhancements over Erlang's model. The Erlang model was further enhanced with Scala's pattern-matching capabilities which enable more advanced pattern-matching on messages compared to Erlang's tuple value matching. Scala Actors are of the type `Any => Unit`, which means that they are essentially untyped. They can receive literally any type and match on it with potential side effects. This behavior could be problematic and systems like Cloud Haskell and Akka aim to improve on it.
+The realization of this model depends on efficiently multiplexing actors to threads. This technique was originally developed in Scala actors, and later was adopted by Akka. This integration allows for Actors to invoke methods that block the underlying thread in a way that doesn't prevent actors from making process. This is important to consider in an event-driven system where handlers are executed on a thread pool, because the underlying event-handlers can't block threads without risking thread pool starvation. The end result here is that Scala Actors enabled a new lightweight concurrency primitive on the JVM, with enhancements over Erlang's model. The Erlang model was further enhanced with Scala's pattern-matching capabilities which enable more advanced pattern-matching on messages compared to Erlang's tuple value matching. Scala Actors are of the type `Any => Unit`, which means that they are essentially untyped. They can receive literally any type and match on it with potential side effects. This behavior could be problematic and systems like Cloud Haskell and Akka aim to improve on it. Akka especially directly draws on the work of Scala Actors, and has now become the standard actor framework for Scala programmers.
 
 ## Cloud Haskell
 
@@ -378,6 +378,33 @@ _On the Integration of the Actor Model into Mainstream Technologies_ by Philipp 
 * _Flexible remote actors_: Many applications can benefit from remote actors, which can communicate transparently over the network. Flexibility in deployment mechanisms is also very important.
 
 These attributes give us a good basis for analyzing whether an actor system can be successful in production. These are attributes that are necessary, but not sufficient for an actor system to be useful in production.
+
+## Failure handling
+
+One of the most important concepts and reasons people use actor systems in production is their support for failure handling and recovery. The root of this support is the previously mentioned ability for actors to supervise one another, and to have supervisors notified of failures. _Designing Reactive Systems: The Role of Actors in Distributed Architecture_ {% cite ReactiveSystems --file message-passing %} details four well-known recovery steps that a supervising actor may take when they are notified of a problem with one of their workers.
+
+* Ignore the error and let the worker resume processing
+* Restart the worker and reset their state
+* Stop the worker entirely
+* Escalate the problem to the supervisor's supervising actor
+
+Based on this scheme, all actors within a system will have a supervisor, which amounts to a large tree of supervision. At the top of the tree is the actor system itself, which may have a default recovery scheme like simply restarting the actor. An interesting note is that this frees up individual actors from handling their failures. The philosophy around failure shifts to "actors will fail" and that we need other explicit actors and methods for handling failure outside of the business logic of the individual actor.
+
+<figure class="main-container">
+  <img src="./supervision_tree.png" alt="An actor supervision hierarchy tree" />
+  <footer>An actor supervision hierarchy. {% cite ReactiveSystems --file message-passing %}</footer>
+</figure>
+
+Another approach that naturally falls out of supervision heirarchies, is that they can be distributed across machines (nodes) within a cluster of actors for fault tolerance.
+
+<figure class="main-container">
+  <img src="./sentinel_nodes.png" alt="Actor supervision across cluster nodes." />
+  <footer>Actor supervision across cluster nodes. {% cite ReactiveSystems --file message-passing %}</footer>
+</figure>
+
+Critical actors can be monitored across nodes, which means that failures can be detected across nodes within a cluster. This allows for other actors within the cluster to easily react to the entire state of the system, not just the state of their local machine. This is important for a number of problems that arise in distributed systems like load-balancing and data/request partitioning. This also allows naturally allows for some form of recovery from the other machines within a cluster, such as spinning up another node automatically or restarting the failed machine/node.
+
+Flexibility around failure handling is a key advantage of using actors in production systems. Supervision means that worker actors can focus on business logic, and failure-handling actors can focus on managing and recovering those actors. Actors can also be cluster-aware and have a view into the state of the entire distributed system.
 
 ## Actors as a framework
 
