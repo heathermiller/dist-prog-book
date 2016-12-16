@@ -135,6 +135,21 @@ Process-based actors are defined as a computation which runs from start to compl
 
 These actors use a `receive` primitive to specify messages that an actor can receive during a given state/point in time. `receive` statements have some notion of defining acceptable messages, usually based on patterns, conditionals or types. If a message is matched, corresponding code is evaluated, but otherwise the actor simply blocks until it gets a message that it knows how to handle. Depending on the language implementation `receive` might specify an explicit message type or perform some pattern matching on message values.
 
+An example of these core concepts of a process with a defined lifecycle and use of the `receive` statement to match messages is a simple counter process written in Erlang. {% cite Armstrong:2010:ERL:1810891.1810910 --file message-passing %}
+
+```
+counter(N) ->
+  receive
+    tick ->
+      counter(N+1);
+    {From, read} ->
+      From ! {self(), N},
+      counter(N)
+  end.
+```
+
+This demonstrates the use of `receive` to match on two different values of messages `tick`, which increments the counter, and `{From, read}` where `From` is a process identifier and `read` is a literal. In response to another process sending the message `tick` by doing something like `CounterId ! tick.` the process calls itself with an incremented value which demonstrates a similarity to the `become` statement, but using recursion and an argument value instead of a named behavior continuation and some state. If the counter receives a message of the form `{<processId>, read}` it will then send that process a message with the counter's processId and value, and call itself recursively with the same value.
+
 ## Erlang
 
 Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor. Erlang was the origin of the process-based actor model. The Ericsson company originally developed this model to program large highly-reliable fault-tolerant telecommunications switching systems. Erlang's development started in 1985, but its model of programming is still used today. The motivations of the Erlang model were around four key properties that were needed to program fault-tolerant operations:
@@ -156,6 +171,23 @@ Erlang also seeks to build failure into the programming model, as one of the cor
 * `link`: two-way notification of process failure/shutdown allowing for coordinated termination
 
 These primitives can be used to construct complex hierarchies of supervision that can be used to handle failure in isolation, rather than failures impacting your entire system. Supervision hierarchies are notably almost the only scheme for fault-tolerance that exists in the world of actors. Almost every actor system that is used to build distributed systems takes a similar approach, and it seems to work. Erlang's philosophies used to build a reliable fault-tolerant telephone exchange seem to be broadly applicable to the fault-tolerance problems of distributed systems.
+
+An example of a process `monitor` written in Erlang is given below. {% cite Armstrong:2010:ERL:1810891.1810910 --file message-passing %}
+
+```
+on_exit(Pid, F) ->
+  spawn(fun() -> monitor(Pid, F) end).
+
+monitor(Pid, F) ->
+  process_flag(trap_exit, true),
+  link(Pid),
+  receive
+    {‘EXIT’, Pid, Why} ->
+      F(Why)
+end.
+```
+
+This defines two processes: `on_exit` which simply spawns a `monitor` process to call a given function when a given process id exits, and `monitor` which uses `link` to receive a message when the given process id exists, and to call a function with the reason it exited. You could imagine chaining many of these `monitor` and `link` operations together to build processes to monitor one another for failure and perform recovery operations depending on the failure behavior.
 
 It is worth mentioning that Erlang achieves all of this through the Erlang Virtual Machine (BEAM), which runs as a single OS process and OS thread per core. These single OS processes then manage many lightweight Erlang processes. The Erlang VM implements all of the concurrency, monitoring, and garbage collection for Erlang processes within this VM, which almost acts like an operating system itself. This is unlike any other language or actor system described here.
 
@@ -202,26 +234,31 @@ E's reference-states define many of the isolation guarantees around computation 
 
 The difference in semantics between the two types of references means that only objects within the same vat are granted synchronous access to one another. The most an eventual reference can do is asynchronously send and queue a message for processing at some unspecified point in the future. This means that within the execution of a vat, a degree of temporal isolation can be defined between the objects and communications within the vat, and the communications to and from other vats.
 
-TODO: explain this code example in the context of the above diagram or come up with a new one?
+This code example ties into the previous diagrams, and demonstrates the two different types reference semantics. {% cite Miller:2005:CSP:1986262.1986274 --file message-passing %}
 
 ```
 def makeStatusHolder(var myStatus) {
   def myListeners := [].diverge()
+
   def statusHolder {
     to addListener(newListener) {
       myListeners.push(newListener)
     }
+
     to getStatus() { return myStatus }
+
     to setStatus(newStatus) {
       myStatus := newStatus
       for listener in myListeners {
-        listener.statusChanged(newStatus)
+        listener <- statusChanged(newStatus)
       }
     }
   }
   return statusHolder
 }
 ```
+
+This creates an object `statusHolder` with methods defined by `to` statements. A method invocation from another vat-local object like `statusHolder.setStatus(123)` causes a message to be synchronously delivered to this object. Other objects can register as event listeners by calling either `statusHolder.addListener()` or `statusHolder <- addListener()` to either synchronously or eventually register as listeners. They will be notified eventually when the value of the `statusHolder` changes. This is done via `<-` which is the eventual-send operator.
 
 The motivation for this referencing model comes from wanting to work at a finer-grained level of references than a traditional actor exposes. The simplest example is that you want to ensure that another actor in your system can read a value, but can't write to it. How do you do that within another actor model? You might imagine creating a read-only variant of an actor which doesn't expose a write message type, or proxies only `read` messages to another actor which supports both `read` and `write` operations. In E because you are handing out object references, you would simply only pass around references to a `read` method, and you don't have to worry about other actors in your system being able to write values. These finer-grained references make reasoning about state guarantees easier because you are no longer exposing references to an entire actor, but instead the granular capabilities of the actor.
 
@@ -273,7 +310,46 @@ Orleans takes the concept of actors whose lifecycle is dependent on messaging or
 
 Orleans uses a different notion of identity than other actor systems. In other systems an "actor" might refer to a behavior and instances of that actor might refer to identities that the actor represents like individual users. In Orleans, an actor represents that persistent identity, and the actual instantiations are in fact reconcilable copies of that identity.
 
-The programmer essentially assumes that a single entity is handling requests to an actor, but the Orleans runtime actually allows for multiple instantiations for scalability. These instantiations are invoked in response to an RPC-like call from the programmer which immediately returns an asynchronous promise. Multiple instances of an actor can be running and modifying the state of that actor at the same time. The immediate question here is how does that actually work? It doesn't intuitively seem like transparently accessing and changing multiple isolated copies of the same state should produce anything but problems when its time to do something with that state.
+The programmer essentially assumes that a single entity is handling requests to an actor, but the Orleans runtime actually allows for multiple instantiations for scalability. These instantiations are invoked in response to an RPC-like call from the programmer which immediately returns an asynchronous promise.
+
+In Orleans, declaring an actor just looks like making any other class which implements a specific interface. A simple example here is a `PlayerGrain` which can join games. All methods of an Orleans actor (grain) interface must return a `Task<T>`, as they are all asynchronous.
+
+```
+public interface IPlayerGrain : IGrainWithGuidKey
+{
+  Task<IGameGrain> GetCurrentGame();
+  Task JoinGame(IGameGrain game);
+}
+
+public class PlayerGrain : Grain, IPlayerGrain
+{
+  private IGameGrain currentGame
+
+  public Task<IGameGrain> GetCurrentGame()
+  {
+     return Task.FromResult(currentGame);
+  }
+
+  public Task JoinGame(IGameGrain game)
+  {
+     currentGame = game;
+     Console.WriteLine("Player {0} joined game {1}", this.GetPrimaryKey(), game.GetPrimaryKey());
+     return TaskDone.Done;
+  }
+}
+```
+
+Invoking a method on an actor is done like any other asynchronous call, using the `await` keyword in C#. This can be done from either a client or inside another actor (grain). In both cases the call looks almost exactly the same, the only different being clients use `GrainClient.GrainFactory` while actors can use `GrainFactory` directly.
+
+```
+IPlayerGrain player = GrainClient.GrainFactory.GetGrain<IPlayerGrain>(playerId);
+Task joinGameTask = player.JoinGame(currentGame);
+await joinGameTask;
+```
+
+Here a game client gets a reference to a specific player, and has that player join the current game. This code looks like any other asynchronous C# code a developer would be used to writing, but this is really an actor system where the runtime has abstracted away many of the details. The runtime handles all of the actor lifecycle in response to the requests clients and other actors within the system make, as well as persistence of state to long-term storage.
+
+Multiple instances of an actor can be running and modifying the state of that actor at the same time. The immediate question here is how does that actually work? It doesn't intuitively seem like transparently accessing and changing multiple isolated copies of the same state should produce anything but problems when its time to do something with that state.
 
 Orleans solves this problem by providing mechanisms to reconcile conflicting changes. If multiple instances of an actor modify persistent state, they need to be reconciled into a consistent state in some meaningful way. The default here is a last-write-wins strategy, but Orleans also exposes the ability to create fine-grained reconciliation policies, as well as a number of common reconcilable data structures. If an application requires a certain reconciliation algorithm, the developer can implement it using Orleans. These reconciliation mechanisms are built upon Orleans' concept of transactions.
 
