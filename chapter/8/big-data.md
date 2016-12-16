@@ -6,21 +6,21 @@ by: "Jingjing and Abhilash"
 ## Introduction
 The growth of Internet has generated the so-called big data(terabytes or petabytes). It is not possible to fit them into a single machine or process them with one single program. Often the computation has to be done fast enough to provide practical services. A common approach taken by tech giants like Google, Yahoo, Facebook is to process big data across clusters of commodity machines. Many of the computations are conceptually straightforward, and Google proposed the MapReduce framework, which separates the programming logic and underlying execution details(data distribution, fault tolerance and scheduling). The model has been proved to be simple and powerful, and from then on, the idea inspired many other programming models.
 
-This chapter covers the original idea of MapReduce framework, split into two sections: programming model and execution model. For each section, we first introduce the original design for MapReduce and its limitations. Then we present follow-up models(e.g. FlumeJava) to either work around these limitations or other models (e.g. Dryad, Spark) that take alternative designs to circumvent inabilities of MapReduce. We also review declarative programming interfaces(Pig, Hive, SparkSQL) built on top of MapReduce frameworks to provide programming efficiency and optimization benefits. In the last section, we briefly outline the ecosystem of Hadoop and Spark. 
+This chapter covers the original idea of MapReduce framework, split into two sections: programming model and execution model. For each section, we first introduce the original design for MapReduce and its limitations. Then we present follow-up models(e.g. FlumeJava) to either work around these limitations or other models (e.g. Dryad, Spark) that take alternative designs to circumvent inabilities of MapReduce. We also review declarative programming interfaces(Pig, Hive, SparkSQL) built on top of MapReduce frameworks to provide programming efficiency and optimization benefits. In the last section, we briefly outline the ecosystem of Hadoop and Spark.
 
-Outline
+Outline  
 1. Programming Models
-- 1.1 Data parallelism: MapReduce, FluemJava, Dryad, Spark
-- 1.2 Querying: Hive/HiveQL, Pig Latin, SparkSQL
-- 1.3 Large-scale parallelism on Graph: BSP, GraphX
+  - 1.1 Data parallelism: MapReduce, FluemJava, Dryad, Spark
+  - 1.2 Querying: Hive/HiveQL, Pig Latin, SparkSQL
+  - 1.3 Large-scale parallelism on Graph: BSP, GraphX
 2. Execution Models
-- 2.1 MapReduce execution model
-- 2.2 Spark execution model
-- 2.3 Hive execution model
-- 2.4 SparkSQL execution model
+  - 2.1 MapReduce execution model
+  - 2.2 Spark execution model
+  - 2.3 Hive execution model
+  - 2.4 SparkSQL execution model
 3. Big Data Ecosystem:
-- 3.1 Hadoop ecosystem
-- 3.2 Spark ecosystem
+  - 3.1 Hadoop ecosystem
+  - 3.2 Spark ecosystem
 
 ## 1 Programming Models
 ### 1.1 Data parallelism
