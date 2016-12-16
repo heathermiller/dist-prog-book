@@ -10,7 +10,7 @@ This chapter covers the original idea of MapReduce framework, split into two sec
 
 Outline  
 1. Programming Models
-  - 1.1 Data parallelism: MapReduce, FluemJava, Dryad, Spark
+  - 1.1 Data parallelism: MapReduce, FlumeJava, Dryad, Spark
   - 1.2 Querying: Hive/HiveQL, Pig Latin, SparkSQL
   - 1.3 Large-scale parallelism on Graph: BSP, GraphX  
 2. Execution Models
@@ -35,7 +35,7 @@ Outline
 The MapReduce model is simple and powerful and quickly becomes very popular among developers. However, when developers start writing real-world applications, they often end up writing many boilerplates and chaining together these stages. Moreover, The pipeline of MapReduce forces them to write additional coordinating codes, i.e., the development style goes backward from simple logic computation abstraction to lower-level coordination management. As we will discuss in *section 2 execution model*, MapReduce writes all data into disk after each stage, which causes severe delays. Programmers need to do manual optimizations for targeted performance, and this again requires them to understand the underlying execution model. The whole process soon becomes cumbersome. **FlumeJava** {%cite chambers2010flumejava --file big-data%} library intends to provide support for developing data-parallel pipelines by abstracting away the complexity involved in data representation and implicitly handling the optimizations. It defers the evaluation, constructs an execution plan from parallel collections, optimizes the plan, and then executes underlying MR primitives. The optimized execution is comparable with hand-optimized pipelines, thus there is no much need to write raw MR programs directly.
 
 
-After MapReduce, Microsoft proposed their data parallelism model: **Dryad** {% cite isard2007dryad --file big-data %}, which abstracts individual computational tasks as vertices, and constructs a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine construct the execution plan and manage scheduling and optimization. One of the advantages of Dryad over MapReduce is that Dryad vertices can process an arbitrary number of inputs and outputs, while MR only supports a single input and a single output for each vertex. Besides the flexibility of computations, Dryad also supports different types of communication channel: file, TCP pipe, and shared-memory FIFO. The programming model is less elegant than MapReduce, programmers are not meant to interact with them directly. Instead, they are expected to use the high-level programming interfaces DryadLinq {% cite yu2008dryadlinq --file big-data %}, which more expressive and well embedded with .NET framework. 
+After MapReduce, Microsoft proposed their data parallelism model: **Dryad** {% cite isard2007dryad --file big-data %}, which abstracts individual computational tasks as vertices, and constructs a communication graph between those vertices. What programmers need to do is to describe this DAG graph and let Dryad execution engine construct the execution plan and manage scheduling and optimization. One of the advantages of Dryad over MapReduce is that Dryad vertices can process an arbitrary number of inputs and outputs, while MR only supports a single input and a single output for each vertex. Besides the flexibility of computations, Dryad also supports different types of communication channel: file, TCP pipe, and shared-memory FIFO. The programming model is less elegant than MapReduce, programmers are not meant to interact with them directly. Instead, they are expected to use the high-level programming interfaces DryadLinq {% cite yu2008dryadlinq --file big-data %}, which more expressive and well embedded with .NET framework.
 
 
 Dryad expresses computation as acyclic data flows, which might be too expensive for some complex applications, e.g. iterative machine learning algorithms. **Spark** {% cite zaharia2010spark --file big-data%} is a framework that uses functional programming and pipelining to provide such support. It is largely inspired by MapReduce's model and builds upon the ideas behind DAG, lazy evaluation of DryadLinq. Instead of writing data to disk for each job as MapReduce does Spark can cache the results across jobs. Spark explicitly caches computational data in memory through specialized immutable data structure named Resilient Distributed Sets(RDD) and reuse the same dataset across multiple parallel operations. The Spark builds upon RDD to achieve fault tolerance by reusing the lineage information of the lost RDD. This results in lesser overhead than what is seen in fault tolerance achieved by the checkpoint in Distributed Shared Memory systems. Moreover, Spark is the underlying framework upon which many very different systems are built, e.g., Spark SQL & DataFrames, GraphX, Streaming Spark, which makes it easy to mix and match the use of these systems all in the same application.These feature makes Spark the best fit for iterative jobs and interactive analytics and also helps it in providing better performance.
@@ -98,7 +98,7 @@ FlumeJava {%cite chambers2010flumejava --file big-data %}was introduced to make 
 - `combineValues()`, semantically a special case of `parallelDo()`, a combination of a MapReduce combiner and a MapReduce reducer, which is more efficient than doing all the combining in the reducer.
 - `flatten`, takes a list of `PCollection<T>`s and returns a single logic `PCollection<T>`.
 
-For example: `todo: explain the code`
+An example implemented using FlumeJava:
 ```java
 PTable<String,Integer> wordsWithOnes =
   words.parallelDo(
@@ -128,7 +128,7 @@ An overall optimizer strategy involves a sequence of optimization actions with t
 3. Insert fusion blocks:
 4. Fuse ParallelDos
 5. Fuse MSCRs: create MSCR operations, and convert any remaining unfused ParallelDo operations into trivial MSCRs.
-The SiteData example{%cite chambers2010flumejava --file big-data %} shows that 16 data-parallel operations can be optimized into two MSCR operations in the final execution plan (refer to Figure 5 in the original paper). One limitation of the optimizer is that all these optimizations are based on the structures of the execution plan, FluemJava doesn't analyze user-defined functions.
+The SiteData example{%cite chambers2010flumejava --file big-data %} shows that 16 data-parallel operations can be optimized into two MSCR operations in the final execution plan (refer to Figure 5 in the original paper). One limitation of the optimizer is that all these optimizations are based on the structures of the execution plan, FlumeJava doesn't analyze user-defined functions.
 
 
 ### 1.1.3 Dryad
@@ -175,20 +175,18 @@ GraphBuilder final = XInputs || YInputs || XToY || YToH || HOutputs;
 The communication graph is acyclic, so if given immutable inputs, the computation result should remain same regardless of the sequence of failures. When a vertex fails, the job manager will either get notified or receive a heartbeat timeout and then the job manager will immediately schedule to re-execute the vertex.
 
 *Comparison with FlumeJava*  
-Both support multiple inputs/outputs for the computation nodes. The big difference is that FlumeJava still exploits the MapReduce approach to read from/write to disks between stages, where Dryad has option to do in-memory transmission. This leaves Dryad a good position to do optimization like re-using in-memory data. In the other hand, Dryad has no optimizations on the graph itself.  
+Both support multiple inputs/outputs for the computation nodes. The big difference is that FlumeJava still exploits the MapReduce approach to reading from/writing to disks between stages, where Dryad has the option to do in-memory transmission. This leaves Dryad a good position to do optimization like re-using in-memory data. In the other hand, Dryad has no optimizations on the graph itself.  
 
-*Compared with MapReduce, Dryad can specify an arbitrary DAG that have multiple number of inputs/outputs and support multiple stages. Also it can have more channels and boost the performance when using TCP pipes and shared-memory.
-But like writing a pipeline of MapReduce jobs, Dryad is a low-level programming model and hard for users to program, thus a more declarative model - DryadLINQ  {%cite yu2008dryadlinq --file big-data %} was created to fill in the gap. It exploits LINQ, a query language in .NET and automatically translates the data-parallel part into execution plan and passed to the Dryad execution engine.*
 
 ### 1.1.4 Spark
 
-Spark  {%cite zaharia2010spark --file big-data %} is a fast, in-memory data processing engine with an elegant and expressive development interface which enables developers to efficiently execute machine learning, SQL or streaming workloads that require fast iterative access to datasets. Its a functional style programming model (similar to DryadLINQ) where a developer can create acyclic data flow graphs and transform a set of input data through a map - reduce like operators. Spark provides two main abstractions - distributed in-memory storage (RDD) and parallel operations (based on Scala’s collection API) on data sets high performance processing, scalability and fault tolerance. 
+Spark  {%cite zaharia2010spark --file big-data %} is a fast, in-memory data processing engine with an elegant and expressive development interface which enables developers to efficiently execute machine learning, SQL or streaming workloads that require fast iterative access to datasets. It is a functional style programming model (similar to DryadLINQ) where a developer can create acyclic data flow graphs and transform a set of input data through a map - reduce like operators. Spark provides two main abstractions: distributed in-memory storage (RDD) and parallel operations (based on Scala’s collection API) on data sets with high-performance processing, scalability, and fault tolerance. 
 
-*Distributed in-memory storage - Resilient Distributed Data sets :*
+*Distributed in-memory storage - Resilient Distributed Data sets*
 
-RDD is a partitioned, read only collection of objects which can be created from data in stable storage or by transforming other RDD. It can be distributed across multiple nodes (parallelize) in a cluster and is fault tolerant(Resilient). If a node fails, an RDD can always be recovered using its lineage; the DAG of computations performed on the source dataset. A RDD is stored in memory (as much as it can fit and rest is spilled to disk) and is immutable - It can only be transformed to a new RDD. These transformations are deferred; that means they are built up and staged, and aren't actually applied until an action is performed on an RDD. Thus, it's important to note that while one might have applied many transformations to a given RDD, some resulting transformed RDD may not be materialized even though one may hold a reference to it.
+RDD is a partitioned, read-only collection of objects which can be created from data in stable storage or by transforming other RDD. It can be distributed across multiple nodes (parallelize) in a cluster and is fault tolerant(resilient). If a node fails, an RDD can always be recovered using its lineage; the DAG of computations performed on the source dataset. An RDD is stored in memory (as much as it can fit and rest is spilled to disk) and is immutable - It can only be transformed to a new RDD. These transformations are deferred; that means they are built up and staged and are not actually applied until an action is performed on an RDD. Thus, it is important to note that while one might have applied many transformations to a given RDD, some resulting transformed RDD may not be materialized even though one may hold a reference to it.
 
-The properties that power RDD with the above mentioned features :
+The properties that power RDD with the above-mentioned features:
 - A list of dependencies on other RDD’s.
 - An array of partitions that a dataset is divided into.
 - A compute function to do a computation on partitions.
@@ -201,35 +199,34 @@ The properties that power RDD with the above mentioned features :
 </figure>
 
 
-Spark API provide two kinds of operations on a RDD:
+Spark API provide two kinds of operations on an RDD:
 
 - Transformations - lazy operations that return another RDD.
-  - `map (f : T => U) : RDD[T] ⇒ RDD[U]` : Return a MappedRDD[U] by applying function f to each element
-  - `flatMap( f : T ⇒ Seq[U]) : RDD[T] ⇒ RDD[U]` : Return a new FlatMappedRDD[U] by first applying a function to all elements     and then flattening the results.
-  - `filter(f:T⇒Bool) : RDD[T] ⇒ RDD[T]` : Return a FilteredRDD[T] having elemnts that f return true
-  - `groupByKey()` : Being called on (K,V) Rdd, return a new RDD[([K], Iterable[V])]
+  - `map (f : T => U) : RDD[T] ⇒ RDD[U]`  Return a MappedRDD[U] by applying function f to each element
+  - `flatMap( f : T ⇒ Seq[U]) : RDD[T] ⇒ RDD[U]`  Return a new FlatMappedRDD[U] by first applying a function to all elements     and then flattening the results.
+  - `filter(f:T⇒Bool) : RDD[T] ⇒ RDD[T]`  Return a FilteredRDD[T] having elemnts that f return true
+  - `groupByKey()` Being called on (K,V) Rdd, return a new RDD[([K], Iterable[V])]
   - `reduceByKey(f: (V, V) => V)` : Being called on (K, V) Rdd, return a new RDD[(K, V)] by aggregating values using eg: reduceByKey(_+_)
-  - `join((RDD[(K, V)], RDD[(K, W)]) ⇒ RDD[(K, (V, W))]` :Being called on (K,V) Rdd, return a new RDD[(K, (V, W))] by joining them by key K.
+  - `join((RDD[(K, V)], RDD[(K, W)]) ⇒ RDD[(K, (V, W))]` Being called on (K,V) Rdd, return a new RDD[(K, (V, W))] by joining them by key K.
 
 
-- Actions - operations that trigger computation on a RDD and return values.
+- Actions - operations that trigger computation on an RDD and return values.
 
-  - `reduce(f:(T,T)⇒T) : RDD[T] ⇒ T` : return T by reducing the elements using specified commutative and associative binary operator
-  - `collect()` : Return an Array[T] containing all elements
-  - `count()` : Return the number of elements
+  - `reduce(f:(T,T)⇒T) : RDD[T] ⇒ T` Return T by reducing the elements using specified commutative and associative binary operator
+  - `collect()`  Return an Array[T] containing all elements
+  - `count()`  Return the number of elements
 
-RDDs by default are discarded after use. However, Spark provides two explicit operations  persist() and cache() to ensure RDDs are persisted in memory once the RDD has been computed for the first time.
+RDDs by default are discarded after use. However, Spark provides two explicit operations: persist() and cache() to ensure RDDs are persisted in memory once the RDD has been computed for the first time.
 
-*Why RDD over Distributed Shared memory (DSM) ?*
-RDDs are immutable and can only be created through coarse grained transformation while DSM allows fine grained read and write operations to each memory location. Since RDDs are immutable they don't require checkpointing at all and can be derived from their lineages. Hence RDDs do not incur the overhead of checkpointing thats present in DSM.
-Also, in DSM, any failure requires the whole program to be restored. In case of RDDs, only the lost RDD partitions need to be recovered. This recovery happens parallely on the affected nodes.
-RDDs are immutable and hence a straggler (slow node) can be replaced with a backup copy as in MapReduce. This is hard to implement in DSM as two copies point to the same location and can interfere in each other’s update.
+*Why RDD, not Distributed Shared memory (DSM) ?*  
+
+RDDs are immutable and can only be created through coarse-grained transformations while DSM allows fine-grained read and write operations to each memory location. Since RDDs are immutable and can be derived from their lineages, they do not require checkpointing at all. Hence RDDs do not incur the overhead of checkpointing as DSM does. Additionally, in DSM, any failure requires the whole program to be restored. In the case of RDDs, only the lost RDD partitions need to be recovered. This recovery happens parallelly on the affected nodes. RDDs are immutable and hence a straggler (slow node) can be replaced with a backup copy as in MapReduce. This is hard to implement in DSM as two copies point to the same location and can interfere the update with one another.
 
 
 
 ***Challenges in Spark***
 
-- `Functional API semantics` : The GroupByKey operator is costly in terms of performance. In that it returns a distributed collection of (key, list of value) pairs to a single machine and then an aggregation on individual keys is performed on the same machine resulting in computation overhead. Spark does provide reduceByKey operator which does a partial aggregation on invidual worker nodes before returning the distributed collection. However, developers who are not aware of such a functionality can unintentionally choose groupByKey. The reason being functional programmers (Scala developers) tend to think more declaratively about the problem and only see the end result of the groupByKey operator. They may not be necessarily trained on how groupByKey is implemented atop of the cluster. Therefore, to use Spark, unlike functional programming languages, one needs to understand how the underlying cluster is going to execute the code. The burden of saving performance is then left to the programmer, who's expected to understand the underlying execution model of Spark, and who should know when to use reduceByKey over groupByKey.
+- `Functional API semantics`: The *GroupByKey* operator is costly in terms of performance. In that it returns a distributed collection of (key, list of value) pairs to a single machine and then an aggregation on individual keys is performed on the same machine resulting in computation overhead. Spark does provide *reduceByKey* operator which does a partial aggregation on individual worker nodes before returning the distributed collection. However, developers who are not aware of such a functionality can unintentionally choose groupByKey. The reason being functional programmers (Scala developers) tend to think more declaratively about the problem and only see the end result of the groupByKey operator. They may not be necessarily trained on how groupByKey is implemented atop of the cluster. Therefore, to use Spark, unlike functional programming languages, one needs to understand how the underlying cluster is going to execute the code. The burden of saving performance is then left to the programmer, who is expected to understand the underlying execution model of Spark, and to know when to use reduceByKey over groupByKey.
 
 - `Debugging and profiling` : There is no availability of debugging tools and developers find it hard to realize if a computation is happening more on a single machine or if the data-structure they used were inefficient.
 
