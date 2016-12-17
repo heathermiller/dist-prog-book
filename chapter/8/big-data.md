@@ -1,7 +1,7 @@
 ---
 layout: page
 title:  "Large Scale Parallel Data Processing"
-by: "Jingjing and Abhilash"
+by: "Jingjing and Abhilash Mysore Somashekar"
 ---
 ## Introduction
 The growth of Internet has generated the so-called big data(terabytes or petabytes). It is not possible to fit them into a single machine or process them with one single program. Often the computation has to be done fast enough to provide practical services. A common approach taken by tech giants like Google, Yahoo, Facebook is to process big data across clusters of commodity machines. Many of the computations are conceptually straightforward, and Google proposed the MapReduce framework, which separates the programming logic and underlying execution details(data distribution, fault tolerance and scheduling). The model has been proved to be simple and powerful, and from then on, the idea inspired many other programming models.
