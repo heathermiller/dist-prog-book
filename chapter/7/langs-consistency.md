@@ -578,7 +578,7 @@ This ensures the preservation of our consistency properties across our ever-inte
 
 Remember that Lasp is an Erlang *library*. Within your existing Erlang program, you're free to drop in some interacting Lasp-processes. These processes will communicate using CRDTs and functions over CRDTs. As such, your Lasp sub-program is guaranteed to exhibit strong eventual consistency properties.
 
-However, the rest of your Erlang program is not. Since Lasp is embeddable, it has no control over the rest of your Erlang program. You must be sure to use Lasp in a safe way. But since it doesn't provide the programmer with the ability to perform non-monotonic operations within the Lasp-context, the programmer can have significant confidence in the eventual consistency of the Lasp portion of the program.
+However, the rest of your Erlang program is not. Since Lasp is embeddable, it has no control over the rest of your Erlang program. You must be sure to use Lasp in a safe way. But since it doesn't provide the programmer with the ability to perform non-monotonic operations within the Lasp-context, the programmer can have significant confidence in the eventual consistency of the Lasp portion of the program. We still aren't totally safe from Jerry the intern, since Jerry can modify our outer-Erlang to do some dangerous things.
 
 Bloom provided a new model for distributed programming, where Lasp aims to provide existing distributed systems with a drop-in solution for adding eventually consistent parts to their systems.
 
