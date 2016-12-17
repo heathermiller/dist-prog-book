@@ -8,7 +8,7 @@ by: "James Larisch"
 ## What's the problem?
    In many ways, web developers deal with distributed systems problems every day: your client and your server are in two different geographical locations, and thus, some coordination between computers is required.
 
-  As Aviral discussed in the previous section, many computer scientists have done a lot of thinking about the nature of distributed systems problems. As such, we realize that it's impossible to completely emulate the behavior of a single computational machine using multiple machines. For example, the network is simply not as reliable as, say, memory - and waiting for responses can result in a lack of timeliness for the application's client. After discussing the Consistency/Availability/Partition-tolerance theorem, Section 6 discussed how we can make drill down into the CAP pyramid and choose the properties of our systems. As stated, we can't perfectly emulate a single computer using multiple machines, but once we accept that fact and learn to work with it... there are plenty of things we *can* do!
+  As Aviral discussed in the previous section, many computer scientists have done a lot of thinking about the nature of distributed systems problems. As such, we realize that it's impossible to completely emulate the behavior of a single computational machine using multiple machines. For example, the network is simply not as reliable as, say, memory - and waiting for responses can result in untimeliness for the application's userbase. After discussing the Consistency/Availability/Partition-tolerance theorem, Section 6 discussed how we can make drill down into the CAP pyramid and choose the necessary and unnecessary properties of our systems. As stated, we can't perfectly emulate a single computer using multiple machines, but once we accept that fact and learn to work with it, there are plenty of things we *can* do!
 
 ## The Shopping Cart
   Let's bring all these theorem talk back to reality. Let's say you're working at a new e-commerce startup, and you'd like to revolutionize the electronic shopping cart. You'd like to give the customer the ability to do the following:
@@ -24,18 +24,18 @@ How can we ensure that the client sees the same cart at every point in her trip?
 
 If you only had one user of your website, this wouldn't be too hard. You could manually, constantly modify and check on all of your servers and personally make sure the state of the customer's shopping cart is consistent across every single server. But what happens when you have millions of customers and thus millions of shopping carts? That would be impossible to keep track of personally. Luckily, you're a programmer - this can be automated! You simply need to make sure that all of your computers stay in-sync, so if the customer checks her cart in Beijing, then in Paris, she sees the same thing.
 
-But as Section 6 already explained, this is not so trivial. Messages between your servers in Beijing and Paris could get dropped, corrupted, reordered, duplicated, or delayed. Servers can crash. Sharks can cut the network cables between countries. Since you have no guarantees about when you'll be able to synchronize state between two servers, it's possible that the customer could see two different cart-states depending on which country she's in (which server she asks).
+But as Section 6 has already explained, this is not so trivial. Messages between your servers in Beijing and Paris could be dropped, corrupted, reordered, duplicated, or delayed. Servers can crash. Sharks can cut the network cables between countries. Since you have no guarantees about when you'll be able to synchronize state between two servers, it's possible that the customer could see two different cart-states depending on which country she's in (which server she asks).
 
-It's possible to implement "consensus" protocols such as Paxos and 3-Phase-Commit that provide coordination between your machines. When failure happens, such as a network shark-attack, the protocol detects a lack of consistency and becomes *unavailable*. For some applications, this is appropriate. For a shopping cart, this seems like overkill. If our shopping cart distributed systems experienced a failure, it means users would not be able to add or remove things from the cart. They also couldn't check out. This means our startup would lose money! Perhaps it's not so important that our clients' shopping carts be completely synchronized across the entire world at all times. After all, how often are people going to be doing such wanderlust shopping?
+It's possible to implement "consensus" protocols such as Paxos and 3-Phase-Commit that provide coordination between your machines. When failure happens, such as a network shark-attack, the protocol detects a lack of consistency and becomes *unavailable* - at least until it is consistent once more. For applications in which inconsistent state is dangerous, this is appropriate. For a shopping cart, this seems like overkill. If our shopping cart system experienced a failure and became unavailable, users would not be able to add or remove things from the cart. They also couldn't check out. This means our startup would lose money! Perhaps it's not so important that our clients' shopping carts be completely synchronized across the entire world at all times. After all, how often are people going to be doing such wanderlust shopping?
 
-This is an important moment. By thinking about our specific problem, we've realized a compromise we're willing to make: our users always need to be able to add things, remove things, and checkout. In other words, our service needs to be *available*. Servers don't necessarily need to agree all the time. We'd like them to, but the system shouldn't shut down if they don't. We'll find a way to deal with it.
+This is an important moment. By thinking about our specific problem, we've realized a compromise we're willing to make: our users always need to be able to add things, remove things, and checkout. In other words, our service needs to be as *available* as possible. Servers don't necessarily need to agree all the time. We'd like them to, but the system shouldn't shut down if they don't. We'll find a way to deal with it.
 
 Turns out there's a company out there called Amazon.com - and they've been having a similar problem. Amazon sells things on their website too, and users can add and remove things from their cart. Amazon has lots of servers spread out across the world. They also have quite a few customers. They need to ensure their customers' carts are robust: if/when servers fail or lose communication with one another, a "best-effort" should be made to display the customer's cart. Amazon acknowledges that failure, latency, or HyperLoop-traveling users can cause inconsistent cart data, depending on which server you ask. How does Amazon resolve these issues?
 
 ## Dynamo
-Amazon built DynamoDB {% cite Dynamo --file langs-consistency %}, which is basically a big distributed hash table. In other words, it's a hashmap spread across multiple computers. A user's cart would be stored as a value under the user's username as the key. When a user adds a new item to her cart, the cart data is replicated across a multiple machines within the network. If the client changes locations and performs another write or a few machines fail and later recover, it's possible for different machines to have different opinions about the state of a given user's cart.
+Amazon built DynamoDB {% cite Dynamo --file langs-consistency %}, which is basically a big distributed hash table. In other words, it's a hashmap spread across multiple computers. A user's cart would be stored as a value under the user's username as the key. (`{'james': {'candle', 'skateboard'}}`) When a user adds a new item to her cart, the cart data is replicated across a multiple machines within the network. If the client changes locations then performs another write, or if a few machines fail and later recover, it's possible for different machines to have different opinions about the state of a given user's cart.
 
-Dynamo has a rather unique way of dealing with these types of conflicts. Since Dynamo always wants to be available for both writes and reads (add/removes, viewing/checkouts, resp) it must have a way of combining inconsistent data. Dynamo chooses to perform this resolution at read time. When a client performs a `get()` on the user's cart, Dynamo will take the multiple conflicting carts and push it all up to the application! Huh? I thought Dynamo resolves this for the programmer!? Actually, Dynamo is a generic key-value store. It detects inconsistencies in the data - but once it does, it simply tells the application (in this case the application is the shopping cart code) that there are some conflicts. The application (shopping cart, in this case) is free to resolve these inconsistencies as it pleases.
+Dynamo has a rather unique way of dealing with these types of conflicts. Since Dynamo always wants to be available for both writes and reads (add/removes, viewing/checkouts, resp) it must have a way of combining inconsistent data. Dynamo chooses to perform this resolution at read time. When a client performs a `get()` on the user's cart, Dynamo will take the multiple conflicting carts and push them up to the application! Huh? I thought Dynamo resolves this for the programmer!? Actually, Dynamo is a generic key-value store. It detects inconsistencies in the data - but once it does, it simply tells the application (in this case the application is the shopping cart code) that there are some conflicts. The application (shopping cart, in this case) is free to resolve these inconsistencies as it pleases.
 
 How should Amazon's shopping cart procede with resolution? It may be fed two cart states like so:
 
@@ -59,9 +59,9 @@ Green Umbrella
 It's important to understand that Amazon has multiple machines storing the contents of your cart. These machines are asynchronously communicating in order to tell each other about updates they've received. Conflicts like this can happen when you try to read before the nodes have had time to gossip about your cart. More likely, however, is the situation in which one of the machines holding your cart goes offline and missing some updates. When it comes back online, you try to read, and this resolution process must occur.
 
 ### Good & Bad
-What do we love about Dynamo? It's a highly available key-value store. It replicates data well, and according to the paper, has high uptime and low latency. We love that it's *eventually consistent*. Nodes are constantly gossiping, so given enough time (and assuming failures are resolved), nodes' states will eventually converge. However, this property is *weak*. It's weak because when failures+conflicts occur, and [and they will occur](https://www.youtube.com/watch?v=JG2ESDGwHHY), it's up to the application developer to figure out how to handle it. In the case of the shopping cart, it's relatively trivial. But as a programmer, every time you'd like to use DynamoDB you need to consider your resolution strategy. The database doesn't provide a general solution.
+What do we love about Dynamo? It's a highly available key-value store. It replicates data well, and according to the paper, has high uptime and low latency. We love that it's *eventually consistent*. Nodes are constantly gossiping, so given enough time (and assuming failures are resolved), nodes' states will eventually converge. However, this property is *weak*. It's weak because when failures & conflicts occur, and [and they will occur](https://www.youtube.com/watch?v=JG2ESDGwHHY), it's up to the application developer to figure out how to handle it. Given a conflict, there isn't a one-size-fits-all solution for resolving them. In the case of the shopping cart, it's relatively trivial. But as a programmer, every time you use DynamoDB for a different purpose you need to consider your resolution strategy. The database doesn't provide a general solution.
 
-Instead of constructing an all-purpose database and forcing the burden of resolution on programmers, what if we constructed general-purpose data structures that required no manual resolution? These data structures would resolve conflicts inherently, themselves, and depending on your application you could choose which data structure works best for you.
+Instead of constructing an all-purpose database and forcing the burden of resolution on programmers, what if we constructed multi-purpose (read: multi, not *all*) data structures that required no manual resolution? These data structures would resolve conflicts inherently, themselves, and depending on your application you could choose which data structure works best for you.
 
 Let's try this transfiguration on the shopping cart. Let's strip it down: how does Amazon handle resolution, really? It treats shopping cart versions as sets of items. In order to perform resolution, Amazon unions the two sets.
 
@@ -70,7 +70,6 @@ Let's try this transfiguration on the shopping cart. Let's strip it down: how do
 ```
 
 Cool. Using this knowledge, let's try to construct our own shopping cart that automatically resolves conflicts.
-
 
 (Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at LWW-Sets.)
 
@@ -233,20 +232,20 @@ Node 2: { }
 This is pretty nasty. Jerry has come along and with a few lines of code he's obliterated our nice strong eventually consistent code. Surely there's a better way.
 
 ### Guarantees
-The original Javascript we wrote down exhibits the property from Section 6 known as *monotonicity*. The union operation ensures that a given node's state is always "greater than or equal to" the states of the other nodes. However, how can we be *sure* that this property is maintained throughout the development of this program? As we've seen, there's nothing stopping an intern from coming along, making a mindless change, and destroying this wonderful property. Ideally, we want to make it impossible (or at least very difficult) to write programs that violate this property. Or, at the very least, we want to make it very easy to write programs that maintain these types of properties.
+The original Javascript we wrote down exhibits the property from Section 6 known as logical *monotonicity*. The union operation ensures that a given node's state is always "greater than or equal to" the states of the other nodes. However, how can we be *sure* that this property is maintained throughout the development of this program? As we've seen, there's nothing stopping an intern from coming along, making a mindless change, and destroying this wonderful property. Ideally, we want to make it impossible (or at least very difficult) to write programs that violate this property. Or, at the very least, we want to make it very easy to write programs that maintain these types of properties.
 
 But where should these guarantees live? In the above Javascript example, the guarantees aren't guarantees at all, really. There's no restriction on what the programmer is allowed to do - the programmer has simply constructed a program that mirrors guarantees that she has modeled in her brain. In order to maintain properties such as *monotonicity*, she must constantly check the model in her brain against the code. We haven't really helped the programmer out that much - she has a lot of thinking to do.
 
-Databases such as PostgreSQL have issues like this as well, though they handle them quite differently, masters may need to ensure that write have occurred on every slave before the database becomes available for reading. A database system like this has pushed consistency concerns to the IO-level, completely out of the users control. They are enforced on system reads and system writes. This approach gives programmers no flexibility: as demonstrated with our shopping cart example, there's no need for these type of restrictions; we can tolerate inconsistency in order to maintain availability.
+Databases such as PostgreSQL have issues like this as well, though they handle them quite differently, masters may need to ensure that writes have occurred on every slave before the database becomes available for reading. A database system like this has pushed consistency concerns to the IO-level, completely out of the users control. They are enforced on system reads and system writes. This approach gives programmers no flexibility: as demonstrated with our shopping cart example, there's no need for these type of restrictions; we can tolerate inconsistency in order to maintain availability.
 
-Why not push the consistency guarantees in between the IO-level and the application-level? {% cite ConsistencyWithoutBorders --file langs-consistency %} { Is there any reason why you as the programmer couldn't program using tools that facilitate these types of monotonic programs? If you're familiar with formal systems -- why not construct a formal system (programming language / library) in which every theorem (program) is formally guarunteed to be monotonic? If it's *impossible* to express a non-monotonic program, the programmer needn't worry about maintaining a direct mapping between their code and their mental model.
+Why not push the consistency guarantees in between the IO-level and the application-level? {% cite ConsistencyWithoutBorders --file langs-consistency %} Is there any reason why you as the programmer couldn't program using tools that facilitate these types of monotonic programs? If you're familiar with formal systems -- why not construct a formal system (programming language / library) in which every theorem (program) is formally guaranteed to be monotonic? If it's *impossible* to express a non-monotonic program, the programmer needn't worry about maintaining a direct mapping between their code and his or her mental model.
 
 Wouldn't it be great if tools like this existed?
 
 ### Bloom
 Before talking about such tools, I'd like you to forget almost everything you know about programming for a second (unless of course you've never programmed in a Von Neumann-based language in which you sequentially update pieces of memory; which, by the way, you have).
 
-Imagine the following scenario: you are "programming" a node in a cluster of computers. All of the other computers work as expected. When you receive a message (all messages will include an integer), your task is to save the message, increment the integer, and resend the message back to its originator. You must also send messages you've received from `stdin`. Unfortunately, the programming environment isn't like anything you've encountered before.
+Imagine the following scenario: you are "programming" a node in a cluster of computers. All of the other computers work as expected. When you receive a message (all messages will include an integer), your task is to save the message, increment the integer, and resend the message back to its originator. You must also send messages you've received from `stdin`. Unfortunately, the programming environment is a little strange.
 You have access to five buffers:
 * Messages you have received in the last 5 seconds
 * Inputs you've received from `stdin` in the last 5 seconds
@@ -288,6 +287,7 @@ onFiveSecondInterval(function() {
     savedBuffer.push(msg);            // save message
     let newMsg = msg.clone()
     newMsg.integer++;                 // increment recv'd message
+    newMsg.flipSourceDestination()
     sendBuffer.push(newMsg);          // send it out
   });
 
@@ -305,6 +305,7 @@ on_five_second_interval do
     saved_buffer << msg
     new_msg = msg.clone
     new_msg.integer += 1
+    new_msg.flip_source_destination
     send_buffer << new_msg
   end
 
@@ -314,7 +315,7 @@ on_five_second_interval do
 end
 ```
 
-We have expressed this model using an event-driven programming style: the main event is `t % 5 = 0`: when the buffers populate & flush.
+We have expressed this model using an event-driven programming style: the callbacks are triggered when `t % 5 = 0`: when the buffers populate & flush.
 
 Notice we perform a few "copies". We read something from one buffer and place it into another one, perhaps after applying some modification. Perhaps we place a message from a given buffer into two buffers (`recv_buffer` to `saved_buffer` & `send_buffer`).
 
@@ -326,7 +327,8 @@ on_five_second_interval do
   send_buffer += recv_buffer.map do |msg| # map over the recv_buffer, increment integers, add to send_buffer
     new_msg = msg.clone
     new_msg.integer += 1
-    new_msg   # this block returns new_msg
+    new_msg.flip_source_destination       # send to originator
+    new_msg                               # this block returns new_msg
   end
 
   send_buffer += stdin_input_buffer       # add stdin messages to the send buffer
@@ -335,12 +337,12 @@ end
 
 After this block/callback is called, the system automatically flushes & routes messages as described above.
 
-Bloom {% cite Bloom --file langs-consistency %}, a research language developed at UC Berkeley, has a similar programming model to the one described above. Execution is broken up into a series of "timesteps". In the above example, one "timestemp" would be the execution of one `on_five_second_interval` function. Bloom, like the theoretical system above, automatically flushes and populates the buffers before and after each timestep. In the above example, 5 seconds was an arbitrary amount of time. In Bloom, timesteps (rounds of evaluation) are logical tools - they may happen every second, 10 seconds, etc. Logically, it shouldn't affect how your program executes. In reality, Bud's timesteps correspond to evaluation iterations. Your code is evaluated, executed, and the process repeats.
+Bloom {% cite Bloom --file langs-consistency %}, a research language developed at UC Berkeley, has a similar programming model to the one described above. Execution is broken up into a series of "timesteps". In the above example, one "timestemp" would be the execution of one `on_five_second_interval` function. Bloom, like the theoretical system above, automatically flushes and populates certain buffers before and after each timestep. In the above example, 5 seconds was an arbitrary amount of time. In Bloom, timesteps (rounds of evaluation) are logical tools - they may happen every second, 10 seconds, etc. Logically, it shouldn't affect how your program executes. In reality, Bud's timesteps correspond to evaluation iterations. Your code is evaluated, executed, and the process repeats.
 
 So what does a Bloom program look like? Bloom's prototypal implementation is called Bud and is implemented in Ruby. There are two main parts to a Bloom program:
 1. User defined buffers: rather than the four buffers I gave you above, Bloom users can define their own buffers. There are different types of buffers depending on the behavior you desire:
-  * `channel`: Above, `recv_buffer` and `send_buffer` would be considered channels. They facilitate sending network messages to and from other nodes. Like the messages above, messages sent into these channels contain a "location-specifier", which tells Bloom where the message should be sent. If you wanted to send a message to `A`, you could push the message `(@A, 10)` into your send buffer (in Ruby, `["@A", 10]`). The `@` denotes the location-specifier.
-  * `table`: Above, `saved_buffer` would be considered a table. The contents of tables persist across timesteps.
+  * `channel`: Above, `recv_buffer` and `send_buffer` would be considered channels. They facilitate sending network messages to and from other nodes. Like the messages above, messages sent into these channels contain a "location-specifier", which tells Bloom where the message should be sent. If you wanted to send a message to `A`, you could push the message `(@A, 10)` into your send buffer (in Ruby, `["@A", 10]`). The `@` denotes the location-specifier. At the end of the timestep (or callback execution in the above example), these buffers are flushed.
+  * `table`: Above, `saved_buffer` would be considered a table. The contents of tables persist across timesteps, which means tables are never flushed.
 2. Code to be executed at each timestep. A Bloom (Bud) program can be seen as the inside of the block passed to `on_five_second_interval`. In fact, it looks very similar, as we'll see.
 
 For the purposes of this chapter, let's assume `stdin_input_buffer` is a special kind of channel in which are sent in via `stdin`. Let's also assume this channel exists in all Bloom programs.
@@ -359,7 +361,7 @@ module Incrementer
 end
 ```
 
-The first line of `state` means: declare a channel called `network_channel` in which messages are 3-tuples. The first field of the message is called `dst`, the second `src`, and the third is called `integer`. `@` is our location-specifier, so if a program wants to send a message to a node at a given identifier, they will place it in the first `dst` field.
+The first line of `state` means: declare a channel called `network_channel` in which messages are 3-tuples. The first field of the message is called `dst`, the second `src`, and the third is called `integer`. `@` is our location-specifier, so if a program wants to send a message to a node at a given identifier, they will place it in the first `dst` field. For example, a message destined for `A` would look like `['A', 'me', 10]`. The `@` denotes the location-specifier within the collection's "schema".
 
 The second line means: declare a table (persists) called `saved_buffer` in which messages follow the same format as `network_channel`. There's no location specifier since this collection is not network-connected.
 
@@ -401,7 +403,7 @@ def increment_messages
   network_channel <~ network_channel.map { |x| [x.src, x.dst, x.integer] }
 end
 ```
-Here, we take messages we've received from the network channel and send them back into the network channel. The `<~` operator says "copy all of the elements in the right-hand-side and eventually send them off onto the network in the channel on the left-hand-side". So, we map over the contents of network channel *in the current timestep*: switching the `src` and `dst` fields, and incrementing the integer. This mapped collection is passed back into the network channel. Bud will ensure those messages sent off at some point.
+Here, we take messages we've received from the network channel and send them back into the network channel. The `<~` operator says "copy all of the elements in the right-hand-side and eventually send them off onto the network in the channel on the left-hand-side". So, we map over the contents of network channel *in the current timestep*: switching the `src` and `dst` fields, and incrementing the integer. This mapped collection is passed back into the network channel. Bud will ensure that those messages are sent off at some point.
 
 ```
 declare
@@ -411,7 +413,7 @@ end
 ```
 In `save_messages`, we use the `<=` operator. `<=` says "copy all of the elements in the right-hand-side and add them to the table on the left-hand-side." It's important to note that this movement occurs *within the current timestep*. This means if `saved_buffer` is referenced elsewhere in the code, it will include the contents of `network_channel`. If we had used the `<+` operator instead, the contents of `network_channel` would show up in `saved_buffer` in the *next* timestep. The latter is useful if you'd like to operate on the current contents of `saved_buffer` in the current timestep but want to specify how `saved_buffer` should be updated for the next timestep.
 
-Remember, all of this code is executed in each timestep - the separation of code into separate methods is merely for readability.
+Remember, all of this code is executed in *each* timestep - the separation of code into separate methods is merely for readability.
 
 ```
 declare
@@ -424,7 +426,7 @@ end
 
 #### Details
 
-Examine Bloom's "style". Compare it to your (probably) standard way of programming. Compare it to the Javascript & Ruby examples within this strange "timestep" model. Bloom has a more "declarative" style: what does this mean? Look at our Javascript:
+Examine Bloom's "style". Compare it to your standard way of programming. Compare it to the Javascript & Ruby timestep/callback examples. Bloom has a more "declarative" style: what does this mean? Look at our Javascript:
 
 ```javascript
 onFiveSecondInterval(function() {
@@ -432,6 +434,7 @@ onFiveSecondInterval(function() {
     savedBuffer.push(msg);            // save message
     let newMsg = msg.clone()
     newMsg.integer++;                 // increment recv'd message
+    newMsg.flipSourceDestination();
     sendBuffer.push(newMsg);          // send it out
   });
 
@@ -441,11 +444,11 @@ onFiveSecondInterval(function() {
 });
 ```
 
-"Every five seconds, loop over the received messages. For each one, do this, then that, then that." We are telling the computer each step we'd like it to perform. In Bud, however, we describe the state of tables and channels at either the current or next timestep using operators and other tables and channels. We describe what we'd like our collections to include and look like, rather than what to do. You declare what you'd like the state of the world to be at the current instant and at following instants.
+"Every five seconds, loop over the received messages. For each message, do this, then that, then that." We are telling the computer each step we'd like it to perform. In Bud, however, we describe the state of tables and channels at either the current or next timestep using operators and other tables and channels. We describe what we'd like our collections to include and look like, rather than what to do. You declare what you'd like the state of the world to be at the current instant and at following instants.
 
 #### Isn't this chapter about consistency?
 
-It's time to implement our shopping cart in Bloom. We are going to introduce one more collection: a `periodic`. For example, `periodic :timer 10` instantiates a new periodic collection. This collection is "not empty" every 10 seconds. Alone, it's not all that useful. However, when `join`'d with another table, it can be used to perform actions every `x` seconds.
+It's time to implement our shopping cart in Bloom. We are going to introduce one more collection: a `periodic`. For example, `periodic :timer 10` instantiates a new periodic collection. This collection becomes "populated" every 10 seconds. Alone, it's not all that useful. However, when `join`'d with another table, it can be used to perform actions every `x` seconds.
 
 ```ruby
 module ShoppingCart
@@ -480,7 +483,7 @@ end
 * `send_items`: join our cart with the 10-second timer. Since the timer only "appears" every 10 seconds, this `join` will produce a result every 10 seconds. When it does, send all cart items to all peers via `send_mcast`.
 * `receive_items`: when we receive a message from a peer, add the item to our cart.
 
-Functionally, this code is equivalent to our working Javascript shopping cart implementation. A few important things to note:
+Functionally, this code is equivalent to our working Javascript shopping cart implementation. However, there are a few important things to note:
 * In our Javascript example, we broadcasted our entire cart to all peers. When a peer received a message, they unioned their current cart with the received one. Here, each node broadcasts each element in the cart. When a node receives an item, it adds it to the current cart. Since tables are represented as sets, repeated or unordered additions do not matter. You can think of `{A, B, C}.add(D)` as equivalent to `{A, B, C}.union({D})`.
 * You cannot add items twice. Since tables are represented as sets and we simply add items to our set, an item can only ever exist once. This was true of our Javascript example as well.
 * You still cannot remove items!
@@ -491,7 +494,7 @@ Bloom has leveraged the montononic, add-only set and constructed a declarative p
 Bloom's programming model is built around the set. As Aviral discussed in the previous chapter, however, sets are not the only monotonic data structures. Other CRDTs are incredibly useful for programming eventually consistent distributed programs.
 
 Recall that a *bounded join semilattice* (CRDT) can be represented as a 3-tuple: `(S, U, ⊥)`. `S` is the set of all elements within the semilattice. `U` is the `least-upper bound` operation. `⊥` is the "least" element within the set. For example, for add-only sets, `S = the set of all sets`, `U = union` and `⊥ = {}`. Elements of these semilattices, when `U` is applied, can only "stay the same or get larger". Sets can only stay the same size or get larger - they can never rollback. For some element `e` in `S`, `e U ⊥` must equal `e`.
-For a semilattice we'll call `integerMax`, `S = the set of all integers`, `U = max(x, y)`, and `⊥ = -Infinity`.
+For a semilattice we'll call `integerMax`, `S = the set of all integers`, `U = max(x, y)`, and `⊥ = -Infinity`. Hopefully you can see that elements of this lattice (integers) "merged" with other elements of this lattice never produce a result less than either of the merged elements.
 
 These semilattices (and many more!) can be used to program other types of distributed, eventually consistent programs. Although sets are powerful, there might be more expressive ways to describe your program. It's not difficult to imagine using `integerMax` to keep a global counter across multiple machines.
 
@@ -510,7 +513,7 @@ interface Lattice {
 }
 ```
 
-[I am purposely leaving out morphisms & monotones for the sake of simplicity.]
+Heather: [I am purposely leaving out morphisms & monotones for the sake of simplicity.]
 
 This provides the user with much more freedom in terms of the types of Bloom programs she can write.
 
@@ -518,7 +521,7 @@ This provides the user with much more freedom in terms of the types of Bloom pro
 
 Bloom aims to provide a new model for writing distributed programs. And since bloom only allows for monotonic data structures with monotonicity-preserving operations, we're safe from Jerry the intern, right?
 
-Wrong. Unfortunately, I left out an operator from Bloom's set of collection operators. `<-` removes all elements in the right-hand-size from the table in the left-hand-side. As we've seen from Jerry's work on our original Javascript shopping cart implementation, naively attempting to remove elements from a distributed set is not a safe operation. Rollbacks can potentially destroy the properties we worked so hard to achieve. So what gives? Why would the Bloom developers add this operation?
+Wrong. Unfortunately, I left out an operator from Bloom's set of collection operators. `<-` removes all elements in the right-hand-size from the table in the left-hand-side. So Bloom's sets are *not* add-only. As we've seen from Jerry's work on our original Javascript shopping cart implementation, naively attempting to remove elements from a distributed set is not a safe operation. Rollbacks can potentially destroy the properties we worked so hard to achieve. So what gives? Why would the Bloom developers add this operation?
 
 Despite putting so much emphasis on consistency via logical monotonicity, the Bloom programmers recognize that your program might need *some* coordination.
 
@@ -526,13 +529,13 @@ In our example, we don't require coordination. We accept the fact that a user ma
 
 For our shopping cart examples: when a client asks a given node what's in her cart, that node will respond with the information it's received so far. We know this information won't be *incorrect*, but this data could be *stale*. That client might be missing information.
 
-The Bloom team calls these points in your program *points of order*. They are points in your program where coordination may be required. In fact, the Bloom developers provide analysis tools for identifying points of order within your program. There's no reason why you couldn't implement a non-monotonic shopping cart in which all nodes must synchronize before giving a response to the user. The Bloom analysis tool would tell you where the points of order lie in your program and you would need to add coordination.
+The Bloom team calls points like the one above, the user asking to checkout the contents at the cart of a given node, *points of order*. These are points in your program where coordination may be required - depending on when and who you ask, you may receive a different response. In fact, the Bloom developers provide analysis tools for identifying points of order within your program. There's no reason why you couldn't implement a non-monotonic shopping cart in which all nodes must synchronize before giving a response to the user. The Bloom analysis tool would tell you where the points of order lie in your program, and you as the programmer could decide whether or not (and how!) to add coordination.
 
 So what does Bloom really give us? First off, it demonstrates an unusual and possibly more expressive way to program distributed systems. Consistency-wise, it uses sets under the hood for its collections. As long as you shy away from `<-` operator, you can be confident that your collections will only monotonically grow. Since the order of packets is not guaranteed, structuring these eventually consistent applications is reasonably easy within Bloom. Bloom<sup>L</sup> also gives us the power to define our own monotonic data structures by "implementing" the lattice interface.
 
 However, Bloom makes it easy to program non-monotonic distributed programs as well. Applications may require coordination and the `<-` operator in particular can cause serious harm to our desired formal properties. Luckily, Bloom attempts to let the programmer know exactly when coordination may be required within their programs. Whenever an operation may return a stale or non-up-to-date value, Bloom's analysis tools let the programmer know.
 
-Another thing to consider: Bloom<sup>L</sup>'s user-defined lattices are just that - user-defined. It's up to the programmer to ensure that the data structures that implement the lattice interface are actually valid lattice structures. If not, Bloom can't help you.
+Another thing to consider: Bloom<sup>L</sup>'s user-defined lattices are just that - user-defined. It's up to the programmer to ensure that the data structures that implement the lattice interface are actually valid lattice structures. If your structures don't follow the rules, your program will behave in some seemingly strange ways.
 
 Currently Bloom exists as a Ruby prototype: Bud. Hypothetically speaking, there's nothing stopping the programmer from writing normal, sequentially evaluated Ruby code within Bud. This can also cause harm to our formal properties.
 
@@ -552,9 +555,28 @@ For those of you unfamiliar with Erlang: a *process* can be thought of as an ind
 
 ### Utilization
 
-Lasp is an Erlang library, and for good reason. Remember the initial discussion and reasoning for models such as Bloom and Lasp: we have a specific type of application that doesn't require tight consistency constraints. The constraints that do exist have been formalized, and we can be quite sure that by using a DSL like Lasp, we'll be safe from interns like Jerry. But Lasp can't do everything. More generally, eventual consistency doesn't solve every problem.
+Compare Lasp and Bloom:
 
-PostgreSQL enforce very specific and restrictive IO-level consistency, and this was too much for our needs. But it's certainly not too much for *all* needs. There certainly are applications (take banking, for example) in which consistency is extremely important. You certainly are not allowed to double spend your money depending on how fast you can travel to a different server, so eventual consistency is not enough! All servers must coordinate.
+Lasp
+* An Erlang library, meant to be used in every-day Erlang programs.
+* Built-in CRDTs. Does not allow user-defined CRDTs (for now).
+* All data structures are CRDTs and all operations are logically monotonic.
+* Thus, it's essentially impossible to construct a non-monotonic program *using only the Lasp library*.
+* It is possible to use Lasp in a non-monotonic way with disrupting outer Erlang code.
+* Follows well-known functional programming patterns and is compatible with optimal Erlang style.
+
+Bloom:
+* Aims to be a full-featured language. Is not meant to be embeddable.
+* Built-in set collections only. Allows user-defined CRDTs.
+* Its sets are not add-only and thus not exclusively logically monotonic. User-defined lattices carry no formal proofs of their consistency gaurantees.
+* It's possible to construct non-monotonic programs. Using the `<-` operator, for example.
+* With the prototype, Bud, it's possible to use normal Ruby code to disrupt Bloom's properties. But this is more a result of the prototype implementation, not the design.
+* Uses a unique programming model based on temporal logic.
+* Contains an analysis tool that tells programmers which points in their code might require coordination, depending on the consistency concerns of the application.
+
+Remember the initial discussion and reasoning for models such as Bloom and Lasp: we have a specific type of application that doesn't require tight consistency constraints. The constraints that do exist have been formalized, and we can be quite sure that by using a DSL like Lasp, we'll be safe from interns like Jerry. But Lasp can't do everything. More generally, eventual consistency doesn't solve every problem.
+
+PostgreSQL, for example, enforced very specific and restrictive IO-level consistency, and this was too much for our needs. But it's certainly not too much for *all* needs. There certainly are applications (take banking, for example) in which consistency is extremely important. You certainly are not allowed to double spend your money depending on how fast you can travel to a different server, so eventual consistency is not enough! All servers must coordinate.
 
 There's a key principle here, however: distributed programming models that attempt to accomodate everything end up doing nothing well; models that accept compromises and formalize certain properties end up being extremely useful for a subset of domains.
 
