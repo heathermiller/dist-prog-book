@@ -302,13 +302,29 @@ One of the criticism of traditional RPC systems would be that they’re blocking
 
 Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason.
 
-The history of promise pipelining can be traced back to the call-streams in Argus. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated futures into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
+The history of promise pipelining can be traced back to the call-streams in Argus. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated Promises into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
 
 Channels in Joule were a similar idea, providing a channel which connects an acceptor and a distributor. Joule was a direct ancestor to E language.
 
 
-Modern promise specifications, like one in Javascript comes with methods which help working with promise pipelining easier. In javascript, a Promises.all method is provided, which takes in an iterable over Promises, and returns a new Promise which gets resolved when all the promises in the iterable get resolved. There’s also a race method, which returns a promise which is resolved when the first promise in the iterable gets resolved.
+Modern promise specifications, like one in Javascript comes with methods which help working with promise pipelining easier. In javascript, a Promises.all method is provided, which takes in an iterable and returns a new Promise which gets resolved when all the promises in the iterable get resolved. There’s also a race method, which returns a promise which is resolved when the first promise in the iterable gets resolved.
 
+```javascript
+
+var a = Promise.resolve(1);
+var b = new Promise(function (resolve, reject) {
+  setTimeout(resolve, 100, 2);
+});
+
+Promise.all([p1, p2]).then(values => {
+  console.log(values); // [1,2]
+});
+
+Promise.race([p1, p2]).then(function(value) {
+  console.log(value); // 1
+});
+
+```
 
 In scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
 
@@ -375,14 +391,12 @@ def divide: Try[Int] = Try(a/b)
 
 divide match {
   case Success(v) =>
-    println(v)
+    println(v) // 10
   case Failure(e) =>
     println(e)
 }
 
 ```
-
-** This prints 10 , while **
 
 ```scala
 
@@ -394,12 +408,10 @@ divide match {
   case Success(v) =>
     println(v)
   case Failure(e) =>
-    println(e)
+    println(e) // java.lang.ArithmeticException: / by zero
 }
 
 ```
-
-** This prints java.lang.ArithmeticException: / by zero **
 
 Try type can be pipelined, allowing for catching exceptions and recovering from them along the way.
 
