@@ -69,7 +69,7 @@ Let's try this transfiguration on the shopping cart. Let's strip it down: how do
 { Red Candle, Blue Skateboard } U { Red Candle, Green Umbrella } == { Red Candle, Blue Skateboard, Green Umbrella }
 ```
 
-Cool. Using this knowledge, let's try to construct our own shopping cart that automatically resolves conflicts.
+Using this knowledge, let's try to construct our own shopping cart that automatically resolves conflicts.
 
 (Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at LWW-Sets.)
 
