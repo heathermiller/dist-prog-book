@@ -17,6 +17,25 @@ This is straightforward to implement as there is only one update operation.
 
 #### Specification
 
+```python
+
+class CmRDT:
+    pass
+
+class Counter(CmRDT):
+
+    def __init__(self):         # constructor function
+        self._count = 0
+
+    def value(self):            # query function
+        return self._count
+
+    def increment(self):        # update function
+        self._count += 1
+        for replica in self.replicas():
+            self.transmit("increment", replica)
+
+```
 
 #### Figure
 
@@ -31,6 +50,29 @@ Since the count always increases, modeling the state as count automatically make
 
 #### Specification
 
+```python
+
+class CvRDT:
+    pass
+
+class Counter(CvRDT):
+
+    def __init__(self, count = 0):  # constructor function
+        self._count = count
+
+    def value(self):                # query function
+        return self._count
+
+    def increment(self):            # update function
+        self._count += 1
+
+    def compare(self, other):       # comparison function
+        return self.value() <= other.value()
+
+    def merge(self, other):         # merge function
+        return Counter(max(self.value(), other.value()))
+
+```
 
 #### Figure
 
@@ -41,6 +83,38 @@ Something is clearly amiss! When two replicas are incremented, they should toget
 
 #### Specification
 
+```python
+
+class CvRDT:
+    pass
+
+class Counter(CvRDT):
+
+    def __init__(self, counts = None):  # constructor function
+        if counts is None:
+            self._counts = [0] * length(self.replicas())
+        else:
+            self._counts = counts
+
+    def value(self):                    # query function
+        return sum(self._counts)
+
+    def counts(self):                   # query function
+        return list(self._counts)       # return a clone
+
+    def increment(self):                # update function
+        self._counts[self.replicaId()] += 1
+
+    def compare(self, other):           # comparison function
+        return all(v1 <= v2 for (v1, v2) in
+                   zip(self.counts(),
+                       other.counts()))
+
+    def merge(self, other):             # merge function
+        return Counter(map(max, zip(self.counts(),
+                                    other.counts())))
+
+```
 
 #### Figure
 
@@ -59,6 +133,31 @@ Something is clearly amiss! When two replicas are incremented, they should toget
 
 #### Specification
 
+```python
+
+class CmRDT:
+    pass
+
+class Counter(CmRDT):
+
+    def __init__(self):         # constructor function
+        self._count = 0
+
+    def value(self):            # query function
+        return self._count
+
+    def increment(self):        # update function
+        self._count += 1
+        for replica in self.replicas():
+            self.transmit("increment", replica)
+
+    def decrement(self):        # update function
+        self._count -= 1
+        for replica in self.replicas():
+            self.transmit("decrement", replica)
+
+```
+
 #### Figure
 
 ![Operation based increment and decrement counter][operation-based-increment-and-decrement-counter]
@@ -67,7 +166,41 @@ Something is clearly amiss! When two replicas are incremented, they should toget
 
 #### Specification
 
+```python
 
+class CvRDT:
+    pass
+
+class Counter(CvRDT):
+
+    def __init__(self, counts = None):  # constructor function
+        if counts is None:
+            self._counts = [0] * length(self.replicas())
+        else:
+            self._counts = counts
+
+    def value(self):                    # query function
+        return sum(self._counts)
+
+    def counts(self):                   # query function
+        return list(self._counts)       # return a clone
+
+    def increment(self):                # update function
+        self._counts[self.replicaId()] += 1
+
+    def decrement(self):                # update function
+        self._counts[self.replicaId()] -= 1
+
+    def compare(self, other):           # comparison function
+        return all(v1 <= v2 for (v1, v2) in
+                   zip(self.counts(),
+                       other.counts()))
+
+    def merge(self, other):             # merge function
+        return Counter(map(max, zip(self.counts(),
+                                    other.counts())))
+
+```
 
 #### Figure
 
@@ -77,46 +210,66 @@ Something is clearly amiss! When two replicas are incremented, they should toget
 
 #### Specification
 
+```python
 
+class CvRDT:
+    pass
+
+class Counter(CvRDT):
+
+    def __init__(self,
+                 increments = None,
+                 decrements = None):   # constructor function
+        if increments is None:
+            self._increments = [0] * length(replicas())
+        else:
+            self._increments = increments
+        if decrements is None:
+            self._decrements = [0] * length(replicas())
+        else:
+            self._decrements = decrements
+
+    def increments(self):               # query function
+        return list(self._increments)   # return a clone
+
+    def decrements(self):               # query function
+        return list(self._decrements)   # return a clone
+
+    def value(self):                    # query function
+        return (sum(self.increments()) -
+                sum(self.decrements()))
+
+    def increment(self):                # update function
+        self._increments[self.replicaId()] += 1
+
+    def decrement(self):                # update function
+        self._decrements[self.replicaId()] += 1
+
+    def compare(self, other):           # comparison function
+        return (all(v1 <= v2 for (v1, v2) in
+                    zip(self.increments(),
+                        other.increments()))
+                and
+                all(v1 <= v2 for (v1, v2) in
+                    zip(self.decrements(),
+                        other.decrements())))
+
+    def merge(self, other):             # merge function
+        return Counter(increments = map(max, zip(self.increments(),
+                                                 other.increments())),
+                       decrements = map(max, zip(self.decrements(),
+                                                 other.decrements())))
+
+```
 
 #### Figure
 
 ![State based increment and decrement counter (correct)][state-based-increment-and-decrement-counter-correct]
 
-## Non-negative Counter
 
-
-
-
-
-### State based specification (CmRDT)
-
-```javascript
-class 
-    counts = [0, 0, ..., 0]
-    
-    update increment()
-        g <- getId()
-        counts[g] <- counts[g] + 1
-    
-    // query function
-    function value():
-        sum = 0
-        for count in counts:
-            sum <- sum + count
-        return sum
-    
-    function compare(other):
-        for i in 0 : length(replicas()):
-            if counts[i] > other.counts[i]:
-                return False
-        return True
-    
-```
-
-[operation-based-increment-only-counter]: images/counters/operation-based-increment-only-counter.png
-[state-based-increment-only-counter-incorrect]: images/counters/state-based-increment-only-counter-incorrect.png
-[state-based-increment-only-counter-correct]: images/counters/state-based-increment-only-counter-correct.png
-[operation-based-increment-and-decrement-counter]: images/counters/operation-based-increment-and-decrement-counter.png
-[state-based-increment-and-decrement-counter-incorrect]: images/counters/state-based-increment-and-decrement-counter-incorrect.png
-[state-based-increment-and-decrement-counter-correct]: images/counters/state-based-increment-and-decrement-counter-correct.png
+[operation-based-increment-only-counter]: resources/images/counters/operation-based-increment-only-counter.png
+[state-based-increment-only-counter-incorrect]: resources/images/counters/state-based-increment-only-counter-incorrect.png
+[state-based-increment-only-counter-correct]: resources/images/counters/state-based-increment-only-counter-correct.png
+[operation-based-increment-and-decrement-counter]: resources/images/counters/operation-based-increment-and-decrement-counter.png
+[state-based-increment-and-decrement-counter-incorrect]: resources/images/counters/state-based-increment-and-decrement-counter-incorrect.png
+[state-based-increment-and-decrement-counter-correct]: resources/images/counters/state-based-increment-and-decrement-counter-correct.png
