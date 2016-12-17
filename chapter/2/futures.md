@@ -290,19 +290,29 @@ Here, we create a Promise, and complete it later. In between we stack up a set o
 # Promise Pipelining
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
 
+
+
 <figure>
-  <img src="./images/9.png" alt="timeline" />
+  <img src="./images/p-1.svg" alt="timeline" />
+</figure>
+
+<figure>
+  <img src="./images/p-2.svg" alt="timeline" />
 </figure>
 
 Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason.
 
-The history of promise pipelining can be traced back to the call-streams in Argus and channels in Joule. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated futures into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
+The history of promise pipelining can be traced back to the call-streams in Argus. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated futures into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
+
+Channels in Joule were a similar idea, providing a channel which connects an acceptor and a distributor. Joule was a direct ancestor to E language.
 
 
 Modern promise specifications, like one in Javascript comes with methods which help working with promise pipelining easier. In javascript, a Promises.all method is provided, which takes in an iterable over Promises, and returns a new Promise which gets resolved when all the promises in the iterable get resolved. There’s also a race method, which returns a promise which is resolved when the first promise in the iterable gets resolved.
 
 
 In scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
+
+
 
 
 # Handling Errors
@@ -339,8 +349,7 @@ try{
 
 ```
 
-In javascript world, some patterns emerged, most noticeably the error-first callback style, also adopted by Node. Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises come to the rescue.
-
+In javascript world, some patterns emerged, most noticeably the error-first callback style ( which we've seen before, also adopted by Node). Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises come to the rescue.
 
 Although most of the earlier papers did not talk about error handling, the Promises paper by Liskov and Shrira did acknowledge the possibility of failure in a distributed environment. They talked about propagation of exceptions from the called procedure to the caller and also about call streams, and how broken streams could be handled. E language also talked about broken promises and setting a promise to the exception of broken references.
 
@@ -355,6 +364,47 @@ f onComplete {
    case Failure(e) => handleFailure(e)
 }
 ```
+
+In Scala, the Try type represents a computation that may either result in an exception, or return a successfully computed value. For example, Try[Int] represents a computation which can either result in Int if it's successful, or return a Throwable if something is wrong.
+
+```scala
+
+val a: Int = 100
+val b: Int = 10
+def divide: Try[Int] = Try(a/b)
+
+divide match {
+  case Success(v) =>
+    println(v)
+  case Failure(e) =>
+    println(e)
+}
+
+```
+
+** This prints 10 , while **
+
+```scala
+
+val a: Int = 100
+val b: Int = 0
+def divide: Try[Int] = Try(a/b)
+
+divide match {
+  case Success(v) =>
+    println(v)
+  case Failure(e) =>
+    println(e)
+}
+
+```
+
+** This prints java.lang.ArithmeticException: / by zero **
+
+Try type can be pipelined, allowing for catching exceptions and recovering from them along the way.
+
+
+
 
 #### In Javascript
 ```javascript
@@ -425,7 +475,34 @@ function check(data) {
 ## Twitter Finagle
 
 
-Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any JVM-hosted language. It uses idea of Futures to encapsulate concurrent tasks and are analogous to threads, but even more lightweight.
+Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any JVM-hosted language. It uses Futures to encapsulate concurrent tasks. Finagle
+introduces two other abstractions built on top of Futures to reason about distributed software :
+
+- ** Services **  are asynchronous functions which represent system boundaries.
+
+- ** Filters ** are application-independent blocks of logic like handling timeouts and authentication.
+
+In Finagle, operations describe what needs to be done, while the actual execution is left to be handled by the runtime. The runtime comes with a robust implementation of connection pooling, failure detection and recovery and load balancers.
+
+Example of a Service:
+
+
+```scala
+
+val service = new Service[HttpRequest, HttpResponse] {
+  def apply(request: HttpRequest) =
+    Future(new DefaultHttpResponse(HTTP_1_1, OK))
+}
+
+```
+A timeout filter can be implemented as :
+
+```scala
+
+def timeoutFilter(d: Duration) =
+  { (req, service) => service(req).within(d) }
+
+```
 
 
 ## Correctables
@@ -435,6 +512,7 @@ Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adr
   <img src="./images/15.png" alt="timeline" />
 </figure>
 
+
 ## Folly Futures
 Folly is a library by Facebook for asynchronous C++ inspired by the implementation of Futures by Twitter for Scala. It builds upon the Futures in the C++11 Standard. Like Scala’s futures, they also allow for implementing a custom executor which provides different ways of running a Future (thread pool, event loop etc).
 
@@ -442,6 +520,7 @@ Folly is a library by Facebook for asynchronous C++ inspired by the implementati
 ## NodeJS Fiber
 Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for NodeJs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
 
-## References
+
+# References
 
 {% bibliography --file futures %}
