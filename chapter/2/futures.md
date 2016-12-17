@@ -288,23 +288,38 @@ Here, we create a Promise, and complete it later. In between we stack up a set o
 
 
 # Promise Pipelining
+
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
 
 
-
 <figure>
-  <img src="./images/p-1.svg" alt="timeline" />
+  <img src="./images/p-1.png" alt="timeline" />
 </figure>
 
 <figure>
-  <img src="./images/p-2.svg" alt="timeline" />
+  <img src="./images/p-2.png" alt="timeline" />
 </figure>
 
 Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason.
 
 The history of promise pipelining can be traced back to the call-streams in Argus. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated Promises into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
 
-Channels in Joule were a similar idea, providing a channel which connects an acceptor and a distributor. Joule was a direct ancestor to E language.
+Channels in Joule were a similar idea, providing a channel which connects an acceptor and a distributor. Joule was a direct ancestor to E language, and talked about it in more detail.
+
+```
+
+t3 := (x <- a()) <- c(y <- b())
+
+t1 := x <- a()
+t2 := y <- b()
+t3 := t1 <- c(t2)
+
+```
+
+Without pipelining in E, this call will require three round trips. First to send a() to x, then b() to y then finally c to the result t1 with t2 as an argument. But with pipelining, the later messages can be sent with promises as result of earlier messages as argument. This allowed sending all the messages together, thereby saving the costly round trips. This is assuming x and y are on the same remote machine, otherwise we can still evaluate t1 and t2 parallely.
+
+
+Notice that this pipelining mechanism is different from asynchronous message passing, as in asynchronous message passing, even if t1 and t2 get evaluated in parallel, to resolve t3 we still wait for t1 and t2 to be resolved, and send it again in another call to the remote machine.
 
 
 Modern promise specifications, like one in Javascript comes with methods which help working with promise pipelining easier. In javascript, a Promises.all method is provided, which takes in an iterable and returns a new Promise which gets resolved when all the promises in the iterable get resolved. There’s also a race method, which returns a promise which is resolved when the first promise in the iterable gets resolved.
@@ -326,14 +341,12 @@ Promise.race([p1, p2]).then(function(value) {
 
 ```
 
-In scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
-
-
+In Scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
 
 
 # Handling Errors
 
-In a synchronous programming model, the most logical way of handling errors is a try...catch block.
+If world would have run without errors we would rejoice in unison, but it is not the case in programming world as well. When you run a program you either receive an expected output or an error. Error can be defined as wrong output or an exception. In a synchronous programming model, the most logical way of handling errors is a try...catch block.
 
 ```javascript
 
@@ -365,14 +378,25 @@ try{
 
 ```
 
-In javascript world, some patterns emerged, most noticeably the error-first callback style ( which we've seen before, also adopted by Node). Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises come to the rescue.
-
-Although most of the earlier papers did not talk about error handling, the Promises paper by Liskov and Shrira did acknowledge the possibility of failure in a distributed environment. They talked about propagation of exceptions from the called procedure to the caller and also about call streams, and how broken streams could be handled. E language also talked about broken promises and setting a promise to the exception of broken references.
-
-In modern languages, Promises generally come with two callbacks. One to handle  the success case and other to handle the failure.
 
 
-#### In Scala
+Although most of the earlier papers did not talk about error handling, the Promises paper by Liskov and Shrira did acknowledge the possibility of failure in a distributed environment. To put this in Argus's perspective, the 'claim' operation waits until the promise is ready. Then it returns normally if the call terminated normally, and otherwise it signals the appropriate 'exception', e.g.,
+
+```
+y: real := pt$claim(x)
+    except when foo: ...
+           when unavailable(s: string): .
+           when failure(s: string): . .
+    end
+
+```
+Here x is a promise object of type pt; the form pi$claim illustrates the way Argus identifies an operation of a type by concatenating the type name with the operation name. When there are communication problems, RPCs in Argus terminate either with the 'unavailable' exception or the 'failure' exception.
+'Unavailable' -  means that the problem is temporary, e.g., communication is impossible right now.
+'Failure' -  means that the problem is permanent, e.g., the handler’s guardian does not exist.
+Thus stream calls (and sends) whose replies are lost because of broken streams will terminate with one of these exceptions. Both exceptions have a string argument that explains the reason for the failure, e.g., future(“handler does not exist”), or unavailable(“cannot communicate”). Since any call can fail, every handler can raise the exceptions failure and unavailable. In this paper they also talked about propagation of exceptions from the called procedure to the caller. In paper about E language they talk about broken promises and setting a promise to the exception of broken references.
+
+In modern languages like Scala, Promises generally come with two callbacks. One to handle the success case and other to handle the failure. e.g.
+
 ```scala
 
 f onComplete {
@@ -382,21 +406,6 @@ f onComplete {
 ```
 
 In Scala, the Try type represents a computation that may either result in an exception, or return a successfully computed value. For example, Try[Int] represents a computation which can either result in Int if it's successful, or return a Throwable if something is wrong.
-
-```scala
-
-val a: Int = 100
-val b: Int = 10
-def divide: Try[Int] = Try(a/b)
-
-divide match {
-  case Success(v) =>
-    println(v) // 10
-  case Failure(e) =>
-    println(e)
-}
-
-```
 
 ```scala
 
@@ -415,9 +424,6 @@ divide match {
 
 Try type can be pipelined, allowing for catching exceptions and recovering from them along the way.
 
-
-
-
 #### In Javascript
 ```javascript
 
@@ -430,8 +436,45 @@ promise.then(function (data) {
 });
 
 ```
+Scala futures exception handling:
 
-In Javascript, Promises have a catch method, which help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler.
+When asynchronous computations throw unhandled exceptions, futures associated with those computations fail. Failed futures store an instance of Throwable instead of the result value. Futures provide the onFailure callback method, which accepts a PartialFunction to be applied to a Throwable. TimeoutException, scala.runtime.NonLocalReturnControl[] and ExecutionException  exceptions are treated differently
+
+Scala promises exception handling:
+
+When failing a promise with an exception, three subtypes of Throwables are handled specially. If the Throwable used to break the promise is a scala.runtime.NonLocalReturnControl, then the promise is completed with the corresponding value. If the Throwable used to break the promise is an instance of Error, InterruptedException, or scala.util.control.ControlThrowable, the Throwable is wrapped as the cause of a new ExecutionException which, in turn, is failing the promise.
+
+
+To handle errors with asynchronous methods and callbacks, the error-first callback style ( which we've seen before, also adopted by Node) is the most common convention. Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises allow asynchronous code to apply structured error handling. Promises .then method takes in two callbacks, a onFulfilled to handle when a promise is resolved successfully and a onRejected to handle if the promise is rejected.
+
+```javascript
+
+var p = new Promise(function(resolve, reject){
+  resolve(100);
+});
+
+p.then(function(data){
+  console.log(data); // 100
+},function(error){
+  console.err(error);
+});
+
+var q = new Promise(function(resolve, reject){
+  reject(new Error(
+    {'message':'Divide by zero'}
+  ));
+});
+
+q.then(function(data){
+  console.log(data);
+},function(error){
+  console.err(error);// {'message':'Divide by zero'}
+});
+
+```
+
+
+Promises also have a catch method, which work the same way as onFailure callback, but also help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler.
 
 
 ```javascript
@@ -464,7 +507,6 @@ function check(data) {
 
 The same behavior can be written using catch block.
 
-
 ```javascript
 
 work("")
@@ -480,6 +522,7 @@ function check(data) {
 }
 
 ```
+
 
 # Futures and Promises in Action
 
