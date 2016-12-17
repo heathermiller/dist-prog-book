@@ -552,6 +552,35 @@ A Simple Lasp Program is defined as either a:
 
 For those of you unfamiliar with Erlang: a *process* can be thought of as an independent piece of code executing asynchronously. Processes can receive messages and send messages to other processes. Process can also subscribe (I think) to other processes' messages.
 
+Programming in Erlang is unique in comparison to programming in Ruby or Javascript. Erlang processes are spun off for just about everything - and they are independent "nodes" of code acting independently while communicating with other processes. Naturally, distributed systems programming fits well here. Processes can be distributed within a single computer or distributed across a cluster of computers. So communication between processes may move over the network.
+
+Distribution of a data structure, then, means the transmission of a data structure across network-distributed processes. If a client asks for the state of the shopping cart in Beijing, the processes located on the computer in Beijing will respond. However, the processes in New York may disagree. Thus, our task is to distribute our data structures (CRDTs, right?) across distributed processes.
+
+So, what's a "Lasp process"? A Lasp process is a process that operates on lattice elements, or CRDTs. Three popular Lasp processes are `map`, `fold`, and `filter`.
+
+* `map`: If you're familiar with functional programming, these functions shouldn't appear too foreign. `map` spins off a never-ending process which applies a user-supplied `f` to all the replicas of a given CRDT this processes receives.
+* `fold`: Spins off a process that continously folds input CRDT values into another CRDT value using a user-provided function.
+* `filter`: Spins off a process that continously picks specific CRDT input values based on a user-provided filtering function.
+
+Drawing parallels to our mock-Bloom-Ruby-callback implementation, we remember that CRDT modifications and movements can be modeled using functional styles. In Bloom, we dealt with mapping values from "collections" to other "collections". These collections were backed by CRDT-like sets.
+
+Here, we are mapping "streams" of CRDT instances to other CRDT instances using the same functional programming methods.
+
+However, here, the stream manipulations occcur within unique processes distributed across a network of computers. These processes consume CRDTs and produce new ones based on functions provided by the user.
+
+There's one hiccup though: the user can't provide *any* function to these processes. Since our datatypes must obey certain properties, the functions that operate on our datas must preserve these properties.
+
+Recall that within a lattice, a partial order exists. One element is always `<=` another element. For example, with add-only sets, `{A} <= {A} <= {A, B} <= {A, B} <= {A, B, C}`. A *monotonic* function that operates over the domain of add-only sets must preserve this partial ordering. For example - if `{A} <= {A, B}` and `f` is a monotonic function that operates over add-only sets, `f({A}) <= f({A, B})`.
+
+This ensures the preservation of our consistency properties across our ever-interacting processes.
+
+#### A Library
+
+Remember that Lasp is an Erlang *library*. Within your existing Erlang program, you're free to drop in some interacting Lasp-processes. These processes will communicate using CRDTs and functions over CRDTs. As such, your Lasp sub-program is guaranteed to exhibit strong eventual consistency properties.
+
+However, the rest of your Erlang program is not. Since Lasp is embeddable, it has no control over the rest of your Erlang program. You must be sure to use Lasp in a safe way. But since it doesn't provide the programmer with the ability to perform non-monotonic operations within the Lasp-context, the programmer can have significant confidence in the eventual consistency of the Lasp portion of the program.
+
+Bloom provided a new model for distributed programming, where Lasp aims to provide existing distributed systems with a drop-in solution for adding eventually consistent parts to their systems.
 
 ### Utilization
 
