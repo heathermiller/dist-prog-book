@@ -1,8 +1,9 @@
 ---
 layout: page
 title:  "Distributed Programming Languages"
-by: "A Systems Person"
+by: "Joe Schmoe and Mary Jane"
 ---
+
 
 ## Problems of Distributed Programming
 
