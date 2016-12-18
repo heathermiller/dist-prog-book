@@ -706,8 +706,8 @@ Spark achieves fault tolerant, high throughput data streaming workloads in real-
 
 *Apache Mesos*
 
-Apache Mesos{%cite hindman2011mesos --file big-data%} is an open source heterogenous cluster/resource manager developed at the University of California, Berkley and used by  companies such  as Twitter, Airbnb, Netflix etc. for handling workloads in a distributed environment through dynamic resource sharing and isolation. It aids in the deployment and management of applications in large-scale clustered environments. Mesos abstracts node allocation by combining the existing resources of the machines/nodes in a cluster into a single pool and enabling fault-tolerant elastic distributed systems. Variety of workloads can utilize the nodes from this single pool voiding the need of allocating specific machines for different workloads. Mesos is highly scalable, achieves fault tolerance through Apache Zookeeper {%cite hunt2010zookeeper --file big-data%} and is a efficient CPU and memory-aware resource scheduler.
 
+Apache Mesos{%cite hindman2011mesos --file big-data%} is an open source heterogenous cluster/resource manager developed at the University of California, Berkley and used by  companies such  as Twitter, Airbnb, Netflix etc. for handling workloads in a distributed environment through dynamic resource sharing and isolation. It aids in the deployment and management of applications in large-scale clustered environments. Mesos abstracts node allocation by combining the existing resources of the machines/nodes in a cluster into a single pool and enabling fault-tolerant elastic distributed systems. Variety of workloads can utilize the nodes from this single pool voiding the need of allocating specific machines for different workloads. Mesos is highly scalable, achieves fault tolerance through Apache Zookeeper {%cite hunt2010zookeeper --file big-data%} and is a efficient CPU and memory-aware resource scheduler.
 
 *Alluxio/Tachyon*
 
