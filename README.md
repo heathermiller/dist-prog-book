@@ -10,6 +10,18 @@ concerns central to distributed systems like consistency, availability, and
 fault tolerance, from the lense of the programming models and frameworks that
 the programmer uses to build these systems.
 
+## Chapters
+
+1. RPC
+2. Futures & Promises
+3. Message-passing
+4. Distributed Programming Languages
+5. CAP, Consistency, & CRDTs
+6. Programming Languages & Consistency
+7. Langauges Extended for Distribution
+8. Large-scale Parallel Batch Processing
+9. Large-scale Streaming
+
 ## Editing this book
 
 ### Workflow
