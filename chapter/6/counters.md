@@ -299,8 +299,11 @@ The figure below shows an execution trace of three replicas confirming to this s
     <img src="{{ site.baseurl }}/chapter/6/resources/images/counters/state-based-increment-and-decrement-counter-correct.png" alt="State based increment and decrement counter (correct)"/>
 </figure>
 
-This design converges to the correct value. This provides us an eventually consistent state based increment and decrement counter.
+This design converges to the correct value. This provides us an eventually consistent state based increment and decrement counter. You can take a look at the lattice to convince yourself.
 
+<figure class="fullwidth">
+    <img src="{{ site.baseurl }}/chapter/6/resources/images/counters/state-based-increment-and-decrement-counter-correct-lattice.png" alt="State based increment and decrement counter(correct) lattice"/>
+</figure>
 
 ## 3. References
 
