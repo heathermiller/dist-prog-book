@@ -10,6 +10,8 @@ concerns central to distributed systems like consistency, availability, and
 fault tolerance, from the lense of the programming models and frameworks that
 the programmer uses to build these systems.
 
+_**Please note that this is a work in progress, the book contents are in this repo, but we have not yet polished everything and published the final book online. Expected release: end of December**_
+
 ## Chapters
 
 1. RPC
