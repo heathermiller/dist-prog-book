@@ -5,9 +5,9 @@ Source repo for the book that I and my students in my course at Northeastern Uni
 
 This is a book about the programming constructs we use to build distributed
 systems. These range from the small, RPC, futures, actors, to the large; systems
-built up of these components like MapReduce and Spark. We explore issues
+built up of these components like MapReduce and Spark. We explore issues and
 concerns central to distributed systems like consistency, availability, and
-fault tolerance, from the lense of the programming models and frameworks that
+fault tolerance, from the lens of the programming models and frameworks that
 the programmer uses to build these systems.
 
 ## Chapters
@@ -16,7 +16,7 @@ the programmer uses to build these systems.
 2. Futures & Promises
 3. Message-passing
 4. Distributed Programming Languages
-5. Langauges Extended for Distribution
+5. Languages Extended for Distribution
 6. CAP, Consistency, & CRDTs
 7. Programming Languages & Consistency
 8. Large-scale Parallel Batch Processing
@@ -69,14 +69,12 @@ make sure to navigate there explicitly, e.g.,
 
 Articles are in Markdown with straightforward YAML frontmatter.
 
-You can include code, math (Latex syntax), figures, blockquotes, side notes,
-etc. You can also use regular bibtex to make a bibliography. To see everything
+You can include code, math (LaTeX syntax), figures, blockquotes, side notes,
+etc. You can also use regular BibTeX to make a bibliography. To see everything
 you can do, I've prepared an example article.
 
 - [Live example article](http://dist-prog-book.com/example.html)
 - [Corresponding example page markdown](https://raw.githubusercontent.com/heathermiller/dist-prog-book/master/example.md)
 
-If you would like to add bibtex entries to the bibliography for your chapter,
+If you would like to add BibTeX entries to the bibliography for your chapter,
 check the `_bibliography` directory for a `.bib` file named after your chapter.
-
-
