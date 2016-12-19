@@ -16,9 +16,9 @@ the programmer uses to build these systems.
 2. Futures & Promises
 3. Message-passing
 4. Distributed Programming Languages
-5. CAP, Consistency, & CRDTs
-6. Programming Languages & Consistency
-7. Langauges Extended for Distribution
+5. Langauges Extended for Distribution
+6. CAP, Consistency, & CRDTs
+7. Programming Languages & Consistency
 8. Large-scale Parallel Batch Processing
 9. Large-scale Streaming
 
