@@ -8,7 +8,7 @@ by: "James Larisch"
 ## What's the problem?
    In many ways, web developers deal with distributed systems problems every day: your client and your server are in two different geographical locations, and thus, some coordination between computers is required.
 
-  As Aviral discussed in the previous section, many computer scientists have done a lot of thinking about the nature of distributed systems problems. As such, we realize that it's impossible to completely emulate the behavior of a single computational machine using multiple machines. For example, the network is simply not as reliable as, say, memory - and waiting for responses can result in untimeliness for the application's userbase. After discussing the Consistency/Availability/Partition-tolerance theorem, Section 6 discussed how we can make drill down into the CAP pyramid and choose the necessary and unnecessary properties of our systems. As stated, we can't perfectly emulate a single computer using multiple machines, but once we accept that fact and learn to work with it, there are plenty of things we *can* do!
+  As Aviral discussed in the previous section, many computer scientists have done a lot of thinking about the nature of distributed systems problems. As such, we realize that it's impossible to completely emulate the behavior of a single computational machine using multiple machines. For example, the network is simply not as reliable as, say, memory - and waiting for responses can result in untimeliness for the application's user base. After discussing the Consistency/Availability/Partition-tolerance theorem, Section 6 discussed how we can drill down into the CAP pyramid and choose the necessary and unnecessary properties of our systems. As stated, we can't perfectly emulate a single computer using multiple machines, but once we accept that fact and learn to work with it, there are plenty of things we *can* do!
 
 ## The Shopping Cart
   Let's bring all these theorem talk back to reality. Let's say you're working at a new e-commerce startup, and you'd like to revolutionize the electronic shopping cart. You'd like to give the customer the ability to do the following:
@@ -26,7 +26,7 @@ If you only had one user of your website, this wouldn't be too hard. You could m
 
 But as Section 6 has already explained, this is not so trivial. Messages between your servers in Beijing and Paris could be dropped, corrupted, reordered, duplicated, or delayed. Servers can crash. Sharks can cut the network cables between countries. Since you have no guarantees about when you'll be able to synchronize state between two servers, it's possible that the customer could see two different cart-states depending on which country she's in (which server she asks).
 
-It's possible to implement "consensus" protocols such as Paxos and 3-Phase-Commit that provide coordination between your machines. When failure happens, such as a network shark-attack, the protocol detects a lack of consistency and becomes *unavailable* - at least until it is consistent once more. For applications in which inconsistent state is dangerous, this is appropriate. For a shopping cart, this seems like overkill. If our shopping cart system experienced a failure and became unavailable, users would not be able to add or remove things from the cart. They also couldn't check out. This means our startup would lose money! Perhaps it's not so important that our clients' shopping carts be completely synchronized across the entire world at all times. After all, how often are people going to be doing such wanderlust shopping?
+It's possible to implement "consensus" protocols such as Paxos and Raft that provide coordination between your machines. When more failures than the system can tolerate occur, such as a network shark-attack, the protocol detects a lack of consistency and becomes *unavailable* - at least until it is consistent once more. For applications in which inconsistent state is dangerous, this is appropriate. For a shopping cart, this seems like overkill. If our shopping cart system experienced a failure and became unavailable, users would not be able to add or remove things from the cart. They also couldn't check out. This means our startup would lose money! Perhaps it's not so important that our clients' shopping carts be completely synchronized across the entire world at all times. After all, how often are people going to be doing such wanderlust shopping?
 
 This is an important moment. By thinking about our specific problem, we've realized a compromise we're willing to make: our users always need to be able to add things, remove things, and checkout. In other words, our service needs to be as *available* as possible. Servers don't necessarily need to agree all the time. We'd like them to, but the system shouldn't shut down if they don't. We'll find a way to deal with it.
 
@@ -71,11 +71,11 @@ Let's try this transfiguration on the shopping cart. Let's strip it down: how do
 
 Using this knowledge, let's try to construct our own shopping cart that automatically resolves conflicts.
 
-(Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at LWW-Sets.)
+(Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at OR-Sets.)
 
 ### Example
 
-Let's take a look at the following Javascript. For simplicity's sake, let's pretend users can only add things to their shopping cart.
+Let's take a look at the following JavaScript. For simplicity's sake, let's pretend users can only add things to their shopping cart.
 
 ```javascript
 class Cart {
@@ -131,7 +131,7 @@ Here is an (almost) fully functional shopping cart program. You can imagine this
   6. Sleep for 10 seconds.
   7. Repeat!
 
-Hopefully it's clear that if a client adds an item to her cart in Beijing and then 10 seconds later checks her cart in Paris, she should see the same thing. Well, not exactly - remember, the network is unreliable, and Beijing's `synchronize` messages might have been dropped. But no worries! Beijing is `synchronizing` again in another 10 seconds. This should remind you of Dynamo's gossiping: nodes are constantly attempting to converge.
+Hopefully it's clear that if a client adds an item to her cart in Beijing and then 10 seconds later checks her cart in Paris, she should see the same thing. Well, not exactly - remember, the network is unreliable, and Beijing's `synchronize` messages might have been dropped, delayed, or reordered. But no worries! Beijing is `synchronizing` again in another 10 seconds. This should remind you of Dynamo's gossiping: nodes are constantly attempting to converge.
 
 Both systems are eventually consistent - the difference here is our Javascript shopping cart displays *strong* eventual consistency. It's strong because it requires no specialized resolution. When a node transmits its state to another node, there's absolutely no question about how to integrate that state into the current one. There's no conflict.
 
@@ -246,30 +246,30 @@ Wouldn't it be great if tools like this existed?
 Before talking about such tools, I'd like you to forget almost everything you know about programming for a second (unless of course you've never programmed in a Von Neumann-based language in which you sequentially update pieces of memory; which, by the way, you have).
 
 Imagine the following scenario: you are "programming" a node in a cluster of computers. All of the other computers work as expected. When you receive a message (all messages will include an integer), your task is to save the message, increment the integer, and resend the message back to its originator. You must also send messages you've received from `stdin`. Unfortunately, the programming environment is a little strange.
-You have access to five buffers:
+You have access to five sets:
 * Messages you have received in the last 5 seconds
 * Inputs you've received from `stdin` in the last 5 seconds
-* An outgoing messages buffer: flushed & sent every 5 seconds
+* An outgoing messages set: flushed & sent every 5 seconds
 * A bucket of saved messages: *never* flushed
 
-However, you only have access to these buffers *every 5 seconds*. If messages are formatted as such: `(SOURCE, INTEGER, T)`, your buffers might look like when `t = 0`. (`t` is the number of seconds elapsed)
+However, you only have access to these sets *every 5 seconds*. If messages are formatted as such: `(SOURCE, INTEGER, T)`, your sets might look like when `t = 0`. (`t` is the number of seconds elapsed)
 
 ```
 <T = 0>
-RECV-BUFFER: [(A, 1, 0), (B, 2, 0)]
-RSTDIN-INPUTS: [(A, 5, 0), (C, 10, 0)]
-SEND-BUFFER: []
-SAVED: [(D, -1, 0), (E, -100, 0)]
+RECV-BUFFER: {(A, 1, 0), (B, 2, 0)}
+RSTDIN-INPUTS: {(A, 5, 0), (C, 10, 0)}
+SEND-BUFFER: {}
+SAVED: {(D, -1, 0), (E, -100, 0)}
 ```
 
-If you don't write any code to manipulate these buffers, when `t = 5`, your buffers might look like:
+If you don't write any code to manipulate these sets, when `t = 5`, your sets might look like:
 
 ```
 <T = 5>
-RECV-BUFFER: [(C, 10, 5)]
-STDIN-INPUTS: [(X, 1, 5)]
-SEND-BUFFER: []
-SAVED: [(D, -1, 0), (E, -100, 0)]
+RECV-BUFFER: {(C, 10, 5)}
+STDIN-INPUTS: {(X, 1, 5)}
+SEND-BUFFER: {}
+SAVED: {(D, -1, 0), (E, -100, 0)}
 ```
 
 You can see that from `t = 0` to `t = 5`, you received one message from `C` and someone typed a message to `X` via `stdin`.
@@ -301,51 +301,51 @@ or Ruby:
 
 ```ruby
 on_five_second_interval do
-  recv_buffer.each do |msg|
-    saved_buffer << msg
+  recv_set.each do |msg|
+    saved_set << msg
     new_msg = msg.clone
     new_msg.integer += 1
     new_msg.flip_source_destination
-    send_buffer << new_msg
+    send_set << new_msg
   end
 
-  stdin_input_buffer.each do |msg|
-    send_buffer << msg
+  stdin_input_set.each do |msg|
+    send_set << msg
   end
 end
 ```
 
-We have expressed this model using an event-driven programming style: the callbacks are triggered when `t % 5 = 0`: when the buffers populate & flush.
+We have expressed this model using an event-driven programming style: the callbacks are triggered when `t % 5 = 0`: when the sets populate & flush.
 
-Notice we perform a few "copies". We read something from one buffer and place it into another one, perhaps after applying some modification. Perhaps we place a message from a given buffer into two buffers (`recv_buffer` to `saved_buffer` & `send_buffer`).
+Notice we perform a few "copies". We read something from one set and place it into another one, perhaps after applying some modification. Perhaps we place a message from a given set into two sets (`recv_set` to `saved_set` & `send_set`).
 
 This situation screams for a more functional approach:
 ```ruby
 on_five_second_interval do
-  saved_buffer += recv_buffer             # add everything in recv_buffer to saved_buffer
+  saved_set += recv_set             # add everything in recv_set to saved_set
 
-  send_buffer += recv_buffer.map do |msg| # map over the recv_buffer, increment integers, add to send_buffer
+  send_set += recv_set.map do |msg| # map over the recv_set, increment integers, add to send_set
     new_msg = msg.clone
     new_msg.integer += 1
     new_msg.flip_source_destination       # send to originator
     new_msg                               # this block returns new_msg
   end
 
-  send_buffer += stdin_input_buffer       # add stdin messages to the send buffer
+  send_set += stdin_input_set       # add stdin messages to the send set
 end
 ```
 
 After this block/callback is called, the system automatically flushes & routes messages as described above.
 
-Bloom {% cite Bloom --file langs-consistency %}, a research language developed at UC Berkeley, has a similar programming model to the one described above. Execution is broken up into a series of "timesteps". In the above example, one "timestemp" would be the execution of one `on_five_second_interval` function. Bloom, like the theoretical system above, automatically flushes and populates certain buffers before and after each timestep. In the above example, 5 seconds was an arbitrary amount of time. In Bloom, timesteps (rounds of evaluation) are logical tools - they may happen every second, 10 seconds, etc. Logically, it shouldn't affect how your program executes. In reality, Bud's timesteps correspond to evaluation iterations. Your code is evaluated, executed, and the process repeats.
+Bloom {% cite Bloom --file langs-consistency %}, a research language developed at UC Berkeley, has a similar programming model to the one described above. Execution is broken up into a series of "timesteps". In the above example, one "timestemp" would be the execution of one `on_five_second_interval` function. Bloom, like the theoretical system above, automatically flushes and populates certain sets before and after each timestep. In the above example, 5 seconds was an arbitrary amount of time. In Bloom, timesteps (rounds of evaluation) are logical tools - they may happen every second, 10 seconds, etc. Logically, it shouldn't affect how your program executes. In reality, Bud's timesteps correspond to evaluation iterations. Your code is evaluated, executed, and the process repeats.
 
 So what does a Bloom program look like? Bloom's prototypal implementation is called Bud and is implemented in Ruby. There are two main parts to a Bloom program:
-1. User defined buffers: rather than the four buffers I gave you above, Bloom users can define their own buffers. There are different types of buffers depending on the behavior you desire:
-  * `channel`: Above, `recv_buffer` and `send_buffer` would be considered channels. They facilitate sending network messages to and from other nodes. Like the messages above, messages sent into these channels contain a "location-specifier", which tells Bloom where the message should be sent. If you wanted to send a message to `A`, you could push the message `(@A, 10)` into your send buffer (in Ruby, `["@A", 10]`). The `@` denotes the location-specifier. At the end of the timestep (or callback execution in the above example), these buffers are flushed.
-  * `table`: Above, `saved_buffer` would be considered a table. The contents of tables persist across timesteps, which means tables are never flushed.
+1. User defined sets: rather than the four sets I gave you above, Bloom users can define their own sets. There are different types of sets depending on the behavior you desire. Bloom refers to these sets as 'collections':
+  * `channel`: Above, `recv_set` and `send_set` would be considered channels. They facilitate sending network messages to and from other nodes. Like the messages above, messages sent into these channels contain a "location-specifier", which tells Bloom where the message should be sent. If you wanted to send a message to `A`, you could push the message `(@A, 10)` into your send set (in Ruby, `["@A", 10]`). The `@` denotes the location-specifier. At the end of the timestep (or callback execution in the above example), these set are flushed.
+  * `table`: Above, `saved_set` would be considered a table. The contents of tables persist across timesteps, which means tables are never flushed.
 2. Code to be executed at each timestep. A Bloom (Bud) program can be seen as the inside of the block passed to `on_five_second_interval`. In fact, it looks very similar, as we'll see.
 
-For the purposes of this chapter, let's assume `stdin_input_buffer` is a special kind of channel in which are sent in via `stdin`. Let's also assume this channel exists in all Bloom programs.
+For the purposes of this chapter, let's assume `stdin_input_set` is a special kind of channel in which are sent in via `stdin`. Let's also assume this channel exists in all Bloom programs.
 
 Let's take a look at an example Bud program.
 
@@ -355,19 +355,19 @@ First, let's declare our state.
 module Incrementer
   def state
     channel :network_channel ['@dst', 'src', 'integer']
-    table :saved_buffer ['dst', 'src', 'integer']
-    # implied channel :stdin_input_buffer ['@dst', 'src', 'integer']
+    table :saved_set ['dst', 'src', 'integer']
+    # implied channel :stdin_input_set ['@dst', 'src', 'integer']
   end
 end
 ```
 
 The first line of `state` means: declare a channel called `network_channel` in which messages are 3-tuples. The first field of the message is called `dst`, the second `src`, and the third is called `integer`. `@` is our location-specifier, so if a program wants to send a message to a node at a given identifier, they will place it in the first `dst` field. For example, a message destined for `A` would look like `['A', 'me', 10]`. The `@` denotes the location-specifier within the collection's "schema".
 
-The second line means: declare a table (persists) called `saved_buffer` in which messages follow the same format as `network_channel`. There's no location specifier since this collection is not network-connected.
+The second line means: declare a table (persists) called `saved_set` in which messages follow the same format as `network_channel`. There's no location specifier since this collection is not network-connected.
 
 You can think of the Ruby array after the channel name as the "schema" of that collection.
 
-Notice how we only have one network channel for both receiving and sending. Before, we had two buffers, one for sending and one for receiving. When we place items *into* `network_channel`, Bud will automatically send messages to the appropriate `@dst`.
+Notice how we only have one network channel for both receiving and sending. Before, we had two sets, one for sending and one for receiving. When we place items *into* `network_channel`, Bud will automatically send messages to the appropriate `@dst`.
 
 Next, let's write our code. This code will be executed at every timestamp. In fact, you can think of a Bud program as the code inside of a timestamp callback. Let's model the raw Ruby code we saw above.
 
@@ -375,8 +375,8 @@ Next, let's write our code. This code will be executed at every timestamp. In fa
 module Incrementer
   def state
     channel :network_channel ['@dst', 'src', 'integer']
-    table :saved_buffer ['dst', 'src', 'integer']
-    # implied channel :stdin_input_buffer ['@dst', 'src', 'integer']
+    table :saved_set ['dst', 'src', 'integer']
+    # implied channel :stdin_input_set ['@dst', 'src', 'integer']
   end
 
   declare
@@ -386,12 +386,12 @@ module Incrementer
 
   declare
   def save_messages
-    saved_buffer <= network_channel
+    saved_set <= network_channel
   end
 
   declare
   def send_messages
-    network_channel <~ stdin_input_buffer
+    network_channel <~ stdin_input_set
   end
 end
 ```
@@ -408,21 +408,21 @@ Here, we take messages we've received from the network channel and send them bac
 ```
 declare
 def save_messages
-  saved_buffer <= network_channel
+  saved_set <= network_channel
 end
 ```
-In `save_messages`, we use the `<=` operator. `<=` says "copy all of the elements in the right-hand-side and add them to the table on the left-hand-side." It's important to note that this movement occurs *within the current timestep*. This means if `saved_buffer` is referenced elsewhere in the code, it will include the contents of `network_channel`. If we had used the `<+` operator instead, the contents of `network_channel` would show up in `saved_buffer` in the *next* timestep. The latter is useful if you'd like to operate on the current contents of `saved_buffer` in the current timestep but want to specify how `saved_buffer` should be updated for the next timestep.
+In `save_messages`, we use the `<=` operator. `<=` says "copy all of the elements in the right-hand-side and add them to the table on the left-hand-side." It's important to note that this movement occurs *within the current timestep*. This means if `saved_set` is referenced elsewhere in the code, it will include the contents of `network_channel`. If we had used the `<+` operator instead, the contents of `network_channel` would show up in `saved_set` in the *next* timestep. The latter is useful if you'd like to operate on the current contents of `saved_set` in the current timestep but want to specify how `saved_set` should be updated for the next timestep.
 
 Remember, all of this code is executed in *each* timestep - the separation of code into separate methods is merely for readability.
 
 ```
 declare
 def send_messages
-  network_channel <~ stdin_input_buffer
+  network_channel <~ stdin_input_set
 end
 ```
 
-`send_messages` operates very much like `increment_messages`, except it reads the contents of `stdin_input_buffer` and places them into the network channel to be sent off at an indeterminite time.
+`send_messages` operates very much like `increment_messages`, except it reads the contents of `stdin_input_set` and places them into the network channel to be sent off at an indeterminite time.
 
 #### Details
 
@@ -457,13 +457,13 @@ module ShoppingCart
   def state
     table :cart ['item']
     channel :recv_channel ['@src', 'dst', 'item']
-    # implied channel :stdin_input_buffer ['item']
+    # implied channel :stdin_input_set ['item']
     periodic :timer 10
   end
 
   declare
   def add_items
-    cart <= stdin_input_buffer
+    cart <= stdin_input_set
   end
 
   declare
@@ -544,15 +544,15 @@ All in all, Bloom provides programmers with a new model for writing distributed 
 ### Lasp
 Lasp {% cite Lasp --file langs-consistency %}is an Erlang library which aims to facilitate this type of "disorderly" programming.
 
-Lasp provides access to myriad of CRDTs. It does not allows user-defined CRDTs (lattices), but the programmer can have confidence that the CRDTs obey the lattice formal requirements.
+Lasp provides access to myriad of CRDTs. The programmer can have confidence that the CRDTs obey the lattice formal requirements. Like Bloom<sup>L</sup>, if the user desires a new lattice he or she may implement it using an interface.
 
 A Simple Lasp Program is defined as either a:
 * Single CRDT instance
 * A "Lasp process" with *m* inputs, all Simple Lasp Programs, and one output CRDT instance
 
-For those of you unfamiliar with Erlang: a *process* can be thought of as an independent piece of code executing asynchronously. Processes can receive messages and send messages to other processes. Process can also subscribe (I think) to other processes' messages.
+For those of you unfamiliar with Erlang: a *process* can be thought of as an independent piece of code executing asynchronously. Processes in Erlang are actors that act sequentially and exchange messages through asynchronous message passing.
 
-Programming in Erlang is unique in comparison to programming in Ruby or Javascript. Erlang processes are spun off for just about everything - and they are independent "nodes" of code acting independently while communicating with other processes. Naturally, distributed systems programming fits well here. Processes can be distributed within a single computer or distributed across a cluster of computers. So communication between processes may move over the network.
+Programming in Erlang is unique in comparison to programming in Ruby or Javascript. Erlang processes are spun off for just about everything - and they are independent actors of code acting independently while communicating with other processes. Naturally, distributed systems programming fits well here. Processes can be distributed within a single computer or distributed across a cluster of computers. So communication between processes may move over the network.
 
 Distribution of a data structure, then, means the transmission of a data structure across network-distributed processes. If a client asks for the state of the shopping cart in Beijing, the processes located on the computer in Beijing will respond. However, the processes in New York may disagree. Thus, our task is to distribute our data structures (CRDTs, right?) across distributed processes.
 
@@ -588,7 +588,7 @@ Compare Lasp and Bloom:
 
 Lasp
 * An Erlang library, meant to be used in every-day Erlang programs.
-* Built-in CRDTs. Does not allow user-defined CRDTs (for now).
+* Built-in CRDTs.
 * All data structures are CRDTs and all operations are logically monotonic.
 * Thus, it's essentially impossible to construct a non-monotonic program *using only the Lasp library*.
 * It is possible to use Lasp in a non-monotonic way with disrupting outer Erlang code.
