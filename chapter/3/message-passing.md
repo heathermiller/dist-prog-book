@@ -1,7 +1,9 @@
 ---
 layout: page
 title:  "Message Passing and the Actor Model"
+tag: "message passing"
 by: "Nathaniel Dempkowski"
+subtitle: "This is a description that will be the subtitle."
 ---
 
 ## Introduction
@@ -202,6 +204,7 @@ The realization of this model depends on efficiently multiplexing actors to thre
 Cloud Haskell is an extension of Haskell which essentially implements an enhanced version of the computational message-passing model of Erlang in Haskell. {% cite epstein2011 --file message-passing %} It enhances Erlang's model with advantages from Haskell's model of functional programming in the form of purity, types, and monads. Cloud Haskell enables the use of pure functions for remote computation, which means that these functions are idempotent and can be restarted or run elsewhere in the case of failure without worrying about side-effects or undo mechanisms. This alone isn't so different from Erlang, which operates on immutable data in the context of isolated memory.
 
 One of the largest improvements over Erlang is the introduction of typed channels for sending messages. These provide guarantees to the programmer about the types of messages their actors can handle, which is something Erlang lacks. In Erlang, all you have is dynamic pattern matching based on values patterns, and the hope that the wrong types of message don't get passed around your system. Cloud Haskell processes can also use multiple typed channels to pass messages between actors, rather than Erlang's single untyped channel. Haskell's monadic types make it possible for programmers to use a programming style, where they can ensure that pure and effective code are not mixed. This makes reasoning about where side-effects happen in your system easier. Cloud Haskell has shared memory within an actor process, which is useful for certain applications. This might sound like it could cause problems, but shared-memory structures are forbidden by the type system from being shared across actors. Finally, Cloud Haskell allows for the serialization of function closures, which means that higher-order functions can be distributed across actors. This means that as long as a function and its environment are serializable, they can be spun off as a remote computation and seamlessly continued elsewhere. These improvements over Erlang make Cloud Haskell a notable project in the space of process-based actors. Cloud Haskell is currently supported and also has developed the Cloud Haskell Platform, which aims to provide common functionality needed to build and manage a production actor system using Cloud Haskell.
+
 
 ## Communicating event-loops
 

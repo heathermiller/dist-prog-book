@@ -3,6 +3,7 @@
 
   {% include head.html %}
 <body data-spy="scroll" data-target="#toc">
+  <!-- <div class="thin-top-bar"></div> -->
   <div class="topbar">
     <div class="logo-wrap">
       <!-- <div class="circle-logo"></div> -->
@@ -24,8 +25,8 @@
         {% assign minutes = content | number_of_words | divided_by:180 %}
         <div class="category">{{ page.tag }}</div>
         <h1 class="page-title">{{ page.title }}</h1>
+        <div class="author">By {{ page.by }}</div>
         <div class="subtitle">{{ page.subtitle }}
-        <div class="author">By {{ page.by }}</div>  
           {% if minutes <= 5 %}
             <!-- do nothing -->
           {% else %}
