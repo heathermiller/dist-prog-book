@@ -2,7 +2,7 @@
 <html lang="en">
 
   {% include head.html %}
-<body>
+<body data-spy="scroll" data-target="#toc">
   <div class="topbar">
     <div class="logo-wrap">
       <!-- <div class="circle-logo"></div> -->
@@ -25,6 +25,7 @@
         <div class="category">{{ page.tag }}</div>
         <h1 class="page-title">{{ page.title }}</h1>
         <div class="subtitle">{{ page.subtitle }}
+        <div class="author">By {{ page.by }}</div>  
           {% if minutes <= 5 %}
             <!-- do nothing -->
           {% else %}
@@ -43,7 +44,6 @@
       <div class="col-sm-2"></div>
       <div class="col-sm-6">
         <div class="footer-links">
-          <div class="typo"><a href="https://github.com/heathermiller/wwwheathermiller/blob/master/{{ page.path }}">Typo? Suggest a fix.</a></div>
           {% for category in site.categories %}
               {% assign catg_name = category.first %}
               {% if catg_name == page.category %}
@@ -72,6 +72,40 @@
       <div class="col-sm-4"></div>
     </div>
   </div>
+
+  <script>
+
+      $( ".toc-hide" ).click(function() {
+        // $( this ).toggleClass( "gray-bg" );
+        $(".toc-contents").toggleClass( "lighter" );
+
+        if ($(this).text() == 'Hide') {
+          $(this).text("Show");
+        } else {
+          $(this).text("Hide");
+        }
+        // toggle visibility of contents, and expand button
+        $(".nav").toggle();
+        $(".toc-expand").toggle();
+      });
+
+      $( ".toc-expand" ).click(function() {
+        // $( this ).toggleClass( "gray-bg" );
+
+        if ($(this).text() == 'Expand') {
+          $(this).text("Compact");
+          $(".nav").css('display', 'block');
+        } else {
+          $(this).text("Expand");
+          $(".nav .nav").css('display', 'none');
+        }
+      });
+
+      // get current year and put it in span
+      var currYear = new Date().getFullYear()
+      $(".current-year").text(currYear);
+  </script>
+
 </body>
 
 </html>
