@@ -160,7 +160,12 @@ ul > li {
   padding-left: 30px;
 }
 
-.prog-mod {
+.prog-mod,
+a:link > .book-title > .prog-mod,
+a:visited .book-title > .prog-mod,
+a:hover .book-title > .prog-mod {
+  transition: none;
+  border: none;
   font-family: 'Alegreya Sans', sans-serif;
   font-weight: 700;
   font-style: italic;
@@ -170,7 +175,13 @@ ul > li {
   color: #595959;
 }
 
-.dist-comp {
+.dist-comp,
+a:link > .book-title > .dist-comp,
+a:visited > .book-title > .dist-comp,
+a:hover > .book-title > .dist-comp {
+  transition: none;
+  border: none;
+  color: #000;
   font-family: 'Alegreya Sans', sans-serif;
   text-transform: uppercase;
   font-weight: 900;
@@ -218,9 +229,24 @@ code {
 }
 
 .logo-wrap {
+  /*width: 100%;*/
   width: 84%;
   padding-left: 8%;
   padding-right: 8%;
+}
+
+.logo-wrap > a:link,
+.logo-wrap > a:visited,
+.logo-wrap > a:hover {
+  transition: 0;
+  border: 0;
+}
+
+a:link > .logo,
+a:visited > .logo,
+a:hover > .logo {
+  transition: 0;
+  border: 0;
 }
 
 .logo {
@@ -763,13 +789,13 @@ nav[data-toggle='toc'] {
 .navbar > li a {
     display: block;
     text-align: center;
-    margin: 14px 16px;
+    margin: 18px 16px;
     /*padding: 14px 16px;*/
     text-decoration: none;
     font-weight: 700;
     letter-spacing: 1px;
     border: 0;
-    font-size: 11px;
+    /*font-size: 11px;*/
     text-transform: uppercase;
     color: #000;
     padding-bottom: 2px;
@@ -777,13 +803,13 @@ nav[data-toggle='toc'] {
 }
 
 .navbar > li a:hover {
-    color: #562e4b;
-    border-bottom: 2px solid #c5c763;
+    color: #7499aa;
+    border-bottom: 2px solid #562e4b;
 }
 
 .navbar > li a.active {
-  color: #562e4b;
-  border-bottom: 2px solid #c5c763;
+  color: #7499aa;
+  border-bottom: 2px solid #562e4b;
 }
 
 .navbar-wrap {
@@ -871,7 +897,7 @@ nav[data-toggle='toc'] {
   z-index: 90;
   margin: 0;
   padding: 0;
-  margin-top: 60px;
+  margin-top: 70px;
   margin-left: -15px;
 }
 
@@ -893,7 +919,7 @@ nav[data-toggle='toc'] {
 }
 
 .navbar-responsive > li:hover {
-  background: #c5c763;
+  background: #7499aa;
 }
 
 .navbar-responsive > li > a {
@@ -1025,8 +1051,9 @@ nav[data-toggle='toc'] {
 }
 
 .page-title {
-  margin-top: 4px;
-  margin-bottom: 4px;
+    margin-top: 0.15em;
+    margin-bottom: 0.25em;
+    line-height: 0.9em;
 }
 
 .minutes {

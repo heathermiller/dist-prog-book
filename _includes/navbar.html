@@ -1,0 +1,26 @@
+
+    <div class="navbar navbar-default navbar-static-top" role="navigation">
+      <div class="container">
+        <div class="col-md-2"></div>
+        <div class="col-md-6">
+          <div class="navbar-header">
+          {% if page.layout == 'front' %}
+          {% else %}
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+          {% endif %}
+            <!-- <a class="navbar-brand" href="#">Project name</a> -->
+          </div>
+          <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+            {% include navbar-links.html %}
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+        <div class="col-md-2"></div>
+      </div>
+    </div>

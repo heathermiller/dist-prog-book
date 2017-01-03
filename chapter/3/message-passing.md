@@ -100,7 +100,7 @@ Splitting concerns into multiple pieces allows for the programmer to have an eas
 
 This flexibility turns out to be a highly discussed advantage which continues to be touted in modern actor systems.
 
-## Rosette
+### Rosette
 
 Rosette was both a language for concurrent object-oriented programming of actors, as well as a runtime system for managing the usage of and access to resources by those actors. Rosette {% cite Tomlinson:1988:ROC:67387.67410 --file message-passing %} is mentioned throughout Agha's _Concurrent Object-Oriented Programming_, {% cite Agha:1990:COP:83880.84528 --file message-passing %} and the code examples given in the paper are written in Rosette. Agha is even an author on the Rosette paper, so its clear that Rosette is foundational to the classic actor model. It seems to be a language which almost defines what the classic actor model looks like in the context of concurrent object-oriented programming.
 
