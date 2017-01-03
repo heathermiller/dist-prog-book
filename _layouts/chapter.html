@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% include head.html %}
+<body data-spy="scroll" data-target="#toc">
+  <div class="topbar">
+    <div class="container">
+      <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-5">
+          <div class="logo-wrap">
+            <a href="{{ site.baseurl }}/">
+              <svg class="logo" width="100" height="100">
+                <circle cx="50" cy="50" r="35" stroke-width="6" stroke="#fff" fill="#b3c7cf"/>
+                <circle cx="50" cy="50" r="20" fill="#92adb9"/>
+                <circle cx="50" cy="50" r="14" fill="#7499AA"/>
+              </svg>
+              <div class="book-title">
+                <div class="prog-mod">Programming Models for</div>
+                <div class="dist-comp">Distributed Computing</div>
+              </div>
+            </a>
+          </div>
+        </div>
+        <div class="col-sm-5 visible-md visible-lg">
+          <div class="navbar-wrap">
+            <ul class="navbar">
+              {% include navbar-links.html %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-5 visible-sm visible-xs">
+          <div id="burger" data-toggle="collapse" data-target="#navbar-responsive-wrap">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="navbar-responsive-wrap navbar-static-top navbar-collapse collapse" id="navbar-responsive-wrap">
+            <ul class="navbar-responsive">
+              {% include navbar-links.html %}
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-1">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container blog">
+    <div class="row">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-6">
+        {% assign minutes = content | number_of_words | divided_by:180 %}
+        <div class="category">{{ page.tag }}</div>
+        <h1 class="page-title">{{ page.title }}</h1>
+        <div class="author">By {{ page.by }}</div>
+        <div class="subtitle">{{ page.subtitle }}
+          {% if minutes <= 5 %}
+            <!-- do nothing -->
+          {% else %}
+            <span class="minutes">({{ minutes }} min read)</span>
+          {% endif %}
+        </div>
+        <div class="dash">—</div>
+        {{ content }}
+      </div>
+      <div class="col-sm-3">
+        <nav id="toc" class="hidden-print hidden-xs" data-spy="affix" data-toggle="toc"><div class="toc-header" data-spy="affix"><span class="toc-contents">Contents</span></div><span class="toc-hide">Hide</span><span class="toc-expand">Expand</span></nav>
+      </div>
+      <div class="col-sm-1"></div>
+    </div>
+    <div class="row">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-6">
+        <div class="footer-links">
+          {% for category in site.categories %}
+              {% assign catg_name = category.first %}
+              {% if catg_name == page.category %}
+                  {% assign catg_posts = category.last %}
+              {% endif %}
+          {% endfor %}
+          {% for post in catg_posts %}
+              {% if post.title == page.title %}
+                  {% unless forloop.last %}
+                      {% assign next = catg_posts[forloop.index] %}
+                      <a href="{{ site.baseurl }}{{ next.url }}">&larr;{{ next.title }}</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+                  {% endunless %}
+                  {% unless forloop.first %}
+                      <a href="{{ site.baseurl }}{{ prev.url }}">{{ prev.title }}&rarr;</a>
+                  {% endunless %}
+              {% endif %}
+              {% assign prev = post %}
+          {% endfor %}
+          {% if site.categories.blog.size > 5 %}
+            {% assign random = site.time | date: "%s%N" | modulo: site.posts.size %}
+            Random post: <a href="{{ site.baseurl }}{{ site.categories.blog[random].url }}">{{ site.categories.blog[random].title }}</a>
+          {% endif %}
+        </div>
+        <!-- {{ site.categories.blog.size > 3}} -->
+      </div>
+      <div class="col-sm-4"></div>
+    </div>
+  </div>
+
+  <script>
+
+      $( ".toc-hide" ).click(function() {
+        // $( this ).toggleClass( "gray-bg" );
+        $(".toc-contents").toggleClass( "lighter" );
+
+        if ($(this).text() == 'Hide') {
+          $(this).text("Show");
+        } else {
+          $(this).text("Hide");
+        }
+        // toggle visibility of contents, and expand button
+        $(".nav").toggle();
+        $(".toc-expand").toggle();
+      });
+
+      $( ".toc-expand" ).click(function() {
+        // $( this ).toggleClass( "gray-bg" );
+
+        if ($(this).text() == 'Expand') {
+          $(this).text("Compact");
+          $(".nav").css('display', 'block');
+        } else {
+          $(this).text("Expand");
+          $(".nav .nav").css('display', 'none');
+        }
+      });
+
+      // get current year and put it in span
+      var currYear = new Date().getFullYear()
+      $(".current-year").text(currYear);
+  </script>
+
+</body>
+
+</html>

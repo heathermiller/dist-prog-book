@@ -1,10 +1,12 @@
 ---
 layout: page
 title:  "Message Passing and the Actor Model"
+tag: "message passing"
 by: "Nathaniel Dempkowski"
+subtitle: "This is a description that will be the subtitle."
 ---
 
-# Introduction
+## Introduction
 
 Message passing programming models have essentially been discussed since the beginning of distributed computing and as a result message passing can be taken to mean a lot of things. If you look up a broad definition on Wikipedia, it includes things like Remote Procedure Calls (RPC), and Message Passing Interface (MPI). Additionally, there are popular process-calculi like the pi-calculus and Communicating Sequential Processes (CSP) which have inspired practical message passing systems. For example, Go's channels are based on the idea of first-class communication channels from the pi-calculus and Clojure's `core.async` library is based on CSP. However, when people talk about message passing today they mostly mean the actor model. It is a ubiquitous and general message passing programming model that has been developing since the 1970's and is used today to build massive scalable systems.
 
@@ -16,7 +18,7 @@ Despite the actor model's originating as far back as the 1970s, it is still bein
 
 An important framing for the actor models presented is in the question "Why message passing, and specifically why the actor model?" Given the vast number of distributed programming models out there, one might ask, why this one was so important when it was initially proposed? Why has it facilitated advanced languages, systems, and libraries that are widely used today? As we'll see throughout this chapter, some of the broadest advantages of the actor model include isolation of state managed by the given actor, scalability, and simplifying the programmer's ability to reason about their system.
 
-# Original proposal of the actor model
+## Original proposal of the actor model
 
 The actor model was originally proposed in _A Universal Modular ACTOR Formalism for Artificial Intelligence_ {% cite Hewitt:1973:UMA:1624775.1624804 --file message-passing %} in 1973 as a method of computation for artificial intelligence research. The original goal of the model was to model parallel computation in communication in a way that could be safely distributed concurrently across workstations. The paper makes few presumptions about implementation details, instead defining the high-level message passing communication model. Gul Agha developed the model further, by focusing on using actors as a basis for concurrent object-oriented programming. This work is collected in _Actors: A Model of Concurrent Computation in Distributed Systems_. {% cite Agha:1986:AMC:7929 --file message-passing %}
 
@@ -36,7 +38,7 @@ Actors attempt to process messages from their mailboxes by matching their `reque
 
 Interestingly, the original paper introducing the actor model does so in the context of hardware. They mention actors as almost another machine architecture. This paper describes the concepts of an "actor machine" and a "hardware actor" as the context for the actor model, which is totally different from the way we think about modern actors as abstracting away a lot of the hardware details we don't want to deal with. This concept is reminiscent of something like a Lisp machine, though specially built to utilize the actor model of computation for artificial intelligence.
 
-# Classic actor model
+## Classic actor model
 
 The classic actor model was formalized as a unit of computation in Agha's _Concurrent Object-Oriented Programming_. {% cite Agha:1990:COP:83880.84528 --file message-passing %} The classic actor expands on the original proposal of actors, keeping the ideas of asynchronous communication through messages between isolated units of computation and state. The classic actor contains the following primitive operations:
 
@@ -78,7 +80,7 @@ If you squint a little, this actor definition sounds similar to Alan Kay’s ori
 <footer>Alan Kay {% cite KayQuote --file message-passing %}</footer>
 </blockquote>
 
-## Concurrent Object-Oriented Programming (1990)
+### Concurrent Object-Oriented Programming (1990)
 
 One could say that the renaissance of actor models in mainstream program began with Gul Agha's work. His seminal book _Actors: A Model of Concurrent Computation in Distributed Systems_ {% cite Agha:1986:AMC:7929 --file message-passing %} and later paper, _Concurrent Object-Oriented Programming_ {% cite Agha:1990:COP:83880.84528 --file message-passing %}, offer classic actors as a natural solution to solving problems at the intersection of two trends in computing; increased distributed computing resources and the rising popularity of object-oriented programming. The paper defines common patterns of parallelism: pipeline concurrency, divide and conquer, and cooperative problem solving. It then focuses on how the actor model can be used to solve these problems in an object-oriented style, and some of the challenges that arise with distributed actors and objects, as well as strategies and tradeoffs for communication and reasoning about behaviors.
 
@@ -98,7 +100,7 @@ Splitting concerns into multiple pieces allows for the programmer to have an eas
 
 This flexibility turns out to be a highly discussed advantage which continues to be touted in modern actor systems.
 
-## Rosette
+### Rosette
 
 Rosette was both a language for concurrent object-oriented programming of actors, as well as a runtime system for managing the usage of and access to resources by those actors. Rosette {% cite Tomlinson:1988:ROC:67387.67410 --file message-passing %} is mentioned throughout Agha's _Concurrent Object-Oriented Programming_, {% cite Agha:1990:COP:83880.84528 --file message-passing %} and the code examples given in the paper are written in Rosette. Agha is even an author on the Rosette paper, so its clear that Rosette is foundational to the classic actor model. It seems to be a language which almost defines what the classic actor model looks like in the context of concurrent object-oriented programming.
 
@@ -117,7 +119,7 @@ Actors in Rosette are organized into three types of classes which describe diffe
 
 These classes represent a concrete object-oriented abstraction to organize actors which handles the practical constraints of a distributed system. It represents a step in the direction of handling not just the information flow and behavior of the system, but the underlying hardware and resources. Rosette's model feels like a direct expression of those concerns which are something every actor system in production inevitably ends up addressing.
 
-## Akka
+### Akka
 
 Akka is an effort to bring an industrial-strength actor model to the JVM runtime, which was not explicitly designed to support actors. Akka was developed out of initial efforts of [Scala Actors](#scala-actors) to bring the actor model to the JVM. There are a few notable changes from Scala Actors that make Akka worth mentioning, especially as it is being actively developed while Scala Actors is not. Some important changes are detailed in _On the Integration of the Actor Model in Mainstream Technologies: The Scala Perspective_. {% cite Haller:2012:IAM:2414639.2414641 --file message-passing %}
 
@@ -127,7 +129,7 @@ The Akka runtime also provides performance advantages over Scala Actors. The run
 
 Akka is the production-ready result of the classic actor model lineage. It is actively developed and actually used to build scalable systems. The production usage of Akka is detailed later in this chapter. Akka has been successful enough that it has been ported to other languages/runtimes. There is an [Akka.NET](http://getakka.net/) project which brings the Akka programming model to .NET and Mono using C# and F#. Akka has even been ported to JavaScript as [Akka.js](https://github.com/unicredit/akka.js/), built on top of [Scala.js](http://www.scala-js.org/).
 
-# Process-based actors
+## Process-based actors
 
 The process-based actor model is essentially an actor modeled as a process that runs from start to completion. This view is broadly similar to the classic actor, but different mechanics exist around managing the lifecycle and behaviors of actors between the models. The first language to explicitly implement this model is Erlang, {% cite Armstrong:2010:ERL:1810891.1810910 --file message-passing %} and they even say in a retrospective that their view of computation is broadly similar to the Agha's classic actor model.
 
@@ -150,7 +152,7 @@ counter(N) ->
 
 This demonstrates the use of `receive` to match on two different values of messages `tick`, which increments the counter, and `{From, read}` where `From` is a process identifier and `read` is a literal. In response to another process sending the message `tick` by doing something like `CounterId ! tick.` the process calls itself with an incremented value which demonstrates a similarity to the `become` statement, but using recursion and an argument value instead of a named behavior continuation and some state. If the counter receives a message of the form `{<processId>, read}` it will then send that process a message with the counter's processId and value, and call itself recursively with the same value.
 
-## Erlang
+### Erlang
 
 Erlang's implementation of process-based actors gets to the core of what it means to be a process-based actor. Erlang was the origin of the process-based actor model. The Ericsson company originally developed this model to program large highly-reliable fault-tolerant telecommunications switching systems. Erlang's development started in 1985, but its model of programming is still used today. The motivations of the Erlang model were around four key properties that were needed to program fault-tolerant operations:
 
@@ -191,23 +193,24 @@ This defines two processes: `on_exit` which simply spawns a `monitor` process to
 
 It is worth mentioning that Erlang achieves all of this through the Erlang Virtual Machine (BEAM), which runs as a single OS process and OS thread per core. These single OS processes then manage many lightweight Erlang processes. The Erlang VM implements all of the concurrency, monitoring, and garbage collection for Erlang processes within this VM, which almost acts like an operating system itself. This is unlike any other language or actor system described here.
 
-## Scala Actors
+### Scala Actors
 
 Scala Actors is an example of taking and enhancing the Erlang model while bringing it to a new platform. Scala Actors brings lightweight Erlang-style message-passing concurrency to the JVM and integrates it with the heavyweight thread/process concurrency models. {% cite Haller:2009:SAU:1496391.1496422 --file message-passing %} This is stated well in the original paper about Scala Actors as "an impedance mismatch between message-passing concurrency and virtual machines such as the JVM." VMs usually map threads to heavyweight processes, but that a lightweight process abstraction reduces programmer burden and leads to more natural abstractions. The authors claim that “The user experience gained so far indicates that the library makes concurrent programming in a JVM-based system much more accessible than previous techniques.”
 
 The realization of this model depends on efficiently multiplexing actors to threads. This technique was originally developed in Scala actors, and later was adopted by Akka. This integration allows for Actors to invoke methods that block the underlying thread in a way that doesn't prevent actors from making process. This is important to consider in an event-driven system where handlers are executed on a thread pool, because the underlying event-handlers can't block threads without risking thread pool starvation. The end result here is that Scala Actors enabled a new lightweight concurrency primitive on the JVM, with enhancements over Erlang's model. The Erlang model was further enhanced with Scala's pattern-matching capabilities which enable more advanced pattern-matching on messages compared to Erlang's tuple value matching. Scala Actors are of the type `Any => Unit`, which means that they are essentially untyped. They can receive literally any type and match on it with potential side effects. This behavior could be problematic and systems like Cloud Haskell and Akka aim to improve on it. Akka especially directly draws on the work of Scala Actors, and has now become the standard actor framework for Scala programmers.
 
-## Cloud Haskell
+### Cloud Haskell
 
 Cloud Haskell is an extension of Haskell which essentially implements an enhanced version of the computational message-passing model of Erlang in Haskell. {% cite epstein2011 --file message-passing %} It enhances Erlang's model with advantages from Haskell's model of functional programming in the form of purity, types, and monads. Cloud Haskell enables the use of pure functions for remote computation, which means that these functions are idempotent and can be restarted or run elsewhere in the case of failure without worrying about side-effects or undo mechanisms. This alone isn't so different from Erlang, which operates on immutable data in the context of isolated memory.
 
 One of the largest improvements over Erlang is the introduction of typed channels for sending messages. These provide guarantees to the programmer about the types of messages their actors can handle, which is something Erlang lacks. In Erlang, all you have is dynamic pattern matching based on values patterns, and the hope that the wrong types of message don't get passed around your system. Cloud Haskell processes can also use multiple typed channels to pass messages between actors, rather than Erlang's single untyped channel. Haskell's monadic types make it possible for programmers to use a programming style, where they can ensure that pure and effective code are not mixed. This makes reasoning about where side-effects happen in your system easier. Cloud Haskell has shared memory within an actor process, which is useful for certain applications. This might sound like it could cause problems, but shared-memory structures are forbidden by the type system from being shared across actors. Finally, Cloud Haskell allows for the serialization of function closures, which means that higher-order functions can be distributed across actors. This means that as long as a function and its environment are serializable, they can be spun off as a remote computation and seamlessly continued elsewhere. These improvements over Erlang make Cloud Haskell a notable project in the space of process-based actors. Cloud Haskell is currently supported and also has developed the Cloud Haskell Platform, which aims to provide common functionality needed to build and manage a production actor system using Cloud Haskell.
 
-# Communicating event-loops
+
+## Communicating event-loops
 
 The communicating event-loop model was introduced in the E language, {% cite Miller:2005:CSP:1986262.1986274 --file message-passing %} and is one that aims to change the level of granularity at which communication happens within an actor-based system. The previously described actor systems organize communication at the actor level, while the communicating event model puts communication between actors in the context of actions on objects within those actors. The overall messages still reference higher-level actors, but those messages refer to more granular actions within an actor's state.
 
-## E Language
+### E Language
 
 The E language implements a model which is closer to imperative object-oriented programming. Within a single actor-like node of computation called a "vat" many objects are contained. This vat contains not just objects, but a mailbox for all of the objects inside, as well as a call stack for methods on those objects. There is a shared message queue and event-loop that acts as one abstraction barrier for computation across actors. The actual references to objects within a vat are used for addressing communication and computation across actors and operate at a different level of abstraction.
 
@@ -262,7 +265,7 @@ This creates an object `statusHolder` with methods defined by `to` statements. A
 
 The motivation for this referencing model comes from wanting to work at a finer-grained level of references than a traditional actor exposes. The simplest example is that you want to ensure that another actor in your system can read a value, but can't write to it. How do you do that within another actor model? You might imagine creating a read-only variant of an actor which doesn't expose a write message type, or proxies only `read` messages to another actor which supports both `read` and `write` operations. In E because you are handing out object references, you would simply only pass around references to a `read` method, and you don't have to worry about other actors in your system being able to write values. These finer-grained references make reasoning about state guarantees easier because you are no longer exposing references to an entire actor, but instead the granular capabilities of the actor. Finer-grained references also enable partial failures and recoveries within an actor. Individual objects within an actor can fail and be restarted without affecting the health of the entire actor. This is in a way similar to the supervision hierarchies seen in Erlang, and even means that messages to a failed object could be queued for processing while that object is recovering. This is something that could not happen with the same granularity in another actor system, but feels like a natural outcome of object-level references in E.
 
-## AmbientTalk/2
+### AmbientTalk/2
 
 AmbientTalk/2 is a modern revival of the communicating event-loops actor model as a distributed programming language with an emphasis on developing mobile peer-to-peer applications. {% cite Cutsem:2007:AOE:1338443.1338745 --file message-passing %} This idea was originally realized in AmbientTalk/1 {% cite Dedecker:2006:APA:2171327.2171349 --file message-passing %} where actors were modelled as ABCL/1-like active objects {% cite Yonezawa:1986:OCP:960112.28722 --file message-passing %}, but AmbientTalk/2 models actors similarly to E's vats. The authors of AmbientTalk/2 felt limited by not allowing passive objects within an actor to be referenced by other actors, so they chose to go with the more fine-grained approach which allows for remote interactions between and movement of passive objects.
 
@@ -278,7 +281,7 @@ The end result of all this decoupling and isolation of computation is that it is
 
 AmbientTalk/2 is most notable as a reimagining of the communicating event-loops actor model for a modern use case. This again speaks to the broader advantages of actors and their applicability to solving the problems of distributed systems.
 
-# Active Objects
+## Active Objects
 
 Active object actors draw a distinction between two different types of objects: active and passive objects. Every active object has a single entry point defining a fixed set of messages that are understood. Passive objects are the objects that are actually sent between actors, and are copied around to guarantee isolation. This enables a separation of concerns between data that relates to actor communication and data that relates to actor state and behavior.
 
@@ -288,7 +291,7 @@ The active object model as initially described in the ABCL/1 language defines ob
 * `active`: A state in which computation is performed that is triggered when a message is received that satisfies the patterns and constraints that the actor has defined it can process.
 * `waiting`: A state of blocked execution, where the actor is active, but waiting until a certain type or pattern of message arrives to continue computation.
 
-## ABCL/1 Language
+### ABCL/1 Language
 
 The ABCL/1 language implements the active object model described above, representing a system as a collection of objects, and the interactions between those objects as concurrent messages being passed around. {% cite Yonezawa:1986:OCP:960112.28722 --file message-passing %} One interesting aspect of ABCL/1 is the idea of explicitly different modes of message passing. Other actor models generally have a notion of priority around the values, types, or patterns of messages they process, usually defined by the ordering of their receive operation, but ABCL/1 implements two different modes of message passing with different semantics. They have standard queued messages in the `ordinary` mode, but more interestingly they have `express` priority messages. When an object receives an express message it halts any other processing of ordinary messages it is performing, and processes the `express` message immediately. This enables an actor to accept high-priority messages while in `active` mode, and also enables monitoring and interrupting actors.
 
@@ -302,7 +305,7 @@ It is interesting to note that all of these modes can be expressed by the `past`
 
 The key difference here is around how this different style of actors relates to managing their lifecycle. In the active object style, lifecycle is a result of messages or requests to actors, but in other styles we see a more explicit notion of lifecycle and creating/destroying actors.
 
-## Orleans
+### Orleans
 
 Orleans takes the concept of actors whose lifecycle is dependent on messaging or requests and places them in the context of cloud applications. {% cite Bykov:2011:OCC:2038916.2038932 --file message-passing %} Orleans does this via actors (called "grains") which are isolated units of computation and behavior that can have multiple instantiations (called "activations") for scalability. These actors also have persistence, meaning they have a persistent state that is kept in durable storage so that it can be used to manage things like user data.
 
@@ -355,7 +358,7 @@ Transactions in Orleans are a way to causally reason about the different instanc
 
 All of this is a longwinded way of saying that Orleans' programmer-centric contributions are that it separates the concerns of running and managing actor lifecycles from the concerns of how data flows throughout your distributed system. It does this is a fault-tolerant way, and for many programming tasks, you likely wouldn't have to worry about scaling and reconciling data in response to requests. It provides the benefits of the actor model through a programming model that attempts to abstract away details that you would otherwise have to worry about when using actors in production.
 
-# Why the actor model?
+## Why the actor model?
 
 The actor programming model offers benefits to programmers of distributed systems by allowing for easier programmer reasoning about behavior, providing a lightweight concurrency primitive that naturally scales across many machines, and enabling looser coupling among components of a system allowing for change without service disruption. Actors enable a programmer to easier reason about their behavior because they are at a fundamental level isolated from other actors.  When programming an actor, the programmer only has to worry about the behavior of that actor and the messages it can send and receive. This alleviates the need for the programmer to reason about an entire system. Instead the programmer has a fixed set of concerns, meaning they can ensure behavioral correctness in isolation, rather than having to worry about an interaction they hadn’t anticipated occurring. Actors provide a single means of communication (message-passing), meaning that a lot of concerns a programmer has around concurrent modification of data are alleviated. Data is restricted to the data within a single actor and the messages it has been passed, rather than all of the accessible data in the whole system.
 
@@ -377,7 +380,7 @@ Finally, because actors are loosely coupled, only depending on a set of input an
 
 This is not desirable, as a key characteristic of distributed systems is availability, and the more things are linked together, the more of your system you have to take down or halt to make changes/upgrades. Actors compare favorably to other concurrent programming primitives like threads or remote procedure calls due to their low cost and loosely coupled nature. They are also programmer friendly, and ease the programmer burden of reasoning about a distributed system.
 
-# Modern usage in production
+## Modern usage in production
 
 It is important when reviewing models of programming distributed systems not to look just to academia, but to see which of these systems are actually used in industry to build things. This can give us insight into which features of actor systems are actually useful, and the trends that exist throughout these systems.
 
@@ -391,7 +394,7 @@ _On the Integration of the Actor Model in Mainstream Technologies: The Scala Per
 
 These attributes give us a good basis for analyzing whether an actor system can be successful in production. These are attributes that are necessary, but not sufficient for an actor system to be useful in production.
 
-## Failure handling
+### Failure handling
 
 One of the most important concepts and reasons people use actor systems in production is their support for failure handling and recovery. The root of this support is the previously mentioned ability for actors to supervise one another, and to have supervisors notified of failures. _Designing Reactive Systems: The Role of Actors in Distributed Architecture_ {% cite ReactiveSystems --file message-passing %} details four well-known recovery steps that a supervising actor may take when they are notified of a problem with one of their workers.
 
@@ -418,7 +421,7 @@ Critical actors can be monitored across nodes, which means that failures can be 
 
 Flexibility around failure handling is a key advantage of using actors in production systems. Supervision means that worker actors can focus on business logic, and failure-handling actors can focus on managing and recovering those actors. Actors can also be cluster-aware and have a view into the state of the entire distributed system.
 
-## Actors as a framework
+### Actors as a framework
 
 One trend that seems common among the actor systems we see in production is extensive environments and tooling. Akka, Erlang, and Orleans are the primary actor systems that see real production use, and the reason for this is that they essentially act as frameworks where many of the common problems of actors are taken care of for you. They offer support for managing and monitoring the deployment of actors as well as patterns or modules to handle problems like fault-tolerance and load balancing which every distributed actor system has to address. This allows the programmer to focus on the problems within their domain, rather than the common problems of monitoring, deployment, and composition.
 
@@ -444,7 +447,7 @@ Cloud Haskell also provides something analogous to Erlang's OTP called the Cloud
 
 Orleans is different from these as it is built from the ground up with a more declarative style and runtime. This does a lot of the work of distributing and scaling actors for you, but it is still definitely a framework which handles a lot of the common problems of distribution so that programmers can focus on building the logic of their system. Orleans takes care of the distribution of actors across machines, as well as creating new actor instances to handle increased load. Additionally, Orleans also deals with reconciliation of consistency issues across actor instantiations, as well as persistence of actor data to durable storage. These are common issues that the other industrial actor frameworks also address in some capacity using modules and extensions.
 
-## Module vs. managed runtime approaches
+### Module vs. managed runtime approaches
 
 Based on my research there have been two prevalent approaches to frameworks which are actually used to build production actor systems in industry. These are high-level philosophies about the meta-organization of an actor system. They are the design philosophies that aren't even directly considered when just looking at the base actor programming and execution models. The easiest way to describe these is are as the "module approach" and the "managed runtime approach". A high-level analogy to describe these is that the module approach is similar to manually managing memory, while the managed runtime approach is similar to garbage collection. In the module approach, you care about the lifecycle and physical allocation of actors within your system, while in the managed runtime approach you care more about the reconciliation behavior and flow of persistent state between automatic instantiations of your actors.
 
@@ -454,10 +457,10 @@ Orleans goes in another direction, which I call the managed runtime approach. In
 
 Both approaches have been successful in industry. Erlang has the famous use case of a telephone exchange and a successful history since then. Akka has an entire page detailing its usage in giant companies. Orleans has been used as a backend to massive Microsoft-scale games and applications with millions of users. It seems like the module approach is more popular, but there's only really one example of the managed runtime approach out there. There's no equivalent to Orleans on the JVM or Erlang VM, so realistically it doesn't have as much exposure in the distributed programming community.
 
-## Comparison to Communicating Sequential Processes
+### Comparison to Communicating Sequential Processes
 
 One popular model of message-passing concurrency that has been getting attention is Communicating Sequential Processes (CSP). The basic idea behind CSP is that concurrent communication between processes is done by passing messages through channels. Arguably the most popular modern implementation of this is Go's channels. A lot of the surface-level discussions of actors simply take them as something that is a lightweight concurrency primitive which passes messages. This zoomed-out view might conflate CSP-style channels and actors, but it misses a lot of subtleties as CSP really can't be considered an actor framework. The core difference is that CSP implements some form of synchronous messaging between processes, while the actor model entirely decouples messaging between a sender and a receiver. Actors are much more independent, meaning its easier to run them in a distributed environment without changing their semantics. Additionally, receiver failures don't affect senders in the actor model. Actors are a more loosely-coupled abstraction across a distributed environment, while CSP embraces tight-coupling as a means of synchronization across processes. To conflate the two misses the point of both, as actors are operating at a fundamentally different level of abstraction from CSP.
 
-# References
+## References
 
 {% bibliography --file message-passing %}
