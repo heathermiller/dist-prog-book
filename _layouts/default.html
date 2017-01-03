@@ -32,4 +32,37 @@
   </div>
 </body>
 
+<script>
+
+    $( ".toc-hide" ).click(function() {
+      // $( this ).toggleClass( "gray-bg" );
+      $(".toc-contents").toggleClass( "lighter" );
+
+      if ($(this).text() == 'Hide') {
+        $(this).text("Show");
+      } else {
+        $(this).text("Hide");
+      }
+      // toggle visibility of contents, and expand button
+      $(".nav").toggle();
+      $(".toc-expand").toggle();
+    });
+
+    $( ".toc-expand" ).click(function() {
+      // $( this ).toggleClass( "gray-bg" );
+
+      if ($(this).text() == 'Expand') {
+        $(this).text("Compact");
+        $(".nav").css('display', 'block');
+      } else {
+        $(this).text("Expand");
+        $(".nav .nav").css('display', 'none');
+      }
+    });
+
+    // get current year and put it in span
+    var currYear = new Date().getFullYear()
+    $(".current-year").text(currYear);
+</script>
+
 </html>

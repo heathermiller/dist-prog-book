@@ -5,16 +5,43 @@
   <title>{% if page.title %}{{ page.title | escape }}{% else %}{{ site.title | escape }}{% endif %}</title>
   <meta name="description" content="{% if page.excerpt %}{{ page.excerpt | strip_html | strip_newlines | truncate: 160 }}{% else %}{{ site.description }}{% endif %}">
 
+  <!-- jquery js -->
+  <script src="{{ site.baseurl }}/resources/js/vendor/jquery-1.11.0.min.js" type="text/javascript" ></script>
+
+  <!-- retina js -->
+  <script src="{{ site.baseurl }}/resources/js/vendor/retina.js" type="text/javascript" ></script>
+
+  <!-- Bootstrap JS and CSS -->
+  <!-- <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/bootstrap.min.css" type="text/css" media="screen, print"/> -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.3.0/dist/bootstrap-toc.min.css">
+  <script src="{{ site.baseurl }}/resources/js/vendor/bootstrap.min.js" type="text/javascript" ></script>
+  <script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v0.3.0/dist/bootstrap-toc.min.js"></script>
+
   <link rel="stylesheet" href="https://code.cdn.mozilla.net/fonts/fira.css">
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css?family=Alegreya+Sans:100,700i,900" rel="stylesheet">
 
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Domine:400,700" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css?family=Merriweather:300,700,700italic,300italic' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,800,600,700,400' rel='stylesheet' type='text/css'>
+
+  <!-- MathJax -->
   <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
 
-  <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/tufte.css"/>
+  <!-- <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/tufte.css"/> -->
+  <!-- <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/custom.css"/> -->
+  <!-- <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/github.css"/> -->
+
   <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/latex.css"/>
-  <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/custom.css"/>
-  <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/github.css"/>
+  <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/entypo.css" type="text/css" />
+  <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/prettify.css" type="text/css" />
+  <link rel="stylesheet" href="{{ site.baseurl }}/resources/css/blog.css" type="text/css" />
+
+  <!-- Custom javascript -->
+  <script src="{{ site.baseurl }}/resources/js/main.js" type="text/javascript" ></script>  
+
   <!-- <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}"> -->
   <link rel="alternate" type="application/rss+xml" title="{{ site.title }}" href="{{ "/feed.xml" | prepend: site.baseurl | prepend: site.url }}">
 </head>
