@@ -1,33 +1,44 @@
 ---
 layout: page
-title:  "Futures"
+tag: futures and promises
+title:  "Futures and Promises"
+subtitle: "We'll see... (1-2 sentence abstract)"
 by: "Kisalaya Prasad and Avanti Patil"
 ---
 
 ## Introduction
 
-As human beings we have an ability to multitask ie. we can walk, talk and eat at the same time except when you sneeze. Sneeze is like a blocking activity from the normal course of action, because it forces you to stop what you’re doing for a brief moment and then you resume where you left off. Activities like multitasking are called multithreading in computer lingo. In contrast to this behaviour, computer processors are single threaded. So when we say that a computer system has multi-threaded environment, it is actually just an illusion created by processor where processor’s time is shared between multiple processes. Sometimes processor gets blocked when some tasks are hindered from normal execution due to blocking calls. Such blocking calls can range from IO operations like read/write to disk or sending/receiving packets to/from network. Blocking calls can take disproportionate amount of time compared to the processor’s task execution i.e. iterating over a list.
+As human beings we have the ability to multitask _i.e._ we can walk, talk, and eat at the same time except when sneezing. Sneezing is a blocking activity because it forces you to stop what you’re doing for a brief moment, and then you resume where you left off. One can think of the human sense of multitasking as multithreading in the context of computers.
+
+Consider for a moment a simple computer processor; no parallelism, just the ability to complete one task or process at a time. In this scenario, sometimes the processor gets blocked when some blocking operation is called. Such blocking calls can range from I/O operations like reading/writing to disk, or sending or receiving packets over the network. And as programmers, we know that blocking calls can take a disproportionately more time than a typical CPU-bound task, like iterating over a list.
 
 
 The processor can either handle blocking calls in two ways:
-- **Synchronous method**: As a part of running task in synchronous method, processor continues to wait for the blocking call to complete the task and return the result. After this processor will resume processing next task. Problem with this kind of method is CPU time not utilized in an ideal manner.
-- **Asynchronous method**: When you add asynchrony, you can utilize the time of CPU to work on some other task using one of the preemptive time sharing algorithm. This is not blocking the processor at any time and when the asynchronous call returns the result, processor can again switch back to the previous process using preemption and resume the process from the point where it’d left off.
 
-In the world of asynchronous communications many terminologies were defined to help programmers reach the ideal level of resource utilization. As a part of this article we will talk about motivation behind rise of Promises and Futures, how the current notion we have of futures and promises have evolved over time, try to explain various execution models associated with it and finally we will end this discussion with how this construct helps us today in different general purpose programming languages.
+- **Synchronously**: the processor waits until the blocking call completes its task and returns the result. Afterwards, the processor will move on to processing the next task. _This can oftentimes be problematic because the CPU may not be utilized in an efficient manner; it may wait for long periods of time._
+- **Asynchronously**: When tasks are processed  asynchronously, CPU time spent waiting in the synchronous case is instead spent processing some other task using a preemptive time sharing algorithm. That is, the processor is not blocked, waiting, at any time.
+
+In the world of asynchronous programming, many tools and terminologies were introduced in order to help programmers reach ideal levels of resource utilization.
+
+In this chapter, we'll do a deep dive into futures and/or promises, a popular abstraction for doing both synchronous and asynchronous programming. We'll go through the motivation for and history of these abstractions, covering how they evolved over time. We'll cover the various modles of execution associated with these abstractions, and finally we see the different constructs that are utilized today in different general purpose programming languages such as JavaScript, Scala, and C++.
+
+Here's a brief glimpse at a timeline spanning the history of futures and promises as we know them today:
 
 
-<figure>
+<figure style="margin-left: 0px; width: 110%;">
   <img src="./images/1.png" alt="timeline" />
 </figure>
 
 ## Motivation
 
-The rise of promises and futures as a topic of relevance can be traced parallel to the rise of asynchronous or distributed systems. This seems natural, since futures represent a value available in Future which fits in very naturally with the latency which is inherent to these heterogeneous systems. The recent adoption of NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises. As we will see in further sections, this idea of having a *"placeholder for a value that might not be available"* has changed meanings over time.
+The rise of promises and futures as a topic of relevance has for the most part happened alongside of the rise of parallel and concurrent programming and distributed systems. This follows somewhat naturally, since nowadays, futures represent a value that will eventually be available _in the future_, which fits in naturally with things like latency that arise when a node must communicate with another node in a distributed system.
 
-Thunks can be thought of as a primitive notion of a Future or Promise. According to its inventor P. Z. Ingerman, thunks are "A piece of coding which provides an address". {% cite 23 --file futures %}  They were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location.
+Some notion of a future or a promise has been introduced  NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises. As we will see in further sections, this idea of having a *"placeholder for a value that might not be available"* has changed meanings over time.
+
+Thunks can be thought of as a primitive notion of a Future or Promise. According to its inventor P. Z. Ingerman, thunks are "A piece of coding which provides an address". {% cite whatisthis --file futures %}  They were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location.
 
 
-The first mention of Futures was by Baker and Hewitt in a paper on Incremental Garbage Collection of Processes. They coined the term - call-by-futures to describe a calling convention in which each formal parameter to a method is bound to a process which evaluates the expression in the parameter in parallel with other parameters. Before this paper, Algol 68 also presented a way to make this kind of concurrent parameter evaluation possible, using the collateral clauses and parallel clauses for parameter binding.
+The first mention of Futures was by Baker and Hewitt in a paper on Incremental Garbage Collection of Processes {% cite Hewitt77 --file futures %}. They coined the term, _call-by-futures_, to describe a calling convention in which each formal parameter to a method is bound to a process which evaluates the expression in the parameter in parallel with other parameters. Before this paper, Algol 68 **{% cite missingref --file futures%}** also presented a way to make this kind of concurrent parameter evaluation possible, using the collateral clauses and parallel clauses for parameter binding.
 
 
 In their paper, Baker and Hewitt introduced a notion of Futures as a 3-tuple representing an expression E consisting of (1) A process which evaluates E, (2) A memory location where the result of E needs to be stored, (3) A list of processes which are waiting on E. But, the major focus of their work was not on role of futures and the role they play in Asynchronous distributed computing, and focused on garbage collecting the processes which evaluate expressions not needed by the function.
@@ -50,7 +61,7 @@ Promises and javascript have an interesting history. In 2007 inspired by Python�
 ## Different Definitions
 
 
-Future, promise, Delay or Deferred generally refer to same synchronisation mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed.
+Future, promise, Delay or Deferred generally refer to same synchronization mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed.
 
 In some languages however, there is a subtle difference between what is a Future and a Promise.
 “A ‘Future’ is a read-only reference to a yet-to-be-computed value”.
