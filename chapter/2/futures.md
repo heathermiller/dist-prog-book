@@ -4,7 +4,7 @@ title:  "Futures"
 by: "Kisalaya Prasad and Avanti Patil"
 ---
 
-# Introduction
+## Introduction
 
 As human beings we have an ability to multitask ie. we can walk, talk and eat at the same time except when you sneeze. Sneeze is like a blocking activity from the normal course of action, because it forces you to stop what you’re doing for a brief moment and then you resume where you left off. Activities like multitasking are called multithreading in computer lingo. In contrast to this behaviour, computer processors are single threaded. So when we say that a computer system has multi-threaded environment, it is actually just an illusion created by processor where processor’s time is shared between multiple processes. Sometimes processor gets blocked when some tasks are hindered from normal execution due to blocking calls. Such blocking calls can range from IO operations like read/write to disk or sending/receiving packets to/from network. Blocking calls can take disproportionate amount of time compared to the processor’s task execution i.e. iterating over a list.
 
@@ -20,7 +20,7 @@ In the world of asynchronous communications many terminologies were defined to h
   <img src="./images/1.png" alt="timeline" />
 </figure>
 
-# Motivation
+## Motivation
 
 The rise of promises and futures as a topic of relevance can be traced parallel to the rise of asynchronous or distributed systems. This seems natural, since futures represent a value available in Future which fits in very naturally with the latency which is inherent to these heterogeneous systems. The recent adoption of NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises. As we will see in further sections, this idea of having a *"placeholder for a value that might not be available"* has changed meanings over time.
 
@@ -38,16 +38,16 @@ The Multilisp language, presented by Halestead in 1985 built upon this call-by-f
  This design of futures influenced the paper of design of Promises in Argus by Liskov and Shrira in 1988. Both futures in MultiLisp and Promises in Argus provisioned for the result of a call to be picked up later. Building upon the initial design of Future in MultiLisp, they extended the original idea by introducing strongly typed Promises and integration with call streams. Call streams are a language-independent communication mechanism connecting a sender and a receiver in a distributed programming environment. It is used to make calls from sender to receiver like normal RPC. In addition, sender could also make stream-calls where it chooses to not wait for the reply and can make further calls. Stream calls seem like a good use-case for a placeholder to access the result of a call in the future : Promises. Call streams also had provisions for handling network failures. This made it easier to handle exception propagation from callee to the caller and also to handle the typical problems in a multi-computer system. This paper also talked about stream composition. The call-streams could be arranged in pipelines where output of one stream could be used as input on next stream. This notion is not much different to what is known as promise pipelining today, which will be introduced in more details later.
 
 
-E is an object-oriented programming language for secure distributed computing, created by Mark S. Miller, Dan Bornstein, and others at Electric Communities in 1997. One of the major contribution of E was the first non-blocking implementation of Promises. It traces its routes to Joule which was a dataflow programming language. E had an eventually operator, * <- * . This created what is called an eventual send in E : the program doesn't wait for the operation to complete and moves to next sequential statement. Eventual-sends queue a pending delivery and complete immediately, returning a promise. A pending delivery includes a resolver for the promise. Further messages can also be eventually send to a promise before it is resolved. These messages are queued up and forwarded once the promise is resolved. The notion of promise pipelining in E is also inherited from Joule.
+E is an object-oriented programming language for secure distributed computing, created by Mark S. Miller, Dan Bornstein, and others at Electric Communities in 1997. One of the major contribution of E was the first non-blocking implementation of Promises. It traces its routes to Joule which was a dataflow programming language. E had an eventually operator, `* <- *` . This created what is called an eventual send in E : the program doesn't wait for the operation to complete and moves to next sequential statement. Eventual-sends queue a pending delivery and complete immediately, returning a promise. A pending delivery includes a resolver for the promise. Further messages can also be eventually send to a promise before it is resolved. These messages are queued up and forwarded once the promise is resolved. The notion of promise pipelining in E is also inherited from Joule.
 
 
-Among the modern languages, Python was perhaps the first to come up with something on the lines of E’s promises with the Twisted library. Coming out in 2002, it had a concept of Deferred objects, which were used to receive the result of an operation not yet completed. They were just like normal objects and could be passed along, but they didn’t have a value. They supported a callback which would get called once the result of the operation was complete.  
+Among the modern languages, Python was perhaps the first to come up with something on the lines of E’s promises with the Twisted library. Coming out in 2002, it had a concept of Deferred objects, which were used to receive the result of an operation not yet completed. They were just like normal objects and could be passed along, but they didn’t have a value. They supported a callback which would get called once the result of the operation was complete.
 
 
 Promises and javascript have an interesting history. In 2007 inspired by Python’s twisted, dojo came up with it’s own implementation of of dojo.Deferred. This inspired Kris Zyp to then come up with the CommonJS Promises/A spec in 2009. Ryan Dahl introduced the world to NodeJS in the same year. In it’s early versions, Node used promises for the non-blocking API. When NodeJS moved away from promises to its now familiar error-first callback API (the first argument for the callback should be an error object), it left a void for a promises API.  Q.js was an implementation of Promises/A spec by Kris Kowal around this time. FuturesJS library by AJ ONeal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 first introduced Promises to its wider and ever-growing audience. The API for JQuery was subtly different than the Promises/A spec. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces which added to the already infamous callback hell. A+ promises aimed to solve this problem. From this point on, leading from widespread adoption of A+ spec, promises was finally made a part of ECMAScript® 2015 Language Specification. Still, a lack of backward compatibility and additional features provided means that libraries like BlueBird and Q.js still have a place in the javascript ecosystem.
 
 
-# Different Definitions
+## Different Definitions
 
 
 Future, promise, Delay or Deferred generally refer to same synchronisation mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed.
@@ -66,7 +66,7 @@ A promise is a writable, single-assignment container, which completes a future. 
 An important difference between Scala and Java (6) futures is that Scala futures were asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced the Futures as the asynchronous construct which are more familiar in the distributed computing world.
 
 
-In Java 8, the Future<T> interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
+In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
 
 
 In Javascript world, Jquery introduces a notion of Deferred objects which are used to represent a unit of work which is not yet finished. Deferred object contains a promise object which represent the result of that unit of work. Promises are values returned by a function, while the deferred object can be canceled by its caller.
@@ -74,11 +74,11 @@ In Javascript world, Jquery introduces a notion of Deferred objects which are us
 
 C# also makes the distinction between futures and promises. In C#, futures are implemented as Task<T> and in fact in earlier versions of the Task Parallel Library futures were implemented with a class Future<T> which later became Task<T>. The result of the future is available in the readonly property Task<T>.Result which returns T. Tasks are asynchronous in C#.
 
-# Semantics of Execution
+## Semantics of Execution
 
 Over the years promises and futures have been implemented in different programming languages. Different languages chose to implement  futures/promises in a different way. In this section, we try to introduce some different ways in which futures and promises actually get executed and resolved underneath their APIs.
 
-## Thread Pools
+### Thread Pools
 
 Thread pools are a group of ready, idle threads which can be given work. They help with the overhead of worker creation, which can add up in a long running process. The actual implementation may vary everywhere, but what differentiates thread pools is the number of threads it uses. It can either be fixed, or dynamic. Advantage of having a fixed thread pool is that it degrades gracefully : the amount of load a system can handle is fixed, and using fixed thread pool, we can effectively limit the amount of load it is put under. Granularity of a thread pool is the number of threads it instantiates.
 
@@ -129,7 +129,7 @@ As we mentioned, Futures require an ExecutionContext, which is an implicit param
 ForkJoinPool is ideal for many small computations that spawn off and then come back together. Scala’s ForkJoinPool requires the tasks submitted to it to be a ForkJoinTask. The tasks submitted to the global ExecutionContext is quietly wrapped inside a ForkJoinTask and then executed. ForkJoinPool also supports a possibly blocking task, using ManagedBlock method which creates a spare thread if required to ensure that there is sufficient parallelism if the current thread is blocked. To summarize, ForkJoinPool is an really good general purpose ExecutionContext, which works really well in most of the scenarios.
 
 
-## Event Loops
+### Event Loops
 
 Modern systems typically rely on many other systems to provide the functionality they do. There’s a file system underneath, a database system, and other web services to rely on for the information. Interaction with these components typically involves a period where we’re doing nothing but waiting for the response back. This is single largest waste of computing resources.
 
@@ -167,7 +167,7 @@ getData = function(param, callback){
     });
 }
 
-getData(0, function(a){  
+getData(0, function(a){
     getData(a, function(b){
         getData(b, function(c){
             getData(c, function(d){
@@ -246,7 +246,7 @@ We haven’t talked about error handling, but it gets handled the same exact way
 Event loops have proven to be surprisingly performant. When network servers are designed around multithreading, as soon as you end up with a few hundred concurrent connections, the CPU spends so much of its time task switching that you start to lose overall performance. Switching from one thread to another has overhead which can add up significantly at scale. Apache used to choke even as low as a few hundred concurrent users when using a thread per connection while Node can scale up to a 100,000 concurrent connections based on event loops and asynchronous IO.
 
 
-## Thread Model
+### Thread Model
 
 
 Oz programming language introduced an idea of dataflow concurrency model. In Oz, whenever the program comes across an unbound variable, it waits for it to be resolved. This dataflow property of variables helps us write threads in Oz that communicate through streams in a producer-consumer pattern. The major benefit of dataflow based concurrency model is that it’s deterministic - same operation called with same parameters always produces the same result. It makes it a lot easier to reason about concurrent programs, if the code is side-effect free.
@@ -260,7 +260,7 @@ Any expression in Alice can be evaluated in it's own thread using spawn keyword.
 
 Alice also allows for lazy evaluation of expressions. Expressions preceded with the lazy keyword are evaluated to a lazy future. The lazy future is evaluated when it is needed. If the computation associated with a concurrent or lazy future ends with an exception, it results in a failed future. Requesting a failed future does not block, it simply raises the exception that was the cause of the failure.
 
-# Implicit vs. Explicit Promises
+## Implicit vs. Explicit Promises
 
 
 We define Implicit promises as ones where we don’t have to manually trigger the computation vs Explicit promises where we have to trigger the resolution of future manually, either by calling a start function or by requiring the value. This distinction can be understood in terms of what triggers the calculation : With Implicit promises, the creation of a promise also triggers the computation, while with Explicit futures, one needs to triggers the resolution of a promise. This trigger can in turn be explicit, like calling a start method, or implicit, like lazy evaluation where the first use of a promise’s value triggers its evaluation.
@@ -311,7 +311,7 @@ p.complete(new Foo)
 Here, we create a Promise, and complete it later. In between we stack up a set of computations which get executed once the promise is completed.
 
 
-# Promise Pipelining
+## Promise Pipelining
 
 One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
 
@@ -368,7 +368,7 @@ Promise.race([p1, p2]).then(function(value) {
 In Scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
 
 
-# Handling Errors
+## Handling Errors
 
 If world would have run without errors we would rejoice in unison, but it is not the case in programming world as well. When you run a program you either receive an expected output or an error. Error can be defined as wrong output or an exception. In a synchronous programming model, the most logical way of handling errors is a try...catch block.
 
@@ -548,18 +548,18 @@ function check(data) {
 ```
 
 
-# Futures and Promises in Action
+## Futures and Promises in Action
 
 
-## Twitter Finagle
+### Twitter Finagle
 
 
 Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any JVM-hosted language. It uses Futures to encapsulate concurrent tasks. Finagle
 introduces two other abstractions built on top of Futures to reason about distributed software :
 
-- ** Services **  are asynchronous functions which represent system boundaries.
+- **Services**  are asynchronous functions which represent system boundaries.
 
-- ** Filters ** are application-independent blocks of logic like handling timeouts and authentication.
+- **Filters** are application-independent blocks of logic like handling timeouts and authentication.
 
 In Finagle, operations describe what needs to be done, while the actual execution is left to be handled by the runtime. The runtime comes with a robust implementation of connection pooling, failure detection and recovery and load balancers.
 
@@ -584,7 +584,7 @@ def timeoutFilter(d: Duration) =
 ```
 
 
-## Correctables
+### Correctables
 Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adrian Seredinschi at OSDI ‘16, in a paper titled Incremental Consistency Guarantees for Replicated Objects. As the title suggests, Correctables aim to solve the problems with consistency in  replicated objects. They provide incremental consistency guarantees by capturing successive changes to the value of a replicated object. Applications can opt to receive a fast but possibly inconsistent result if eventual consistency is acceptable, or to wait for a strongly consistent result. Correctables API draws inspiration from, and builds on the API of Promises.  Promises have a two state model to represent an asynchronous task, it starts in blocked state and proceeds to a ready state when the value is available. This cannot represent the incremental nature of correctables. Instead, Correctables have a updating state when it starts. From there on, it remains in updating state during intermediate updates, and when the final result is available, it transitions to final state. If an error occurs in between, it moves into an error state. Each state change triggers a callback.
 
 <figure>
@@ -592,14 +592,14 @@ Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adr
 </figure>
 
 
-## Folly Futures
+### Folly Futures
 Folly is a library by Facebook for asynchronous C++ inspired by the implementation of Futures by Twitter for Scala. It builds upon the Futures in the C++11 Standard. Like Scala’s futures, they also allow for implementing a custom executor which provides different ways of running a Future (thread pool, event loop etc).
 
 
-## NodeJS Fiber
+### NodeJS Fiber
 Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for NodeJs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
 
 
-# References
+## References
 
 {% bibliography --file futures %}
