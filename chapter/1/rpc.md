@@ -53,7 +53,7 @@ Here's the code of this simple RPC server, written in Python3.
 from xmlrpc.server import SimpleXMLRPCServer
 
 # a simple RPC function that returns "Hello World!"
-def remote_procedure(n):
+def remote_procedure():
     return "Hello World!"
 
 server = SimpleXMLRPCServer(("localhost", 8080))
