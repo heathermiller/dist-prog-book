@@ -38,6 +38,13 @@ Or said another way, it is an abstraction which encodes a notion of time. By cho
 
 As we'll later see, other states have been introduced in some variations of futures/promises to better support needs like error-handling and cancellation.
 
+Importantly, futures/promises typically enable some degree of concurrency. That is, in one of first defitions of futures:
+
+<blockquote>
+  <p>The construct <code>( future X )</code> immediately returns a future for the value of the expression <code>X</code> and <strong>concurrently</strong> begins evaluating <code>X</code>. When the evaluation of <code>X</code> yields a value, that value replaces the future.</p>
+  <footer>{% cite Multilisp --file futures%}</footer>
+</blockquote>
+
 Some interpretations of futures/promises have a type associated with them, others not. Typically a future/promise is single-assignment; that is, you it can only be written to once. Some interpretations are blocking (synchronous), others are completely non-blocking (asynchronous). Some interpretations must be explicitly _kicked off_ (i.e., manually started), while in other interpretations, computation is started implicitly.
 
 Inspired by functional programming, one of the major distinctions between different interpretations of this construct have to do with _pipelineing_ or _composition_. Some of the more popular interpretations of futures/promises make it possible to _chain_ operations, or define a pipeline of operations to be invoked upon completion of the computation represented by the future/promise. This is in contrast to callback-heavy or more imperative direct blocking approaches.
@@ -100,7 +107,10 @@ Here's a brief glimpse at a timeline spanning the history of futures and promise
 
 Conceptually, futures and promises begin in 1961 with so-called _thunks_. Thunks can be thought of as a primitive notion of a Future or Promise. According to its inventor P. Z. Ingerman, thunks are:
 
-"A piece of coding which provides an address". {% cite Thunks --file futures %}
+<blockquote>
+  <p>A piece of coding which provides an address</p>
+  <footer>{% cite Thunks --file futures %}</footer>
+</blockquote>
 
 Thunks were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location. Think of a thunk as a continuation or a function that was intended to be evaluated in a single-threaded environment.
 
