@@ -71,30 +71,36 @@ Many real world services and systems today make heavy use of futures/promises in
 
 _Future_, _Promise_, _Delay_ or _Deferred_ generally refer to roughly the same synchronization mechanism where an object acts as a proxy for as-of-yet unknown result. When the result is available, some other code then gets executed. Over the years, these terms have come to refer to slightly different semantic meanings between languages and ecosystems.
 
-Sometimes, a language may have _one_ construct named future, promise, delay, deferred, etc. However, in other cases, a language may have _two_ constructs, typically referred to as futures and promises. In this case,
+Sometimes, a language may have _one_ construct named future, promise, delay, deferred, etc.
+
+However, in other cases, a language may have _two_ constructs, typically referred to as futures and promises. Languages like Scala, Java, and Dart fall into this category. In this case,
 
 - A `Future` is a read-only reference to a yet-to-be-computed value.
-- A `Promise` is a single-assignment variable which the Future refers to.
+- A `Promise` (or a `CompletableFuture`/`Completer`/etc) is a single-assignment variable which the `Future` refers to.
 
-In other words, a future is a read-only window to a value written into a promise. You can get the Future associated with a Promise by calling the future method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you Promise something, you are responsible for keeping it, but if someone else makes a Promise to you, you expect them to honor it in Future.
+In other words, a future is a read-only window to a value written into a promise. You can get the `Future` associated with a `Promise` by calling the `future` method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you _promise_ something to someone, you are responsible for keeping it, but if someone else makes a _promise_ to you, you expect them to honor it in the _future_.
 
-More technically, in Scala, “SIP-14 – Futures and Promises” defines them as follows:
-A future is a placeholder object for a result that does not yet exist.
-A promise is a writable, single-assignment container, which completes a future. Promises can complete the future with a result to indicate success, or with an exception to indicate failure.
+In Scala, they are defined as follows:
 
-An important difference between Scala and Java (6) futures is that Scala futures were asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced the Futures as the asynchronous construct which are more familiar in the distributed computing world.
+<blockquote>
+  <p>A future is a placeholder object for a result that does not yet exist.
+     A promise is a writable, single-assignment container, which completes a future. Promises can complete the future with a result to indicate success, or with an exception to indicate failure.
+  </p>
+  <footer>{% cite SIP14 --file futures%}</footer>
+</blockquote>
 
+An important difference between Scala and Java (6) futures is that Scala futures are asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced asynchronous futures to great fanfare.
 
-In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
+In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. `CompletableFutures` can be thought of as something of a promise, since their value can be explicitly set. However, `CompletableFuture` also implements the `Future` interface allowing it to be used as a `Future` as well. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
 
+In the JavaScript world, JQuery introduces a notion of `Deferred` objects which are used to represent a unit of work which is not yet finished. The `Deferred` object contains a promise object which represents the result of that unit of work. Promises are values returned by a function. The deferred object can also be canceled by its caller.
 
-In Javascript world, Jquery introduces a notion of Deferred objects which are used to represent a unit of work which is not yet finished. Deferred object contains a promise object which represent the result of that unit of work. Promises are values returned by a function, while the deferred object can be canceled by its caller.
+Like Scala and Java, C# also makes the distinction between the future and promise constructs described above. In C#, futures are called `Task<T>`s, and promises are called `TaskCompletionSource<T>`. The result of the future is available in the read-only property `Task<T>.Result` which returns `T`, and `TaskCompletionSource<T>.Task<TResult>` has methods to complete the `Task` object with a result of type `T` or with an exception or cancellation. Important to note; `Task`s are asynchronous in C#.
 
+And confusingly, the JavaScript community has standardized on a single construct known as a `Promise` which can be used like other languages' notions of futures. The Promises specification {% cite PromisesAPlus --file futures %} defines only a single interface and leaves the details of completing (or _fulfilling_) the promise to the implementer of the spec. Promises in JavaScript are also asynchronous and able to be pipelined. JavaScript promises are enabled by default in browsers that support ECMAScript 6 (EC6), or are available in a number of libraries such as [Bluebird](http://bluebirdjs.com/docs/getting-started.html) and [Q](https://github.com/kriskowal/q).
 
-C# also makes the distinction between futures and promises. In C#, futures are implemented as `Task<T>` and in fact in earlier versions of the Task Parallel Library futures were implemented with a class `Future<T>` which later became `Task<T>`. The result of the future is available in the readonly property `Task<T>`.Result which returns `T`. Tasks are asynchronous in C#.
+As we can see, concepts, semantics, and terminology seem to be a bit mixed up between languages and library implementations of futures/promises. These differences in terminology and semantics arise from the long history and independent language communities that have proliferated the use of futures/promises.
 
-These differences in terminology and semantics arise from the long history that led to
-History can tell us how all of these different terms for roughly the same concept came to be.
 
 ## History
 
