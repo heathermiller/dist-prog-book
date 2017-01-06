@@ -2,7 +2,7 @@
 layout: page
 tag: futures and promises
 title:  "Futures and Promises"
-subtitle: "We'll see... (1-2 sentence abstract)"
+subtitle: "Futures and promises are a popular abstraction for asynchronous programming, especially in the context of distributed systems. We'll cover the motivation for and history of these abstractions, and see how they have evolved over time. We’ll do a deep dive into their differing semantics, and various models of execution. This isn't only history and evolution; we’ll also dive into futures and promises most widely utilized today in languages like JavaScript, Scala, and C++."
 by: "Kisalaya Prasad, Avanti Patil, and Heather Miller"
 ---
 
@@ -31,7 +31,7 @@ In the broadest sense,
   <p>A <i>future or promise</i> can be thought of as a value that will <i>eventually</i> become available.</p>
 </blockquote>
 
-Or said another way, it is an abstraction which encodes a notion of time. By choosing to use this construct, it is assumed that your value can now have many possible states, depending on the point in time which we inspect it or use it. The simplest variation includes two time-dependent states, either a future/promise is:
+Or said another way, it is an abstraction which encodes a notion of time. By choosing to use this construct, it is assumed that your value can now have many possible states, depending on the point in time which we request it. The simplest variation includes two time-dependent states; a future/promise is either:
 
 1. **_completed_/_determined_**: the computation is complete and the future/promise's value is available.
 2. **_incomplete_/_undetermined_**: the computation is not yet complete.
@@ -44,18 +44,20 @@ Inspired by functional programming, one of the major distinctions between differ
 
 ## Motivation and Uses
 
-The rise of promises and futures as a topic of relevance has for the most part occurred alongside of the rise of parallel and concurrent programming and distributed systems. This follows somewhat naturally, since .
+The rise of promises and futures as a topic of relevance has for the most part occurred alongside of the rise of parallel and concurrent programming and distributed systems. This follows somewhat naturally, since, as an abstraction which encodes time, futures/promises introduce a nice way to reason about state changes when latency becomes an issue; a common concern faced by programmers when a node must communicate with another node in a distributed system.
 
-However promises and futures are considered useful in a number of other contexts as well;
+However promises and futures are considered useful in a number of contexts as well, both distributed and not. Some such contexts include:
 
-- request-response
-- **Long-Running Computations** Imagine you would like the process which initiated a long-running computation, such as a complex numerical algorithm, not to and to move on to process some other task.
-- exception
+- **Request-Response Patterns**, such as web service calls over HTTP. A future may be used to represent the value of the response of the HTTP request.
+- **Input/Output**, such as UI dialogs requiring user input, or operations such as reading large files from disk. A future may be used to represent the IO call and the resulting value of the IO (e.g., terminal input, array of bytes of a file that was read).
+- **Long-Running Computations**. Imagine you would like the process which initiated a long-running computation, such as a complex numerical algorithm, not to wait on the completion of that long-running computation and to instead move on to process some other task. A future may be used to represent this long-running computation and the value of its result.
+- **Database Queries**. Like long-running computations, database queries can be time-consuming. Thus, like above, it may be desirable to offload the work of doing the query to another process and move on to processing the next task. A future may be used to represent the query and resulting value of the query.
+- **RPC**. Network latency is typically an issue when making an RPC call to a server. Like above, it may be desirable to not have to wait on the result of the RPC invocation by instead offloading it to another process. A future may be used to represent the RPC call and its result; when the server responds with a result, the future is completed and its value is the server's response.
+- **Reading Data from a Socket** can be time-consuming particularly due to network latency. It may thus be desirable to not to have to wait on incoming data, and instead to offload it to another process. A future may be used to represent the reading operation and the resulting value of what it reads when the future is completed.
+- **Timeouts**, such as managing timeouts in a web service. A future representing a timeout could simply return no result or some kind of empty result like the `Unit` type in typed programming languages.
 
 
-nowadays, futures represent a value that will eventually be available _in the future_, which fits in naturally with things like latency that arise when a node must communicate with another node in a distributed system.
-
-Some notion of a future or a promise has been introduced  NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises. As we will see in further sections, this idea of having a *"placeholder for a value that might not be available"* has changed meanings over time.
+Many real world services and systems today make heavy use of futures/promises in popular contexts such as these, thanks to the notion of a future or a promise having been introduced in popular languages and frameworks such as JavaScript, NodeJS, Scala, Java, C++, amongst many others. As we will see in further sections, this proliferation of futures/promises has resulted in futures/promises changing meanings and names over time and across languages.
 
 
 ## Diverging Terminology
@@ -100,13 +102,17 @@ Conceptually, futures and promises begin in 1961 with so-called _thunks_. Thunks
 
 "A piece of coding which provides an address". {% cite Thunks --file futures %}
 
-They were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location.
+Thunks were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location. Think of a thunk as a continuation or a function that was intended to be evaluated in a single-threaded environment.
 
 The first mention of Futures was by Baker and Hewitt in a paper on Incremental Garbage Collection of Processes {% cite Hewitt77 --file futures %}. They coined the term, _call-by-futures_, to describe a calling convention in which each formal parameter to a method is bound to a process which evaluates the expression in the parameter in parallel with other parameters. Before this paper, Algol 68 **{% cite missingref --file futures%}** also presented a way to make this kind of concurrent parameter evaluation possible, using the collateral clauses and parallel clauses for parameter binding.
 
+In their paper, Baker and Hewitt introduced a notion of Futures as a 3-tuple representing an expression `E` consisting of:
 
-In their paper, Baker and Hewitt introduced a notion of Futures as a 3-tuple representing an expression E consisting of (1) A process which evaluates E, (2) A memory location where the result of E needs to be stored, (3) A list of processes which are waiting on E. But, the major focus of their work was not on role of futures and the role they play in Asynchronous distributed computing, and focused on garbage collecting the processes which evaluate expressions not needed by the function.
+1. A process which evaluates `E`,
+2. A memory location where the result of `E` needs to be stored,
+3. A list of processes which are waiting on `E`.
 
+Though importantly, the focus of their work was not on role of futures and the role they play in asynchronous distributed computing. Instead, it was focused on garbage collecting the processes which evaluate expressions that were not needed by the function.
 
 The Multilisp language, presented by Halestead in 1985 built upon this call-by-future with a Future annotation. Binding a variable to a future expression creates a process which evaluates that expression and binds x to a token which represents its (eventual) result. It allowed an operation to move past the actual computation without waiting for it to complete. If the value is never used, the current computation will not pause. MultiLisp also had a lazy future construct, called Delay, which only gets evaluated when the value is first required.
 
