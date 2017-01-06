@@ -25,7 +25,7 @@
   pages     = {727-739},
 }
 
-@article{1,
+@article{Multilisp,
  author = {Halstead,Jr., Robert H.},
  title = {MULTILISP: A Language for Concurrent Symbolic Computation},
  journal = {ACM Trans. Program. Lang. Syst.},
@@ -44,24 +44,7 @@
  address = {New York, NY, USA},
 }
 
-@inproceedings{2,
- author = {Liskov, B. and Shrira, L.},
- title = {Promises: Linguistic Support for Efficient Asynchronous Procedure Calls in Distributed Systems},
- booktitle = {Proceedings of the ACM SIGPLAN 1988 Conference on Programming Language Design and Implementation},
- series = {PLDI '88},
- year = {1988},
- isbn = {0-89791-269-1},
- location = {Atlanta, Georgia, USA},
- pages = {260--267},
- numpages = {8},
- url = {http://doi.acm.org/10.1145/53990.54016},
- doi = {10.1145/53990.54016},
- acmid = {54016},
- publisher = {ACM},
- address = {New York, NY, USA},
-}
-
-@article{3,
+@article{Promises88,
  author = {Liskov, B. and Shrira, L.},
  title = {Promises: Linguistic Support for Efficient Asynchronous Procedure Calls in Distributed Systems},
  journal = {SIGPLAN Not.},
@@ -78,6 +61,17 @@
  acmid = {54016},
  publisher = {ACM},
  address = {New York, NY, USA},
+}
+
+@article{Argus88,
+  title={Distributed programming in Argus},
+  author={Liskov, Barbara},
+  journal={Communications of the ACM},
+  volume={31},
+  number={3},
+  pages={300--312},
+  year={1988},
+  publisher={ACM}
 }
 
 @article{4,
@@ -208,7 +202,7 @@
   url = {http://stackoverflow.com/questions/14541975/difference-between-future-and-promise}
 }
 
-@misc{23,
+@misc{whatisthis,
   title={Welcome to Thunk.org!},
   url = {https://thunk.org/}
 }
@@ -329,7 +323,7 @@
  keywords = {Compiling, Lisp, functional combinations, multiprocessing, recursion, suspensions, suspensions, Compiling, functional combinations, Lisp, multiprocessing, recursion},
 }
 
-@techreport{36,
+@techreport{Hewitt77,
  author = {Baker,Jr., Henry G. and Hewitt, Carl},
  title = {The Incremental Garbage Collection of Processes},
  year = {1977},
@@ -338,7 +332,7 @@
  address = {Cambridge, MA, USA},
 }
 
-@inproceedings{37,
+@inproceedings{ELang,
  author = {Miller, Mark S. and Tribble, E. Dean and Shapiro, Jonathan},
  title = {Concurrency Among Strangers: Programming in E As Plan Coordination},
  booktitle = {Proceedings of the 1st International Conference on Trustworthy Global Computing},
@@ -352,6 +346,49 @@
  acmid = {1986274},
  publisher = {Springer-Verlag},
  address = {Berlin, Heidelberg},
+}
+
+@article{PromisePipe07,
+  title={The Promise System},
+  author = {Miller, Mark S. and Tribble, E. Dean and Jellinghaus, Rob},
+  journal={Presentation},
+  url = {http://web.archive.org/web/20071023111712/http://www.sunless-sea.net/Transcripts/promise.html},
+  year={2007}
+}
+
+@techreport{Joule,
+  title={Joule: Distributed application foundations},
+  author={Tribble, E. Dean and Miller, Mark S. and Hardy, Norm and Krieger, David},
+  number={ADd003.4P},
+  institution={Agorics, Inc.},
+  url={http://www.erights.org/history/joule/MANUAL.BK2.pdf},
+  year={1995}
+}
+
+@misc{Twisted,
+  author = {Glyph Lefkowitz},
+  title = {Twisted},
+  year = {2002},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/twisted/twisted}}
+}
+
+@misc{Qjs,
+  author = {Kris Kowal},
+  title = {Q.js},
+  year = {2009},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/kriskowal/q}}
+}
+
+@online{JQueryPromises,
+    author = {Valerio Gheri},
+    title = {JavaScript Promises and Why JQuery Implementation is Broken},
+    year = 2013,
+    url = {\url{https://thewayofcode.wordpress.com/tag/jquery-deferred-broken/}},
+    urldate = {2017-01-06}
 }
 
 @INPROCEEDINGS{38,
@@ -368,6 +405,38 @@
   author={Heather Miller},
   url = {https://speakerdeck.com/heathermiller/futures-and-promises-in-scala-2-dot-10}
 }
+
+@article{SIP14,
+  title={Futures and promises},
+  author={Haller, Philipp and Prokopec, Aleksandar and Miller, Heather and Klang, Viktor and Kuhn, Roland and Jovanovic, Vojin},
+  journal={Scala Documentation},
+  url = {http://docs.scala-lang.org/overviews/core/futures.html},
+  year={2013}
+}
+
+@article{PromisesAPlus,
+  title={Promises/A+ Specification},
+  author={Promises/A+},
+  journal={Promises/A+ Specification},
+  url = {https://promisesaplus.com/},
+  year={2013}
+}
+
+
+@article{PromisesA,
+  title={CommonJS Promises/A Specification},
+  author={Kris Zyp},
+  journal={Promises/A Specification},
+  url = {http://wiki.commonjs.org/wiki/Promises/A},
+  year={2009}
+}
+
+@misc{Ecmascript15,
+  title={ECMAScript Language Specification},
+  author={ECMAScript, ECMA and European Computer Manufacturers Association and others},
+  year={2015}
+}
+
 
 @misc{40,
   title={Futures and promises},
@@ -408,4 +477,23 @@
 @misc{47,
   title={futures},
   url = {https://www.ps.uni-saarland.de/alice/manual/futures.html}
+}
+
+@article{Thunks,
+ author = {Ingerman, P. Z.},
+ title = {Thunks: A Way of Compiling Procedure Statements with Some Comments on Procedure Declarations},
+ journal = {Commun. ACM},
+ issue_date = {Jan. 1961},
+ volume = {4},
+ number = {1},
+ month = jan,
+ year = {1961},
+ issn = {0001-0782},
+ pages = {55--58},
+ numpages = {4},
+ url = {http://doi.acm.org/10.1145/366062.366084},
+ doi = {10.1145/366062.366084},
+ acmid = {366084},
+ publisher = {ACM},
+ address = {New York, NY, USA},
 }
