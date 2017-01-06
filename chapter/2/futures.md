@@ -111,7 +111,7 @@ Here's a brief glimpse at a timeline spanning the history of futures and promise
   <img src="./images/1.png" alt="timeline" />
 </figure>
 
-Conceptually, futures and promises begin in 1961 with so-called _thunks_. Thunks can be thought of as a primitive notion of a Future or Promise. According to its inventor P. Z. Ingerman, thunks are:
+The first concept which eventually led to futures/promises appeared in 1961, with so-called _thunks_. Thunks can be thought of as a primitive, sequential notion of a future or promise. According to its inventor P. Z. Ingerman, thunks are:
 
 <blockquote>
   <p>A piece of coding which provides an address</p>
