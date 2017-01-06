@@ -3,24 +3,91 @@ layout: page
 tag: futures and promises
 title:  "Futures and Promises"
 subtitle: "We'll see... (1-2 sentence abstract)"
-by: "Kisalaya Prasad and Avanti Patil"
+by: "Kisalaya Prasad, Avanti Patil, and Heather Miller"
 ---
 
 ## Introduction
 
 As human beings we have the ability to multitask _i.e._ we can walk, talk, and eat at the same time except when sneezing. Sneezing is a blocking activity because it forces you to stop what you’re doing for a brief moment, and then you resume where you left off. One can think of the human sense of multitasking as multithreading in the context of computers.
 
-Consider for a moment a simple computer processor; no parallelism, just the ability to complete one task or process at a time. In this scenario, sometimes the processor gets blocked when some blocking operation is called. Such blocking calls can range from I/O operations like reading/writing to disk, or sending or receiving packets over the network. And as programmers, we know that blocking calls can take a disproportionately more time than a typical CPU-bound task, like iterating over a list.
+Consider for a moment a simple computer processor; no parallelism, just the ability to complete one task or process at a time. In this scenario, sometimes the processor is blocked when some blocking operation is called. Such blocking calls can include I/O operations like reading/writing to disk, or sending or receiving packets over the network. And as programmers, we know that blocking calls like I/O can take a disproportionately more time than a typical CPU-bound task, like iterating over a list.
 
-
-The processor can either handle blocking calls in two ways:
+The processor can handle blocking calls in two ways:
 
 - **Synchronously**: the processor waits until the blocking call completes its task and returns the result. Afterwards, the processor will move on to processing the next task. _This can oftentimes be problematic because the CPU may not be utilized in an efficient manner; it may wait for long periods of time._
-- **Asynchronously**: When tasks are processed  asynchronously, CPU time spent waiting in the synchronous case is instead spent processing some other task using a preemptive time sharing algorithm. That is, the processor is not blocked, waiting, at any time.
+- **Asynchronously**: When tasks are processed  asynchronously, CPU time spent waiting in the synchronous case is instead spent processing some other task using a preemptive time sharing algorithm. That is, rather than wait, process some other task instead. Thus, the processor is never left waiting at any time.
 
-In the world of asynchronous programming, many tools and terminologies were introduced in order to help programmers reach ideal levels of resource utilization.
+In the world of programming, many constructs have been introduced in order to help programmers reach ideal levels of resource utilization. Arguably one of the most widely-used of which are futures and/or promises.
 
-In this chapter, we'll do a deep dive into futures and/or promises, a popular abstraction for doing both synchronous and asynchronous programming. We'll go through the motivation for and history of these abstractions, covering how they evolved over time. We'll cover the various modles of execution associated with these abstractions, and finally we see the different constructs that are utilized today in different general purpose programming languages such as JavaScript, Scala, and C++.
+In this chapter, we'll do a deep dive into futures and promises, a popular abstraction for doing both synchronous and asynchronous programming. We'll go through the motivation for and history of these abstractions, understand what sort of scenarios they're useful for, and cover how they have evolved over time. We'll cover the various models of execution associated with these abstractions, and finally we'll touch on the futures and promises most widely utilized today in different general purpose programming languages such as JavaScript, Scala, and C++.
+
+## The Basic Idea
+
+As we'll see in subsequent sections, what we choose to call this concept, and its precise definition tends to vary. We will start with the widest possible definition of the concept of a future/promise, and later zoom in and cover the many semantic differences between different languages' interpretations of these constructs.
+
+In the broadest sense,
+
+<blockquote>
+  <p>A <i>future or promise</i> can be thought of as a value that will <i>eventually</i> become available.</p>
+</blockquote>
+
+Or said another way, it is an abstraction which encodes a notion of time. By choosing to use this construct, it is assumed that your value can now have many possible states, depending on the point in time which we inspect it or use it. The simplest variation includes two time-dependent states, either a future/promise is:
+
+1. **_completed_/_determined_**: the computation is complete and the future/promise's value is available.
+2. **_incomplete_/_undetermined_**: the computation is not yet complete.
+
+As we'll later see, other states have been introduced in some variations of futures/promises to better support needs like error-handling and cancellation.
+
+Some interpretations of futures/promises have a type associated with them, others not. Typically a future/promise is single-assignment; that is, you it can only be written to once. Some interpretations are blocking (synchronous), others are completely non-blocking (asynchronous). Some interpretations must be explicitly _kicked off_ (i.e., manually started), while in other interpretations, computation is started implicitly.
+
+Inspired by functional programming, one of the major distinctions between different interpretations of this construct have to do with _pipelineing_ or _composition_. Some of the more popular interpretations of futures/promises make it possible to _chain_ operations, or define a pipeline of operations to be invoked upon completion of the computation represented by the future/promise. This is in contrast to callback-heavy or more imperative direct blocking approaches.
+
+## Motivation and Uses
+
+The rise of promises and futures as a topic of relevance has for the most part occurred alongside of the rise of parallel and concurrent programming and distributed systems. This follows somewhat naturally, since .
+
+However promises and futures are considered useful in a number of other contexts as well;
+
+- request-response
+- **Long-Running Computations** Imagine you would like the process which initiated a long-running computation, such as a complex numerical algorithm, not to and to move on to process some other task.
+- exception
+
+
+nowadays, futures represent a value that will eventually be available _in the future_, which fits in naturally with things like latency that arise when a node must communicate with another node in a distributed system.
+
+Some notion of a future or a promise has been introduced  NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises. As we will see in further sections, this idea of having a *"placeholder for a value that might not be available"* has changed meanings over time.
+
+
+## Diverging Terminology
+
+_Future_, _Promise_, _Delay_ or _Deferred_ generally refer to roughly the same synchronization mechanism where an object acts as a proxy for as-of-yet unknown result. When the result is available, some other code then gets executed. Over the years, these terms have come to refer to slightly different semantic meanings between languages and ecosystems.
+
+Sometimes, a language may have _one_ construct named future, promise, delay, deferred, etc. However, in other cases, a language may have _two_ constructs, typically referred to as futures and promises. In this case,
+
+- A `Future` is a read-only reference to a yet-to-be-computed value.
+- A `Promise` is a single-assignment variable which the Future refers to.
+
+In other words, a future is a read-only window to a value written into a promise. You can get the Future associated with a Promise by calling the future method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you Promise something, you are responsible for keeping it, but if someone else makes a Promise to you, you expect them to honor it in Future.
+
+More technically, in Scala, “SIP-14 – Futures and Promises” defines them as follows:
+A future is a placeholder object for a result that does not yet exist.
+A promise is a writable, single-assignment container, which completes a future. Promises can complete the future with a result to indicate success, or with an exception to indicate failure.
+
+An important difference between Scala and Java (6) futures is that Scala futures were asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced the Futures as the asynchronous construct which are more familiar in the distributed computing world.
+
+
+In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
+
+
+In Javascript world, Jquery introduces a notion of Deferred objects which are used to represent a unit of work which is not yet finished. Deferred object contains a promise object which represent the result of that unit of work. Promises are values returned by a function, while the deferred object can be canceled by its caller.
+
+
+C# also makes the distinction between futures and promises. In C#, futures are implemented as `Task<T>` and in fact in earlier versions of the Task Parallel Library futures were implemented with a class `Future<T>` which later became `Task<T>`. The result of the future is available in the readonly property `Task<T>`.Result which returns `T`. Tasks are asynchronous in C#.
+
+These differences in terminology and semantics arise from the long history that led to
+History can tell us how all of these different terms for roughly the same concept came to be.
+
+## History
 
 Here's a brief glimpse at a timeline spanning the history of futures and promises as we know them today:
 
@@ -29,14 +96,11 @@ Here's a brief glimpse at a timeline spanning the history of futures and promise
   <img src="./images/1.png" alt="timeline" />
 </figure>
 
-## Motivation
+Conceptually, futures and promises begin in 1961 with so-called _thunks_. Thunks can be thought of as a primitive notion of a Future or Promise. According to its inventor P. Z. Ingerman, thunks are:
 
-The rise of promises and futures as a topic of relevance has for the most part happened alongside of the rise of parallel and concurrent programming and distributed systems. This follows somewhat naturally, since nowadays, futures represent a value that will eventually be available _in the future_, which fits in naturally with things like latency that arise when a node must communicate with another node in a distributed system.
+"A piece of coding which provides an address". {% cite Thunks --file futures %}
 
-Some notion of a future or a promise has been introduced  NodeJS and server side Javascript has only made promises more relevant. But, the idea of having a placeholder for a result came in significantly before than the current notion of futures and promises. As we will see in further sections, this idea of having a *"placeholder for a value that might not be available"* has changed meanings over time.
-
-Thunks can be thought of as a primitive notion of a Future or Promise. According to its inventor P. Z. Ingerman, thunks are "A piece of coding which provides an address". {% cite whatisthis --file futures %}  They were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location.
-
+They were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location.
 
 The first mention of Futures was by Baker and Hewitt in a paper on Incremental Garbage Collection of Processes {% cite Hewitt77 --file futures %}. They coined the term, _call-by-futures_, to describe a calling convention in which each formal parameter to a method is bound to a process which evaluates the expression in the parameter in parallel with other parameters. Before this paper, Algol 68 **{% cite missingref --file futures%}** also presented a way to make this kind of concurrent parameter evaluation possible, using the collateral clauses and parallel clauses for parameter binding.
 
@@ -56,34 +120,6 @@ Among the modern languages, Python was perhaps the first to come up with somethi
 
 
 Promises and javascript have an interesting history. In 2007 inspired by Python’s twisted, dojo came up with it’s own implementation of of dojo.Deferred. This inspired Kris Zyp to then come up with the CommonJS Promises/A spec in 2009. Ryan Dahl introduced the world to NodeJS in the same year. In it’s early versions, Node used promises for the non-blocking API. When NodeJS moved away from promises to its now familiar error-first callback API (the first argument for the callback should be an error object), it left a void for a promises API.  Q.js was an implementation of Promises/A spec by Kris Kowal around this time. FuturesJS library by AJ ONeal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 first introduced Promises to its wider and ever-growing audience. The API for JQuery was subtly different than the Promises/A spec. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces which added to the already infamous callback hell. A+ promises aimed to solve this problem. From this point on, leading from widespread adoption of A+ spec, promises was finally made a part of ECMAScript® 2015 Language Specification. Still, a lack of backward compatibility and additional features provided means that libraries like BlueBird and Q.js still have a place in the javascript ecosystem.
-
-
-## Different Definitions
-
-
-Future, promise, Delay or Deferred generally refer to same synchronization mechanism where an object acts as a proxy for a yet unknown result. When the result is discovered, promises hold some code which then gets executed.
-
-In some languages however, there is a subtle difference between what is a Future and a Promise.
-“A ‘Future’ is a read-only reference to a yet-to-be-computed value”.
-“A ‘Promise’ is a pretty much the same except that you can write to it as well.”
-
-
-In other words, a future is a read-only window to a value written into a promise. You can get the Future associated with a Promise by calling the future method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you Promise something, you are responsible for keeping it, but if someone else makes a Promise to you, you expect them to honor it in Future.
-
-More technically, in Scala, “SIP-14 – Futures and Promises” defines them as follows:
-A future is a placeholder object for a result that does not yet exist.
-A promise is a writable, single-assignment container, which completes a future. Promises can complete the future with a result to indicate success, or with an exception to indicate failure.
-
-An important difference between Scala and Java (6) futures is that Scala futures were asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced the Futures as the asynchronous construct which are more familiar in the distributed computing world.
-
-
-In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. CompletableFutures can be thought of as Promises as their value can be set. But it also implements the Future interface and therefore it can be used as a Future too. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
-
-
-In Javascript world, Jquery introduces a notion of Deferred objects which are used to represent a unit of work which is not yet finished. Deferred object contains a promise object which represent the result of that unit of work. Promises are values returned by a function, while the deferred object can be canceled by its caller.
-
-
-C# also makes the distinction between futures and promises. In C#, futures are implemented as Task<T> and in fact in earlier versions of the Task Parallel Library futures were implemented with a class Future<T> which later became Task<T>. The result of the future is available in the readonly property Task<T>.Result which returns T. Tasks are asynchronous in C#.
 
 ## Semantics of Execution
 
