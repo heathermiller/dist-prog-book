@@ -158,7 +158,7 @@ Similar to `Executor`, Scala includes is a `ExecutionContext`s as part of the `s
 
 While it's possible to use different thread pool implementations, Scala's default `ExecutionContext` implementation is backed by Java's `ForkJoinPool`; a thread pool implementation that features a work-stealing algorithm in which idle threads pick up tasks previously scheduled to other busy threads. The `ForkJoinPool` is a popular thread pool implementation due to its improved performance over `Executor`s, its ability to better avoid pool-induced deadlock, and for minimizing the amount of time spent switching between threads.
 
-Scala's futures (and promises) are based on this `ExecutionContext`. While typically users use the underlying default `ExecutionContext` which is backed by a `ForkJoinPool`, users may also elect to provide (or implement) their own `ExecutionContext` if they need a specific behavior, like blocking futures.
+Scala's futures (and promises) are based on this `ExecutionContext` interface to an underlying thread pool. While typically users use the underlying default `ExecutionContext` which is backed by a `ForkJoinPool`, users may also elect to provide (or implement) their own `ExecutionContext` if they need a specific behavior, like blocking futures.
 
 In Scala, every usage of a future or promise requires some kind of `ExecutionContext` to be passed along. This parameter is implicit, and is usually `ExecutionContext.global` (the default underlying `ForkJoinPool` `ExecutionContext`). For example, a creating and running a basic future:
 
@@ -180,13 +180,12 @@ val f = Future {
 }
 
 f.onComplete {
-  case success(response) => println(response.body)
-  case Failure(t) => println(t)
+  case Success(response) => println(response)
+  case Failure(t) => println(t.getMessage())
 }
 ```
 
-
-It is generally a good idea to use callbacks with Futures, as the value may not be available when you want to use it.
+In this example, we first create a future `f`, and when it completes, we provide two possible expressions that can be invoked depending on whether the future was executed successfully or if there was an error. In this case, if successful, we get the result of the computation an HTTP string, and we print it. Else, if an exception was thrown, we get the message string contained within the exception and we print that.
 
 So, how does it all work together?
 
