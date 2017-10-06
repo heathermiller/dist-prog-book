@@ -12,6 +12,8 @@ the programmer uses to build these systems.
 
 _**Please note that this is a work in progress, the book contents are in this repo, but we have not yet polished everything and published the final book online. Expected release: end of December**_
 
+_Note: the chapters can be viewed by manually going to `http://dist-prog-book.com/chapter/x/article-name.html`. One we finish off the chapters that need the most work, we will "release" the book by putting a proper index page in place._
+
 ## Chapters
 
 1. RPC
