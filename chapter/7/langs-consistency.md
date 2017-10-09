@@ -11,7 +11,7 @@ by: "James Larisch"
   As Aviral discussed in the previous section, many computer scientists have done a lot of thinking about the nature of distributed systems problems. As such, we realize that it's impossible to completely emulate the behavior of a single computational machine using multiple machines. For example, the network is simply not as reliable as, say, memory - and waiting for responses can result in untimeliness for the application's user base. After discussing the Consistency/Availability/Partition-tolerance theorem, Section 6 discussed how we can drill down into the CAP pyramid and choose the necessary and unnecessary properties of our systems. As stated, we can't perfectly emulate a single computer using multiple machines, but once we accept that fact and learn to work with it, there are plenty of things we *can* do!
 
 ## The Shopping Cart
-  Let's bring all these theorem talk back to reality. Let's say you're working at a new e-commerce startup, and you'd like to revolutionize the electronic shopping cart. You'd like to give the customer the ability to do the following:
+  Let's bring all this theorem talk back to reality. Let's say you're working at a new e-commerce startup, and you'd like to revolutionize the electronic shopping cart. You'd like to give the customer the ability to do the following:
   1. Log in to the site and add a candle to the cart while traveling in Beijing.
   1. Take a HyperLoop (3 hours) from Beijing to Los Angeles.
   1. Log back in, remove the candle from the cart, and add a skateboard.
@@ -33,9 +33,9 @@ This is an important moment. By thinking about our specific problem, we've reali
 Turns out there's a company out there called Amazon.com - and they've been having a similar problem. Amazon sells things on their website too, and users can add and remove things from their cart. Amazon has lots of servers spread out across the world. They also have quite a few customers. They need to ensure their customers' carts are robust: if/when servers fail or lose communication with one another, a "best-effort" should be made to display the customer's cart. Amazon acknowledges that failure, latency, or HyperLoop-traveling users can cause inconsistent cart data, depending on which server you ask. How does Amazon resolve these issues?
 
 ## Dynamo
-Amazon built DynamoDB {% cite Dynamo --file langs-consistency %}, which is basically a big distributed hash table. In other words, it's a hashmap spread across multiple computers. A user's cart would be stored as a value under the user's username as the key. (`{'james': {'candle', 'skateboard'}}`) When a user adds a new item to her cart, the cart data is replicated across a multiple machines within the network. If the client changes locations then performs another write, or if a few machines fail and later recover, it's possible for different machines to have different opinions about the state of a given user's cart.
+Amazon built DynamoDB {% cite Dynamo --file langs-consistency %}, which is basically a big distributed hash table. I won't go into the details of DHTs, but let's imagine Dynamo as a hashmap, replicated across multiple servers. A user's cart is stored as a value under the user's username as the key. (`{'james': ['candle', 'skateboard']}`) When a user adds a new item to her cart, either the entire cart or this update is sent to every other server (or, replica). Since, say, a network cable can fail, one replica may have *inconsistent state*: a different view of the universe (a shopping cart, in this case) than every other server.
 
-Dynamo has a rather unique way of dealing with these types of conflicts. Since Dynamo always wants to be available for both writes and reads (add/removes, viewing/checkouts, resp) it must have a way of combining inconsistent data. Dynamo chooses to perform this resolution at read time. When a client performs a `get()` on the user's cart, Dynamo will take the multiple conflicting carts and push them up to the application! Huh? I thought Dynamo resolves this for the programmer!? Actually, Dynamo is a generic key-value store. It detects inconsistencies in the data - but once it does, it simply tells the application (in this case the application is the shopping cart code) that there are some conflicts. The application (shopping cart, in this case) is free to resolve these inconsistencies as it pleases.
+Dynamo has a rather unique way of dealing with these types of inconsistencies. Since Dynamo always wants to be available for both writes and reads (add/removes, viewing/checkouts, resp) it must have a way of combining inconsistent data. Dynamo chooses to perform this resolution at read time. When a client performs a `get()` on the user's cart, Dynamo will query multiple servers for the cart data, for redunancy's sake. Dynamo recognizes the inconsistent state and will take the multiple conflicting carts and push them up to the application! Huh? I thought Dynamo resolves this for the programmer!? Actually, Dynamo is a rather unopinionated key-value store. It detects inconsistencies in the data - but once it does, it simply tells the application (in this case the application is the shopping cart code) that there are some conflicts. The application (shopping cart, in this case) is free to resolve these inconsistencies as it pleases.
 
 How should Amazon's shopping cart procede with resolution? It may be fed two cart states like so:
 
@@ -46,7 +46,7 @@ Red Candle       |  Red Candle
 Blue Skateboard  |  Green Umbrella
 ```
 
-Amazon doesn't want to accidently *remove* anything from your cart, so it errs on the side of inclusion. If given this particular conflict, you would see:
+Amazon doesn't want to accidently *remove* anything from your cart, so it errs on the side of inclusion. If given this particular conflict, you may see:
 
 ```
 James's Cart
@@ -58,7 +58,7 @@ Green Umbrella
 
 Dynamo has multiple machines in charge of storing the contents of your cart. When you add something to your cart, Dynamo specifies a minimum number of nodes that must receive the new data before the write is considered complete. The same thing goes for reading the contents of your cart: Dynamo requires a minimum number of healthy, responsive nodes to return cart data before relaying this data to the user. Nodes periodically gossip their local state to their neighbors to ensure that any updates, which occurred while the node may have been offline, are eventually delivered. However, Dynamo sends updates to your carts asynchronously to all replicas. This means when you read the contents of your cart, it's possible to receive different results from different replicas.
 
-### Good & Bad
+## Dynamo Simplification
 What do we love about Dynamo? It's a highly available key-value store. It replicates data well, and according to the paper, has high uptime and low latency. We love that it's *eventually consistent*. Nodes are constantly gossiping and `put`s are asynchronously propagated, so given enough time (and assuming failures are resolved), nodes' states will eventually converge. However, this property is *weak*. It's weak because when failures & conflicts occur, and [and they will occur](https://www.youtube.com/watch?v=JG2ESDGwHHY), it's up to the application developer to figure out how to handle it. Given a conflict, there isn't a one-size-fits-all solution for resolving them. In the case of the shopping cart, it's relatively trivial: our resolution strategy errs on the side of inclusion. But as a programmer, every time you use DynamoDB for a different purpose you need to consider your resolution strategy. The database doesn't provide a general solution.
 
 Instead of constructing an all-purpose database and forcing the burden of resolution on programmers, what if we constructed multi-purpose (read: multi, not *all*) data structures that required no manual resolution? These data structures would resolve conflicts inherently, themselves, and depending on your application you could choose which data structure works best for you.
@@ -71,7 +71,7 @@ Let's try this transfiguration on the shopping cart. Let's strip it down: how do
 
 Using this knowledge, let's try to construct our own shopping cart that automatically resolves conflicts.
 
-(Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at OR-Sets.)
+(Unfortunately Amazon has a leg up on our startup. Their programmers have figured out a way to add multiple instances of a single item into the cart. Users on our website can only add one "Red Candle"" to their shopping cart. This is due to a fundamental limitation in the type of CRDT I chose to exemplify. It's quite possible to have a fully functional cart. Take a look at OR-Sets. If these sentences made no sense to you, don't worry!)
 
 ### Example
 
@@ -133,9 +133,9 @@ Here is an (almost) fully functional shopping cart program. You can imagine this
 
 Hopefully it's clear that if a client adds an item to her cart in Beijing and then 10 seconds later checks her cart in Paris, she should see the same thing. Well, not exactly - remember, the network is unreliable, and Beijing's `synchronize` messages might have been dropped, delayed, or reordered. But no worries! Beijing is `synchronizing` again in another 10 seconds. This should remind you of Dynamo's gossip and propagation: nodes are constantly attempting to converge.
 
-Both systems are eventually consistent - the difference here is our Javascript shopping cart displays *strong* eventual consistency. It's strong because it requires no specialized resolution. When a node transmits its state to another node, there's absolutely no question about how to integrate that state into the current one. There's no conflict.
+Both systems are eventually consistent - the difference here is our Javascript shopping cart displays *strong* eventual consistency. It's strong because the resolution strategy is built in. In order words, the carts know *how to handle inconsistency*, rather than simply asking the programmer what to do. When a node transmits its state to another node, there's absolutely no question about how to integrate that state into the current one. There's no conflict. This is certainly an improvement from Dynamo.
 
-### The Intern
+## The Intern: A Lack of Guarantees
 Unfortunately Jerry, the intern, has found your code. He'd like to add `remove` functionality to the cart. So he makes the following changes:
 
 ```javascript
@@ -167,12 +167,14 @@ class Cart {
     if (clientAddition !== undefined) {
       this.addItem(clientAddition);
     }
+
     // JERRY WAS HERE
     var clientDeletion = Interface.nonBlockingReceiveInput():
     if (clientDeletion !== undefined) {
       this.items.delete(clientDeletion);
     }
     // END JERRY WAS HERE
+
     var receivedState = mySocket.nonBlockingRead(); // invented
     if (receivedState !== undefined) {
       this.receiveState(receivedState);
@@ -196,19 +198,19 @@ Uh-oh. Can you spot the problem? Let's break it down. In the original code, the 
 ```
 > I want to delete things. If you delete something from node 1, and intersect it's state from node 2, the item will be deleted from node 2 as well.
 
-Node 1: { A, B }
-Node 2: { A, B }
+Node1: { A, B }
+Node2: { A, B }
 
 delete(Node2, A)
 
-Node 1: { A, B }
-Node 2: { B }
+Node1: { A, B }
+Node2: { B }
 
 Node1 = Node1.intersect(Node2)
 Node1: { B }
 ```
 
-The reasoning is sound. However, there's a huge issue here. We've flipped the `union` operation on its head! Now, carts can *never* expand! They can only either stay the same size or shrink. So although Jerry's contrived example works, it's impossible to ever reach the beginning states of Node 1 and Node 2 unless those two nodes receive *the same writes*. Let's take it from the top:
+The reasoning may be sound. However, there's a huge issue here. We've flipped the `union` operation on its head! Now, carts can *never* expand! They can only either stay the same size or shrink. So although Jerry's contrived example works, it's impossible to ever reach the beginning states of Node 1 and Node 2 unless those two nodes receive *the same writes*. Let's take it from the top:
 
 ```
 Node 1: { }
@@ -231,7 +233,7 @@ Node 2: { }
 
 This is pretty nasty. Jerry has come along and with a few lines of code he's obliterated our nice strong eventually consistent code. Surely there's a better way.
 
-### Guarantees
+## Logical Monotonicity
 The original Javascript we wrote down exhibits the property from Section 6 known as logical *monotonicity*. The union operation ensures that a given node's state is always "greater than or equal to" the states of the other nodes. However, how can we be *sure* that this property is maintained throughout the development of this program? As we've seen, there's nothing stopping an intern from coming along, making a mindless change, and destroying this wonderful property. Ideally, we want to make it impossible (or at least very difficult) to write programs that violate this property. Or, at the very least, we want to make it very easy to write programs that maintain these types of properties.
 
 But where should these guarantees live? In the above Javascript example, the guarantees aren't guarantees at all, really. There's no restriction on what the programmer is allowed to do - the programmer has simply constructed a program that mirrors guarantees that she has modeled in her brain. In order to maintain properties such as *monotonicity*, she must constantly check the model in her brain against the code. We haven't really helped the programmer out that much - she has a lot of thinking to do.
@@ -242,17 +244,17 @@ Why not push the consistency guarantees in between the IO-level and the applicat
 
 Wouldn't it be great if tools like this existed?
 
-### Bloom
-Before talking about such tools, I'd like you to forget almost everything you know about programming for a second (unless of course you've never programmed in a Von Neumann-based language in which you sequentially update pieces of memory; which, by the way, you have).
+## Bloom
+Before talking about such tools, I'd like you to forget almost everything you know about programming for a second (unless of course you've never programmed in a Von Neumann-based language in which you sequentially update pieces of memory).
 
-Imagine the following scenario: you are "programming" a node in a cluster of computers. All of the other computers work as expected. When you receive a message (all messages will include an integer), your task is to save the message, increment the integer, and resend the message back to its originator. You must also send messages you've received from `stdin`. Unfortunately, the programming environment is a little strange.
+Imagine the following scenario: you are "programming" a node in a cluster of computers. All of the other computers work as expected. As a node in this cluser, when you receive a message (all messages will include an integer), your task is to save the message, increment the integer, and resend the new message with the incremented integer back to its originator. You must also send any new messages you've received from `stdin`. Unfortunately, the programming environment is a little strange.
 You have access to five sets:
-* Messages you have received in the last 5 seconds
-* Inputs you've received from `stdin` in the last 5 seconds
-* An outgoing messages set: flushed & sent every 5 seconds
-* A bucket of saved messages: *never* flushed
+* Messages you have received in the last 5 seconds (read)
+* Inputs you've received from `stdin` in the last 5 seconds (read)
+* An outgoing messages set: flushed & sent every 5 seconds (write)
+* A bucket of saved messages: *never* flushed (read/write)
 
-However, you only have access to these sets *every 5 seconds*. If messages are formatted as such: `(SOURCE, INTEGER, T)`, your sets might look like when `t = 0`. (`t` is the number of seconds elapsed)
+However, you're only given access to these sets *every 5 seconds*. If messages are formatted as such: `(SOURCE, INTEGER, T)`, your sets might look like when `t = 0`. (`t` is the number of seconds elapsed)
 
 ```
 <T = 0>
@@ -424,7 +426,7 @@ end
 
 `send_messages` operates very much like `increment_messages`, except it reads the contents of `stdin_input_set` and places them into the network channel to be sent off at an indeterminite time.
 
-#### Details
+### Details
 
 Examine Bloom's "style". Compare it to your standard way of programming. Compare it to the Javascript & Ruby timestep/callback examples. Bloom has a more "declarative" style: what does this mean? Look at our Javascript:
 
@@ -446,7 +448,7 @@ onFiveSecondInterval(function() {
 
 "Every five seconds, loop over the received messages. For each message, do this, then that, then that." We are telling the computer each step we'd like it to perform. In Bud, however, we describe the state of tables and channels at either the current or next timestep using operators and other tables and channels. We describe what we'd like our collections to include and look like, rather than what to do. You declare what you'd like the state of the world to be at the current instant and at following instants.
 
-#### Isn't this chapter about consistency?
+### Isn't this chapter about consistency?
 
 It's time to implement our shopping cart in Bloom. We are going to introduce one more collection: a `periodic`. For example, `periodic :timer 10` instantiates a new periodic collection. This collection becomes "populated" every 10 seconds. Alone, it's not all that useful. However, when `join`'d with another table, it can be used to perform actions every `x` seconds.
 
@@ -490,7 +492,7 @@ Functionally, this code is equivalent to our working Javascript shopping cart im
 
 Bloom has leveraged the montononic, add-only set and constructed a declarative programming model based around these sets. When you treat everything as sets (not unlike SQL) and you introduce the notion of "timestemps", you can express programs as descriptions of state rather than an order of operations. Besides being a rather unique model, Bloom presents an accessible and (perhaps...) safe model for programming eventually consistent programs.
 
-#### Sets only?
+### Sets only?
 Bloom's programming model is built around the set. As Aviral discussed in the previous chapter, however, sets are not the only monotonic data structures. Other CRDTs are incredibly useful for programming eventually consistent distributed programs.
 
 Recall that a *bounded join semilattice* (CRDT) can be represented as a 3-tuple: `(S, U, ⊥)`. `S` is the set of all elements within the semilattice. `U` is the `least-upper bound` operation. `⊥` is the "least" element within the set. For example, for add-only sets, `S = the set of all sets`, `U = union` and `⊥ = {}`. Elements of these semilattices, when `U` is applied, can only "stay the same or get larger". Sets can only stay the same size or get larger - they can never rollback. For some element `e` in `S`, `e U ⊥` must equal `e`.
@@ -517,7 +519,7 @@ Heather: [I am purposely leaving out morphisms & monotones for the sake of simpl
 
 This provides the user with much more freedom in terms of the types of Bloom programs she can write.
 
-#### Review
+### Review
 
 Bloom aims to provide a new model for writing distributed programs. And since bloom only allows for monotonic data structures with monotonicity-preserving operations, we're safe from Jerry the intern, right?
 
@@ -541,7 +543,7 @@ Currently Bloom exists as a Ruby prototype: Bud. Hypothetically speaking, there'
 
 All in all, Bloom provides programmers with a new model for writing distributed programs. If the user desires monotonic data structures and operations, it's relatively easy to use and reason about. Rather than blindly destroying the properties of your system, you will know exactly when you introduce a possible point of order into your program. It's up to you to decide whether or not you need to introduce coordination.
 
-### Lasp
+## Lasp
 Lasp {% cite Lasp --file langs-consistency %}is an Erlang library which aims to facilitate this type of "disorderly" programming.
 
 Lasp provides access to myriad of CRDTs. The programmer can have confidence that the CRDTs obey the lattice formal requirements. Like Bloom<sup>L</sup>, if the user desires a new lattice he or she may implement it using an interface.
@@ -574,7 +576,7 @@ Recall that within a lattice, a partial order exists. One element is always `<=`
 
 This ensures the preservation of our consistency properties across our ever-interacting processes.
 
-#### A Library
+### A Library
 
 Remember that Lasp is an Erlang *library*. Within your existing Erlang program, you're free to drop in some interacting Lasp-processes. These processes will communicate using CRDTs and functions over CRDTs. As such, your Lasp sub-program is guaranteed to exhibit strong eventual consistency properties.
 
@@ -582,7 +584,7 @@ However, the rest of your Erlang program is not. Since Lasp is embeddable, it ha
 
 Bloom provided a new model for distributed programming, where Lasp aims to provide existing distributed systems with a drop-in solution for adding eventually consistent parts to their systems.
 
-### Utilization
+## Consistency Languages: Utilization
 
 Compare Lasp and Bloom:
 
