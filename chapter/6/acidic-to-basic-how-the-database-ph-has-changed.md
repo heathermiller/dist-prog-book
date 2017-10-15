@@ -8,23 +8,23 @@ by: "Aviral Goel"
 
 Relational Database Management Systems are the most ubiquitous database systems for persisting state. Their properties are defined in terms of transactions on their data. A database transaction can be either a single operation or a sequence of operations, but is treated as a single logical operation on the data by the database. The properties of these transactions provide certain guarantees to the application developer. The acronym **ACID** was coined by Andreas Reuter and Theo Härder in 1983 to describe them.
 
-* **Atomicity** guarantees that any transaction will either complete or leave the database unchanged. If any operation of the transaction fails, the entire transaction fails. Thus, a transaction is perceived as an atomic operation on the database. This property is guaranteed even during power failures, system crashes and other erroneous situations. 
+* **Atomicity** guarantees that any transaction will either complete or leave the database unchanged. If any operation of the transaction fails, the entire transaction fails. Thus, a transaction is perceived as an atomic operation on the database. This property is guaranteed even during power failures, system crashes and other erroneous situations.
 
-* **Consistency** guarantees that any transaction will always result in a valid database state, i.e., the transaction preserves all database rules, such as unique keys. 
+* **Consistency** guarantees that any transaction will always result in a valid database state, i.e., the transaction preserves all database rules, such as unique keys.
 
-* **Isolation** guarantees that concurrent transactions do not interfere with each other. No transaction views the effects of other transactions prematurely. In other words, they execute on the database as if they were invoked serially (though a read and write can still be executed in parallel). 
+* **Isolation** guarantees that concurrent transactions do not interfere with each other. No transaction views the effects of other transactions prematurely. In other words, they execute on the database as if they were invoked serially (though a read and write can still be executed in parallel).
 
 * **Durability** guarantees that upon the completion of a transaction, the effects are applied permanently on the database and cannot be undone. They remain visible even in the event of power failures or crashes. This is done by ensuring that the changes are committed to disk (non-volatile memory).
 
 <blockquote><p><b>ACID</b>ity implies that if a transaction is complete, the database state is structurally consistent (adhering to the rules of the schema) and stored on disk to prevent any loss.</p></blockquote>
 
-Because of the strong guarantees this model simplifies the life of the developer and has been traditionally the go to approach in application development. It is instructive to examine how these properties are enforced. 
+Because of the strong guarantees this model simplifies the life of the developer and has been traditionally the go to approach in application development. It is instructive to examine how these properties are enforced.
 
 Single node databases can simply rely upon locking to ensure *ACID*ity. Each transaction marks the data it operates upon, thus enabling the database to block other concurrent transactions from modifying the same data. The lock has to be acquired both while reading and writing data. The locking mechanism enforces a strict linearizable consistency, i.e., all transactions are performed in a particular sequence and invariants are always maintained by them. An alternative, *multiversioning* allows a read and write operation to execute in parallel. Each transaction which reads data from the database is provided the earlier unmodified version of the data that is being modified by a write operation. This means that read operations don't have to acquire locks on the database. This enables read operations to execute without blocking write operations and write operations to execute without blocking read operations.
 
 This model works well on a single node. But it exposes a serious limitation when too many concurrent transactions are performed. A single node database server will only be able to process so many concurrent read operations. The situation worsens when many concurrent write operations are performed. To guarantee *ACID*ity, the write operations will be performed in sequence. The last write request will have to wait for an arbitrary amount of time, a totally unacceptable situation for many real time systems. This requires the application developer to decide on a **Scaling** strategy.
 
-### 1.2. Scaling transaction volume 
+### 1.2. Scaling transaction volume
 
 To increase the volume of transactions against a database, two scaling strategies can be considered
 
@@ -32,7 +32,7 @@ To increase the volume of transactions against a database, two scaling strategie
 
 * **Horizontal Scaling** is a more viable option and can be implemented in two ways. Data can be segregated into functional groups spread across databases. This is called *Functional Scaling*. Data within a functional group can be further split across multiple databases, enabling functional areas to be scaled independently of one another for even more transactional capacity. This is called *sharding*.
 
-Horizontal Scaling through functional partitioning enables high degree of scalability. However, the functionally separate tables employ constraints such as foreign keys. For these constraints to be enforced by the database itself, all tables have to reside on a single database server. This limits horizontal scaling. To work around this limitation the tables in a functional group have to be stored on different database servers. But now, a single database server can no longer enforce constraints between the tables. In order to ensure *ACID*ity of distributed transactions, distributed databases employ a two-phase commit (2PC) protocol. 
+Horizontal Scaling through functional partitioning enables high degree of scalability. However, the functionally separate tables employ constraints such as foreign keys. For these constraints to be enforced by the database itself, all tables have to reside on a single database server. This limits horizontal scaling. To work around this limitation the tables in a functional group have to be stored on different database servers. But now, a single database server can no longer enforce constraints between the tables. In order to ensure *ACID*ity of distributed transactions, distributed databases employ a two-phase commit (2PC) protocol.
 
 * In the first phase, a coordinator node interrogates all other nodes to ensure that a commit is possible. If all databases agree then the next phase begins, else the transaction is canceled.
 
@@ -55,22 +55,25 @@ Availability requirement implies that every request should receive a response ev
 
 ## 3. The CAP Theorem
 
-![Partitioned Network](resources/partitioned-network.jpg)
+<figure class="main-container">
+  <img src="./resources/images/partitioned-network.jpg" alt="A partitioned network" />
+  <footer>A partitioned network</footer>
+</figure>
 
 In the network above, all messages between the node set M and N are lost due to a network issue. The system as a whole detects this situation. There are two options -
 
 1. **Availability first** - The system allows any application to read and write to data objects on these nodes independently even though they are not able to communicate. The application writes to a data object on node M. Due to **network partition**, this change is not propagated to replicas of the data object in N. Subsequently, the application tries to read the value of that data object and the read operation executes in one of the nodes of N. The read operation returns the older value of the data object, thus making the application state not **consistent**.
 
-2. **Consistency first** - The system  does not allow any application to write to data objects as it cannot ensure **consistency** of replica states. This means that the system is perceived to be **unavailable** by the applications. 
+2. **Consistency first** - The system  does not allow any application to write to data objects as it cannot ensure **consistency** of replica states. This means that the system is perceived to be **unavailable** by the applications.
 
-If there are no partitions, clearly both consistency and availability can be guaranteed by the system. This observation led Eric Brewer to conjecture in an invited talk at PODC 2000- 
+If there are no partitions, clearly both consistency and availability can be guaranteed by the system. This observation led Eric Brewer to conjecture in an invited talk at PODC 2000-
 
 <blockquote>It is impossible for a web service to provide the following three guarantees:
 Consistency
 Availability
 Partition Tolerance</blockquote>
 
-This is called the CAP theorem. 
+This is called the CAP theorem.
 
 It is clear that the prime culprit here is network partition. If there are no network partitions, any distributed service will be both highly available and provide strong consistency of shared data objects. Unfortunately, network partitions cannot be remedied in a distributed system.
 
@@ -102,19 +105,19 @@ When viewed through the lens of CAP theorem and its consequences on distributed 
 ## 6. Partitions and latency
 Any large scale distributed system has to deal with latency issue. In fact, network partitions and latency are fundamentally related. Once a request is made and no response is received within some duration, the sender node has to assume that a partition has happened. The sender node can take one of the following steps:
 
-1) Cancel the operation as a whole. In doing so, the system is choosing consistency over availability. 
+1) Cancel the operation as a whole. In doing so, the system is choosing consistency over availability.
 2) Proceed with the rest of the operation. This can lead to inconsistency but makes the system highly available.
-3) Retry the operation until it succeeds. This means that the system is trying to ensure consistency and reducing availability. 
+3) Retry the operation until it succeeds. This means that the system is trying to ensure consistency and reducing availability.
 
 Essentially, a partition is an upper bound on the time spent waiting for a response. Whenever this upper bound is exceeded, the system chooses C over A or A over C. Also, the partition may be perceived only by two nodes of a system as opposed to all of them. This means that partitions are a local occurrence.
 
 ## 7. Handling Partitions
-Once a partition has happened, it has to be handled explicitly. The designer has to decide which operations will be functional during partitions. The partitioned nodes will continue their attempts at communication. When the nodes are able to establish communication, the system has to take steps to recover from the partitions. 
+Once a partition has happened, it has to be handled explicitly. The designer has to decide which operations will be functional during partitions. The partitioned nodes will continue their attempts at communication. When the nodes are able to establish communication, the system has to take steps to recover from the partitions.
 
 ### 7.1. Partition mode functionality
-When at least one side of the system has entered into partition mode, the system has to decide which functionality to support. Deciding this depends on the invariants that the system must maintain. Depending on the nature of problem, the designer may choose to compromise on certain invariants by allowing partitioned system to provide functionality which might violate them. This means the designer is choosing availability over consistency. Certain invariants may have to be maintained and operations that will violate them will either have to be modified or prohibited. This means the designer is choosing consistency over availability. 
+When at least one side of the system has entered into partition mode, the system has to decide which functionality to support. Deciding this depends on the invariants that the system must maintain. Depending on the nature of problem, the designer may choose to compromise on certain invariants by allowing partitioned system to provide functionality which might violate them. This means the designer is choosing availability over consistency. Certain invariants may have to be maintained and operations that will violate them will either have to be modified or prohibited. This means the designer is choosing consistency over availability.
 Deciding which operations to prohibit, modify or delay also depends on other factors such as the node. If the data is stored on the same node, then operations on that data can typically proceed on that node but not on other node.
-In any event, the bottomline is that if the designer wishes for the system to be available, certain operations have to be allowed. The node has to maintain a history of these operations so that it can be merged with the rest of the system when it is able to reconnect. 
+In any event, the bottomline is that if the designer wishes for the system to be available, certain operations have to be allowed. The node has to maintain a history of these operations so that it can be merged with the rest of the system when it is able to reconnect.
 Since the operations can happen simultaneously on multiple disconnected nodes, all sides will maintain this history. One way to maintain this information is through version vectors.
 Another interesting problem is to communicate the progress of these operations to the user. Until the system gets out of partition mode, the operations cannot be committed completely. Till then, the user interface has to faithfully represent their incomplete or in-progress status to the user.
 
