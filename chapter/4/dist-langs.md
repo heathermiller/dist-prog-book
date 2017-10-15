@@ -1,9 +1,8 @@
 ---
 layout: page
 title:  "Distributed Programming Languages"
-by: "Joe Schmoe and Mary Jane"
+by: "Connor Zanin"
 ---
-
 
 ## Problems of Distributed Programming
 
