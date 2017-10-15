@@ -13,7 +13,7 @@ In this section, we present an overview of these three problems and their impact
 
 ### Partial Failure
 
-In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system {% cite waldo1997 --file dist-langs.bib %}
+In the case of a crash on a local environment, either the machine has failed (total failure), or the source of the crash can be learned from a central resource manager such as the operating system. {% cite waldo1997 --file dist-langs.bib %}
 If an application consists of multiple communicating processes partial failure is possible, however because the cause of the partial failure can be determined, this kind of partial failure can be repaired given the operating system's knowledge.
 For example, a process can be restored based on a checkpoint, another process in the application can query the operating system about the failed process' state, etc.
 
@@ -22,7 +22,7 @@ In a distributed environment, there is no (reliable) central manager that can re
 Further, due to the inherent concurrency in a distributed system, nondeterminism is a problem that must be considered when designing distributed models, languages, and systems.
 Communication is perhaps the most obvious example of this; messages may be lost or arrive out-of-order.
 Finally, unlike in a local environment where failure returns control to the caller, failure may not be reported or the response may simply vanish.
-Because of this, distributed communication must be designed expecting partial failure, and be able to "fail gracefully."
+Because of this, distributed communication must be designed expecting partial failure, and be able to "fail gracefully".
 
 Several methods have been developed to deal with the problem of partial failure.
 One method, made popular with batch processing and MapReduce style frameworks, is to remember the series of computations needed to obtain a result and recompute the result in the case of failure.
@@ -42,7 +42,7 @@ In other systems, like Argus, objects are reconstructed from state that is autom
 
 ### Consistency (Concurrency)
 
-If computing on shared data can be avoided, parallel computations would not be bottlenecked by serialized accesses.
+If computing on shared data can be avoided, parallel computations will not be bottlenecked by serialized accesses.
 Unfortunately, there are many instances where operating on shared data is necessary.
 While problems with shared data can be dealt with fairly simply in the local case, distribution introduces problems that make consistency more complex.
 
@@ -86,7 +86,7 @@ Although their may be subtle timing differences that arise from contention from 
 As well, machine hardware is constant.
 There are no changes to the latency of communication channels on a single machine.
 
-Distribution introduces network topology.
+Distribution of computation introduces a network topology which changes many of the underlying assumptions around latency.
 This topology significantly (orders of magnitude) increases the latency of communication, as well as introduces a source of nondeterminism.
 At any time, routing protocols or hardware changes (or both) may cause the latency between two machines to change.
 Therefore, distributed applications may not rely on specific timings of communication in order to function.
@@ -471,12 +471,12 @@ Another definition is offered (and commonly cited) by {% cite Deursen2000 --file
 
 Generally, I would refer to a domain-specific language (DSL) as a *system*, be it a standalone language, compiler extension, library, set of macros, etc., that is designed for a set of cohesive operations to be easily expressed.
 
-For example, the python twitter library is designed for easily expressing operations that manage a twitter account.
+For example, the Python Twitter library is designed for easily expressing operations that manage a Twitter account.
 
 The problem in defining this term (I believe) is the the vagueness of the components *domain* and *language*.
 Depending on the classification, a set of problems designated in a certain domain may span a "wide" or "narrow" scope.
-For example, does "tweeting" qualify as a domain (within the twitter library)?
-Would "social media sharing" qualify as a domain (containing the twitter library)?
+For example, does "tweeting" qualify as a domain (within the Twitter library)?
+Would "social media sharing" qualify as a domain (containing the Twitter library)?
 For my purposes I will accept the definition of a domain as a "well-defined, cohesive set of operations."
 
 It is also difficult to come up with a definition for a language.
@@ -511,7 +511,6 @@ DSL's that are implemented as full languages with unique compilers are unattract
 Another problem that drives DSL development towards libraries is ecosystem.
 In order for a DSL to be adopted, there must be a body of developers that can incorporate the DSL into existing systems.
 If either (1) the DSL does not incorporate well with existing code bases or (2) the DSL requires significant investment to learn, adoption will be less likely.
-
 
 ## References
 
