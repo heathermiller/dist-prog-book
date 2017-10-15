@@ -19,30 +19,32 @@ Early designs of distributed programming models in the late 1970s focused on *bu
 The different approaches to implementing a distributed programming model differ on the tradeoffs they offer to both language designers and users.
 
 ### Clean-slate language implementations
-A straightforward approach to implementing a new language is to start from scratch. Beginning with a clean slate offers several advantages. First, the implementor has complete control (up to what they are willing and able to implement) over every aspect of the design. Second, some elements of language design are difficult to integrate with other languages. Type systems are a good example of the problem. How to combine the designs of two type systems into one that has the properties of both is an open problem. If types play a prominent role in the language than starting anew may be the only option. However, as explained below, this strategy has apparent drawbacks not only in term of implementation effort for the creator(s) but also for users.
+
+A straightforward approach to implementing a new language is to start from scratch. Beginning with a clean slate offers several advantages. First, the implementor has complete control (up to what they are willing and able to implement) over every aspect of the design. Second, some elements of language design are difficult to integrate with other languages. Type systems are a good example of the problem. How to combine the designs of two type systems into one that has the properties of both is an open problem. If types play a prominent role in the language then starting anew may be the only option. However, this strategy has apparent drawbacks not only in term of implementation effort for the creator(s) but also for users.
 
 ### Extension to an existing language
+
 Another option is to use another language as a starting point and modify that language’s implementation for your own purposes. Think of it as forking a compiler and/or runtime and then making your own modifications. An advantage of this approach is the savings in implementation effort. If the computation models coincide then the language designer only has to implement the communication model and fault-tolerance strategy. Another plus is that users of the existing language may be more likely to consider trying or adopting the new language since it is only a step away from what they already know. A downside for maintaining any fork is keeping up to date with upstream changes.
 
 ### Library
+
 The final approach to consider is similar to extending a language, but this time doing so only by writing code in that language to create new abstractions implementing a language model. This strategy offers similar savings in implementation effort to extending a language (perhaps more so). But a major benefit is that is significantly easier for users to use and adopt; the only new concepts they must learn are the specifics of the programming model, as opposed to other concerns such as syntax.
 
 ## Roadmap
+
 Language designers have explored a broad spectrum of designs for distributed programming models.
 
 ### Actors
-One common sense and popular approach to extending a language for distribution is to implement the constructs of the Actor model (discussed in chapter 3). This is the approach taken by Termite Scheme, CloudHaskell, and Scala Actors to name a few. Doing so requires two steps: first, implementing facilities for spawning and linking actors and sending and receiving messages; and second, fitting actor-style concurrency on top of the language’s concurrency model.
 
+One common sense and popular approach to extending a language for distribution is to implement the constructs of the Actor model (discussed in chapter 3). This is the approach taken by Termite Scheme, CloudHaskell, and Scala Actors to name a few. Doing so requires two steps: first, implementing facilities for spawning and linking actors and sending and receiving messages; and second, fitting actor-style concurrency on top of the language’s concurrency model.
 
 Erlang/OTP {% cite Erlang --file langs-extended-for-dist %} is a language designed with the intention of building resilient distributed applications for operating telephony switches. Erlang provides a simple base language and an extensive library of facilities for distribution. Erlang/OTP fits into the Actor model of distribution: the basic agents in a system are processes which communicate by sending messages to each other. Erlang/OTP stands out for the extent to which fault tolerance is considered. Erlang programmers are encouraged to think about failure as a routine occurrence and provides libraries for describing policies on how to handle such failures. Chapter 3 includes a more detailed overview of Erlang.
 
 TermiteScheme {% cite TermiteScheme --file langs-extended-for-dist %} is an extension to a Scheme language with constructs for Erlang-style distribution. The primary innovations of Termite are found by leveraging features of the host language. In particular, the features of interest are macros and continuations.
 
-Macros allow users or library developers to design higher-level abstractions than
-the actor model and treat them as first-class in the language. Macros are a very powerful tool for abstraction. They allow library authors to elevate many patterns, such as patterns of communication, to first-class constructs. A simple example is a construct for RPC implemented by TermiteScheme as a macro expanding to a send followed by a receive.
+Macros allow users or library developers to design higher-level abstractions than the actor model and treat them as first-class in the language. Macros are a very powerful tool for abstraction. They allow library authors to elevate many patterns, such as patterns of communication, to first-class constructs. A simple example is a construct for RPC implemented by TermiteScheme as a macro expanding to a send followed by a receive.
 
-A continuation is a concrete representation of how to finish computation of a program. A helpful analogy is to the call-stack in a procedural language. The call-stack tells you, once you’ve finished the current procedure, what to do next. Likewise, a continuation tells you, once you’ve finished evaluating the current expression, what to do next. Languages with first-class continuations have a way of reifying this concept, historically named `call/cc`, an abbreviation for `call-with-current-continuation`. First-class continuations allow for simple process migration; a process can capture its continuation and use that as the behavior of a spawned
-actor on another node.
+A continuation is a concrete representation of how to finish computation of a program. A helpful analogy is to the call-stack in a procedural language. The call-stack tells you, once you’ve finished the current procedure, what to do next. Likewise, a continuation tells you, once you’ve finished evaluating the current expression, what to do next. Languages with first-class continuations have a way of reifying this concept, historically named `call/cc`, an abbreviation for `call-with-current-continuation`. First-class continuations allow for simple process migration; a process can capture its continuation and use that as the behavior of a spawned actor on another node.
 
 In addition to supporting the classic actor style which places few if any constraints on what messages may be sent, Haskell and Scala based implementations leverage the host language's powerful type system to create more structured communication patterns. Both CloudHaskell and Akka, the successor to Scala Actors, provide *typed channels* between actors. For example, the type checker will reject a program where an actor expecting to receive numbers is instead sent a string. Anecdotally, typed actors in Akka are not commonly used. This might suggest that errors due to incorrect message types are not that serious of a concern for users.
 
@@ -70,7 +72,7 @@ extern val alert : string -> unit @ home
 do alert [Hello, home!]
 ```
 
-This snippet declares a location in the system called `home` that can execute Javascript code. Additionally, there is a function named `alert` that can be used from the location `home` (defined through an interface to plain Javascript). The last line is an example of calling the `alert` function with the string `”Hello, home!”` (yes, strings are in brackets).
+This snippet declares a location in the system called `home` that can execute Javascript code. Additionally, there is a function named `alert` that can be used from the location `home` (defined through an interface to plain Javascript). The last line is an example of calling the `alert` function with the String `"Hello, home!"`. (In ML5 the String type is indicated by square brackets)
 
 A slightly more complex example (again from {% cite ML5 --file langs-extended-for-dist %}) demonstrates movement between locations:
 
@@ -81,21 +83,23 @@ extern val version : unit -> string @ server
 extern val alert : string -> unit @ home
 do alert (from server get version ())
 ```
+
 This example features two locations (worlds), the default `home` location and one named `server`. As before, we can call `alert` from `home`, but now we can also call `version` on `server`. Locations access one another using addresses; the declaration of `server` as a `server addr @ home` says that the home location knows the address of the `server` location and can therefore access `version`.
 
-ML5 does not consider fault-tolerance. For the web front/back-end examples this is perhaps not too big of an issue. Still, the absence of a compelling strategy for handling failures is a shortcoming of the design. Since `home` is the default location, the same way that `main` is the default entry point for C programs, this program typechecks. An error would be raised if the `alert` function was called from a different location.
+ML5 does not consider fault-tolerance. For the web front/back-end examples this is perhaps not too big of an issue, but the absence of a compelling strategy for handling failures is a shortcoming of the design. Since `home` is the default location, the same way that `main` is the default entry point for C programs, this program typechecks. An error would be raised if the `alert` function was called from a different location.
 
 AliceML {% cite Alice --file langs-extended-for-dist %} is an example of another extension to SML. AliceML leverages SML's advanced module system to explore building *open* distributed systems. Open systems are those where each node is only loosely coupled to its peers, meaning it allows for dynamic update and replacements. AliceML enables this by forcing components to program to interfaces and dynamically type-checking components as they enter the system.
 
 ### Objects
-Object-Oriented languages have been extended for distribution in various fashions. Objects are an appealing model for agents in a distributed system. Indeed, Alan Kay's metaphor of objects as miniature computers and method invocation as message passing {% cite smalltalkHistory --file langs-extended-for-dist %} seems directly evocative of distributed systems.
 
-Eden {% cite Eden --file langs-extended-for-dist %} was an early pioneer (the project began in 1979) in both distributed and object-oriented programming languages. In fact, Eden can be classified as a language extended for distribution: Eden applications “were written in the Eden Programming Language (EPL) — a version of Concurrent Euclid to which the Eden team had added support for remote object invocation” {% cite bhjl07 --file langs-extended-for-dist %}. However, Eden did not take full advantage of the overlap (namely, objects) between
-the computation and distribution models.
+Object-Oriented languages have been extended for distribution in various fashions. Objects are an appealing model for agents in a distributed system. Alan Kay's metaphor of objects as miniature computers and method invocation as message passing {% cite smalltalkHistory --file langs-extended-for-dist %} seems directly evocative of distributed systems.
+
+Eden {% cite Eden --file langs-extended-for-dist %} was an early pioneer (the project began in 1979) in both distributed and object-oriented programming languages. Eden can be classified as a language extended for distribution: Eden applications “were written in the Eden Programming Language (EPL) — a version of Concurrent Euclid to which the Eden team had added support for remote object invocation” {% cite bhjl07 --file langs-extended-for-dist %}. However, Eden did not take full advantage of the overlap (namely, objects) between the computation and distribution models.
 
 See Chapter 4 for a more extensive overview of the languages using an object-based model for distribution, such as Emerald, Argus, and E.
 
 ### Batch Processing
+
 Another common extension is in the domain of batch processing large-scale data. MapReduce (and correspondingly Hadoop) is the landmark example of a programming model for distributed batch processing. Essentially, batch processing systems present a restricted programming model. For example, MapReduce programs must fit into the rigid model of two-step produce then aggregate. A restricted model alllows the system to make more guarantees, such as for fault tolerance. Subsequently language designers have sought to increase the expressiveness of the programming models and to boost performance. Chapter 8 covers batch processing languages in more detail.
 
 MBrace {% cite MBrace --file langs-extended-for-dist %} is an extension to the F# programming language for writing computations for clusters. MBrace provides a *monadic* interface (point to something about monads here) which allows for building cluster jobs out of smaller jobs while still exploiting available parallelism. MBrace is a framework that features its own runtime for provisioning, scheduling, and monitoring nodes in a cluster.
@@ -106,15 +110,16 @@ Batch processing systems offer an interesting take on how to handle fault tolera
 
 Several languages explore designs for ensuring the *consistency* of distributed applications, or the requirement that each node agree on some state. CRDTs are a family of distributed data structures that maintain consistency. Chapter 6 explains consistency and CRDTS in further detail while chapter 7 takes a closer look at the following languages.
 
-Dedalus {% cite Dedalus --file langs-extended-for-dist %} and Bloom {% cite Bloom --file langs-extended-for-dist %} both represent uses of a logic-programming based attempt to design languages providing consistency guarantees. Dedalus is meant to provide the underlying model of distribution while Bloom provides a high-level language intended to be usable for creating applications. Logic-programming is an attractive model because execution is order-independent. Using Datalog, a logic-programming language, as the computation model encourages programmers to develop applications that are agnostic to message-reorderings. Bloom is implemented as a Ruby library BUD.
+Dedalus {% cite Dedalus --file langs-extended-for-dist %} and Bloom {% cite Bloom --file langs-extended-for-dist %} both represent uses of a logic-programming based attempt to design languages providing consistency guarantees. Dedalus is meant to provide the underlying model of distribution while Bloom provides a high-level language intended to be usable for creating applications. Logic-programming is an attractive model because execution is order-independent. Using Datalog, a logic-programming language, as the computation model encourages programmers to develop applications that are agnostic to message-reorderings. Bloom is implemented as a Ruby library called Bud (Bloom Under Development).
 
 Lasp {% cite Lasp --file langs-extended-for-dist %} is a language model where CRDTs are the only distributed data. CRDT sets are the primary data structure and Lasp programs are built by composing set transformations such as maps, filters, and folds.
 
 Lasp is implemented as an Erlang library. In practice, applications using Lasp are free to use other forms of distributed data, but consistency is only promised for the library-provided tools. Lasp nodes then share the same fault-tolerance platform as Erlang applications.
 
-Lasp’s programming model is very restrictive; sets are the primary data structure and folding operations. Future work may show how to enrich the programming model while still making the same strong consistency guarantees.
+Lasp’s programming model is very restrictive; sets are the primary data structure and folding operations are the primary operations provided. Future work may show how to enrich the programming model while still making the same strong consistency guarantees.
 
 ### Tuplespaces
+
 Linda {% cite Linda --file langs-extended-for-dist %} is a distributed programming model more in the vein of shared memory than message passing. Linda programs are a collection of processes and a shared *tuplespace*. The tuplespace holds an unordered collection of tuples. A process adds data to the tuplespace using the `out` form. The `in` form takes a *pattern* and removes and returns a tuple matching the pattern from the tuplespace, blocking until one such appears.
 
 A simple example demonstrating communication in Linda:
@@ -122,17 +127,17 @@ A simple example demonstrating communication in Linda:
 ```
 ;; INITIALLY the tuplespace is empty
 ;; Process A
-out (“Hello”, “from process A”);
+out ("Hello", "from process A");
 
-;; after Process A executes the tuplespace contains one record, (“Hello”, “from process A”)
+;; after Process A executes the tuplespace contains one record, ("Hello", "from process A")
 
 ;; Process B
-in(“Hello”, x);
-;; x = “from process A”
+in("Hello", x);
+;; x = "from process A"
 ;; the tuplespace is empty again
 ```
 
-If the tuplespace was not empty but instead contained tuples of some for *besides* 2-entry tuples where the first element was the string `”Hello”` the above interaction would remain unchanged. However, if some process C had entered the tuple `(“Hello”, “I am process C”)` then
+If the tuplespace was not empty but instead contained tuples of some for *besides* 2-entry tuples where the first element was the string `"Hello"` the above interaction would remain unchanged. However, if some process C had entered the tuple `("Hello", "I am process C")` then
 B would receive either A’s or B’s tuple with one of the tuples remaining in the tuplespace.
 
 The Linda model of distribution has several advantages. Linda processes are not only spatially decoupled (able to execute on different machines, as in actor implementations) but *temporally* decoupled as well. That is, a Linda process can communicate with other processes even after it exits! Tuples remain in the shared space even after the process that created them exits. Therefore a different process can receive those tuples at any point in the future. Another point is that Linda processes don’t need to know the identities of the other process it communicates with. Unlike actors, which in order to send a message need to know the address of the other actor’s mailbox, Linda processes operate entirely through their connection to the tuplespace. Processes need to “know exactly as much about one another as is appropriate for the programming situation at hand” {% cite Linda --file langs-extended-for-dist %}.
@@ -143,7 +148,7 @@ Maintaining the consistency of the tuplespace is of paramount importance for Lin
 
 ## Discussion
 
-The line between a language and a library can be extremely blurry {% cite LanguagesAsLibraries --file langs-extended-for-dist %}. A language provides some building blocks and forms for combining and composing {% cite 700pl --file langs-extended-for-dist %}. For example, numbers, strings, and Booleans are common primitive building blocks. Operations like addition, concatenation, and negation offer ways of combining such blocks. More interesting operations allow *abstraction* over parts of the language: function (or λ) abstraction allows for creating operations over all numbers. Objects provide a way of combining data and functions in a way that abstracts over particular implementation details. Most importantly, a language defines the *semantics*, or meaning, of such operations.
+The line between a language and a library can be extremely blurry {% cite LanguagesAsLibraries --file langs-extended-for-dist %}. A language provides some building blocks and forms for combining and composing. {% cite 700pl --file langs-extended-for-dist %} For example, numbers, strings, and Booleans are common primitive building blocks. Operations like addition, concatenation, and negation offer ways of combining such blocks. More interesting operations allow *abstraction* over parts of the language: function (or λ) abstraction allows for creating operations over all numbers. Objects provide a way of combining data and functions in a way that abstracts over particular implementation details. Most importantly, a language defines the *semantics*, or meaning, of such operations.
 
 Many libraries can be described in the same way. The first-order values provided by a library are the primitives while the provided functions, classes, or objects perform combination and composition. A library can implement the primitives and operations such that they are in correspondence with the forms and semantics defined by a language.
 
