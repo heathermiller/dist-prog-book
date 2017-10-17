@@ -6,29 +6,28 @@ by: "Aviral Goel"
 
 Counters are replicated integers. They are the most basic distributed object. This chapter describes the different variations of counter CRDT in both state based and operation based form.
 
-## 1. G-counter - Increment only counter
+## G-counter - Increment only counter
 
 As the name suggests, these counters only support increment operation. They can be used to implement the `like` button functionality of social media websites.
 
-### 1.1. CmRDT: Operation based design
+### CmRDT: Operation based design
 
 In the operation based implementation, the increment operation is transmitted to all other replicas. 
 This is straightforward to implement as there is only one update operation. 
 
-<pre style="background:#fff;color:#000"><span style="color:#ff5600">class</span> <span style="color:#21439c">Counter</span>(CmRDT):
+```python
+class Counter(CmRDT):
+    def __init__(self):
+        self._count = 0
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c"><span style="color:#a535ae">__init__</span></span>(self):         <span style="color:#919191"># constructor function</span>
-        self._count <span style="color:#ff5600">=</span> 0
+    def value(self): 
+        return self._count
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">value</span>(self):            <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> self._count
-
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increment</span>(self):        <span style="color:#919191"># update function</span>
-        self._count <span style="color:#ff5600">+=</span> 1
-        <span style="color:#ff5600">for</span> replica <span style="color:#ff5600">in</span> self.replicas():
-            self.transmit(<span style="color:#00a33f">"increment"</span>, replica)
-
-</pre>
+    def increment(self):
+        self._count += 1
+        for replica in self.replicas():
+            self.transmit("increment", replica)
+```
 
 Let's try to understand how it works through an example. The figure below shows an execution trace of three replicas confirming to this specification. In accordance with the specification, each increment request increments the counter locally by one unit and the operation is transmitted by the replica to all other replicas of the system.
 
@@ -44,7 +43,7 @@ We can make the following observations:
 
 * **Concurrent operations** - A replica may have to handle concurrent operations. For example, at *t<sub>19</sub>*, <b>c<sub>1</sub></b> encounters two increment operations. Since its the same operation, there is only one way to handle the situation. There is no conflict.
 
-### 1.2. CvRDT: State based design
+### CvRDT: State based design
 
 In the state based implementation, the counter state is transmitted to all other replicas.
 But how do we model the state? Of course, the counter's count is its state. 
@@ -52,24 +51,23 @@ Since the count always increases, modeling the state as count automatically make
 
 The code below provides the specification of this counter.
 
-<pre style="background:#fff;color:#000"><span style="color:#ff5600">class</span> <span style="color:#21439c">Counter</span>(CvRDT):
+```python
+class Counter(CvRDT):
+    def __init__(self, count = 0):  
+        self._count = count
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c"><span style="color:#a535ae">__init__</span></span>(self, count <span style="color:#ff5600">=</span> 0):  <span style="color:#919191"># constructor function</span>
-        self._count <span style="color:#ff5600">=</span> count
+    def value(self):                
+        return self._count
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">value</span>(self):                <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> self._count
+    def increment(self):            
+        self._count += 1
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increment</span>(self):            <span style="color:#919191"># update function</span>
-        self._count <span style="color:#ff5600">+=</span> 1
+    def compare(self, other):       
+        return self.value() <= other.value()
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">compare</span>(self, other):       <span style="color:#919191"># comparison function</span>
-        <span style="color:#ff5600">return</span> self.value() <span style="color:#ff5600">&lt;=</span> other.value()
-
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">merge</span>(self, other):         <span style="color:#919191"># merge function</span>
-        <span style="color:#ff5600">return</span> Counter(<span style="color:#a535ae">max</span>(self.value(), other.value()))
-
-</pre>
+    def merge(self, other):         
+        return Counter(max(self.value(), other.value()))
+```
 
 Let's try to understand how it works through an example. The figure below shows an execution trace of three replicas confirming to this specification. The replicas keep transmitting their state at random times to other randomly chosen replicas.
 
@@ -92,33 +90,33 @@ Let's observe the problem again. Our merge method only returns the state of that
 
 The specification below shows how this can be implemented.
 
-<pre style="background:#fff;color:#000"><span style="color:#ff5600">class</span> <span style="color:#21439c">Counter</span>(CvRDT):
+```python
+class Counter(CvRDT):
+    def __init__(self, counts = None):
+        if counts is None:
+            self._counts = [0] * length(self.replicas())
+        else:
+            self._counts = counts
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c"><span style="color:#a535ae">__init__</span></span>(self, counts <span style="color:#ff5600">=</span> <span style="color:#a535ae">None</span>):  <span style="color:#919191"># constructor function</span>
-        <span style="color:#ff5600">if</span> counts <span style="color:#ff5600">is</span> <span style="color:#a535ae">None</span>:
-            self._counts <span style="color:#ff5600">=</span> [0] <span style="color:#ff5600">*</span> length(self.replicas())
-        <span style="color:#ff5600">else</span>:
-            self._counts <span style="color:#ff5600">=</span> counts
+    def value(self):
+        return sum(self._counts)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">value</span>(self):                    <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">sum</span>(self._counts)
+    def counts(self):
+		# return a copy of the counts
+        return list(self._counts)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">counts</span>(self):                   <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">list</span>(self._counts)       <span style="color:#919191"># return a clone</span>
+    def increment(self):
+        self._counts[self.replicaId()] += 1
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increment</span>(self):                <span style="color:#919191"># update function</span>
-        self._counts[self.replicaId()] <span style="color:#ff5600">+=</span> 1
-
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">compare</span>(self, other):           <span style="color:#919191"># comparison function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">all</span>(v1 <span style="color:#ff5600">&lt;=</span> v2 <span style="color:#ff5600">for</span> (v1, v2) <span style="color:#ff5600">in</span>
-                   <span style="color:#a535ae">zip</span>(self.counts(),
+    def compare(self, other):
+        return all(v1 <= v2 for (v1, v2) in
+                   zip(self.counts(),
                        other.counts()))
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">merge</span>(self, other):             <span style="color:#919191"># merge function</span>
-        <span style="color:#ff5600">return</span> Counter(<span style="color:#a535ae">map</span>(<span style="color:#a535ae">max</span>, <span style="color:#a535ae">zip</span>(self.counts(),
+    def merge(self, other):
+        return Counter(map(max, zip(self.counts(),
                                     other.counts())))
-
-</pre>
+```
 
 The figure below shows an execution trace of three replicas confirming to this specification.
 
@@ -128,34 +126,32 @@ The figure below shows an execution trace of three replicas confirming to this s
 
 This design converges to the correct value. This provides us an eventually consistent state based increment only counter.
 
-## 2. PN-counter - Increment and Decrement counter
+## PN-counter - Increment and Decrement counter
 
 A PN-counter can be incremented and decremented. These can serve as a general purpose counters, as they also provide a decrement operation. For example - counting the number of users active one a social media website at any point. Note that the users can go offline and the counter will have to decremented. This can't be done with an increment only counter.
 
-### 2.1. CmRDT: Operation based design
+### CmRDT: Operation based design
 
 The code below provides the specification of an operation based increment and decrement counter.
 
-<pre style="background:#fff;color:#000">
+```python
+class Counter(CmRDT):
+    def __init__(self):
+        self._count = 0
 
-<span style="color:#ff5600">class</span> <span style="color:#21439c">Counter</span>(CmRDT):
+    def value(self):
+        return self._count
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c"><span style="color:#a535ae">__init__</span></span>(self):         <span style="color:#919191"># constructor function</span>
-        self._count <span style="color:#ff5600">=</span> 0
+    def increment(self):
+        self._count += 1
+        for replica in self.replicas():
+            self.transmit("increment", replica)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">value</span>(self):            <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> self._count
-
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increment</span>(self):        <span style="color:#919191"># update function</span>
-        self._count <span style="color:#ff5600">+=</span> 1
-        <span style="color:#ff5600">for</span> replica <span style="color:#ff5600">in</span> self.replicas():
-            self.transmit(<span style="color:#00a33f">"increment"</span>, replica)
-
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">decrement</span>(self):        <span style="color:#919191"># update function</span>
-        self._count <span style="color:#ff5600">-=</span> 1
-        <span style="color:#ff5600">for</span> replica <span style="color:#ff5600">in</span> self.replicas():
-            self.transmit(<span style="color:#00a33f">"decrement"</span>, replica)
-</pre>
+    def decrement(self):
+        self._count -= 1
+        for replica in self.replicas():
+            self.transmit("decrement", replica)
+```
 
 Let's try to understand how it works through an example. The figure below shows an execution trace of three replicas confirming to this specification. In accordance with the specification, each increment request increments the counter locally by one unit and each decrement request decrements the counter locally by one unit. The corresponding operation is transmitted by the replica to all other replicas of the system. 
 
@@ -177,40 +173,41 @@ We can make the the following observations:
 
 In both cases the result is same because the two operations commute, i.e. - the order in which they are executed by the replicas does not matter. Both replicas perform them in different orders and still achieve consistency, eventually.
 
-### 2.2. CvRDT: State based design
+### CvRDT: State based design
 
 The code below provides the specification of a state based increment and decrement counter. We take inspiration from the design of state based increment only counter and model the state of this counter in the same way.
 
-<pre style="background:#fff;color:#000"><span style="color:#ff5600">class</span> <span style="color:#21439c">Counter</span>(CvRDT):
+```python
+class Counter(CvRDT):
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c"><span style="color:#a535ae">__init__</span></span>(self, counts <span style="color:#ff5600">=</span> <span style="color:#a535ae">None</span>):  <span style="color:#919191"># constructor function</span>
-        <span style="color:#ff5600">if</span> counts <span style="color:#ff5600">is</span> <span style="color:#a535ae">None</span>:
-            self._counts <span style="color:#ff5600">=</span> [0] <span style="color:#ff5600">*</span> length(self.replicas())
-        <span style="color:#ff5600">else</span>:
-            self._counts <span style="color:#ff5600">=</span> counts
+    def __init__(self, counts = None):
+        if counts is None:
+            self._counts = [0] * length(self.replicas())
+        else:
+            self._counts = counts
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">value</span>(self):                    <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">sum</span>(self._counts)
+    def value(self):
+        return sum(self._counts)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">counts</span>(self):                   <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">list</span>(self._counts)       <span style="color:#919191"># return a clone</span>
+    def counts(self):
+		# return a copy of the counts
+        return list(self._counts)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increment</span>(self):                <span style="color:#919191"># update function</span>
-        self._counts[self.replicaId()] <span style="color:#ff5600">+=</span> 1
+    def increment(self):
+        self._counts[self.replicaId()] += 1
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">decrement</span>(self):                <span style="color:#919191"># update function</span>
-        self._counts[self.replicaId()] <span style="color:#ff5600">-=</span> 1
+    def decrement(self):
+        self._counts[self.replicaId()] -= 1
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">compare</span>(self, other):           <span style="color:#919191"># comparison function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">all</span>(v1 <span style="color:#ff5600">&lt;=</span> v2 <span style="color:#ff5600">for</span> (v1, v2) <span style="color:#ff5600">in</span>
-                   <span style="color:#a535ae">zip</span>(self.counts(),
+    def compare(self, other):
+        return all(v1 <= v2 for (v1, v2) in
+                   zip(self.counts(),
                        other.counts()))
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">merge</span>(self, other):             <span style="color:#919191"># merge function</span>
-        <span style="color:#ff5600">return</span> Counter(<span style="color:#a535ae">map</span>(<span style="color:#a535ae">max</span>, <span style="color:#a535ae">zip</span>(self.counts(),
+    def merge(self, other):
+        return Counter(map(max, zip(self.counts(),
                                     other.counts())))
-
-</pre>
+```
 
 Let's try to understand how it works through an example. The figure below shows an execution trace of three replicas confirming to this specification. The replicas keep transmitting their state at random times to other randomly chosen replicas.
 
@@ -246,52 +243,54 @@ But we do gain two valuable insights from this design-
 
 Let's try to correct this problem. We need a way to count the decrement operations without losing monotonicity. One solution is to model this counter using two increment only counters. The first counter counts the increment operations and the second one counts the decrement operations. The value of the actual counter is the difference between the two corresponding counters. The specification below shows how this can be implemented.
 
-<pre style="background:#fff;color:#000"><span style="color:#ff5600">class</span> <span style="color:#21439c">Counter</span>(CvRDT):
+```python
+class Counter(CvRDT):
+    def __init__(self,
+                 increments = None,
+                 decrements = None):
+        if increments is None:
+            self._increments = [0] * length(replicas())
+        else:
+            self._increments = increments
+        if decrements is None:
+            self._decrements = [0] * length(replicas())
+        else:
+            self._decrements = decrements
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c"><span style="color:#a535ae">__init__</span></span>(self,
-                 increments <span style="color:#ff5600">=</span> <span style="color:#a535ae">None</span>,
-                 decrements <span style="color:#ff5600">=</span> <span style="color:#a535ae">None</span>):   <span style="color:#919191"># constructor function</span>
-        <span style="color:#ff5600">if</span> increments <span style="color:#ff5600">is</span> <span style="color:#a535ae">None</span>:
-            self._increments <span style="color:#ff5600">=</span> [0] <span style="color:#ff5600">*</span> length(replicas())
-        <span style="color:#ff5600">else</span>:
-            self._increments <span style="color:#ff5600">=</span> increments
-        <span style="color:#ff5600">if</span> decrements <span style="color:#ff5600">is</span> <span style="color:#a535ae">None</span>:
-            self._decrements <span style="color:#ff5600">=</span> [0] <span style="color:#ff5600">*</span> length(replicas())
-        <span style="color:#ff5600">else</span>:
-            self._decrements <span style="color:#ff5600">=</span> decrements
+    def increments(self):
+		# return a copy of the increments
+        return list(self._increments)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increments</span>(self):               <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">list</span>(self._increments)   <span style="color:#919191"># return a clone</span>
+    def decrements(self):
+		# return a copy of the decrements
+        return list(self._decrements)
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">decrements</span>(self):               <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> <span style="color:#a535ae">list</span>(self._decrements)   <span style="color:#919191"># return a clone</span>
+    def value(self):
+        return (sum(self.increments()) -
+                sum(self.decrements()))
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">value</span>(self):                    <span style="color:#919191"># query function</span>
-        <span style="color:#ff5600">return</span> (<span style="color:#a535ae">sum</span>(self.increments()) <span style="color:#ff5600">-</span>
-                <span style="color:#a535ae">sum</span>(self.decrements()))
+    def increment(self):
+        self._increments[self.replicaId()] += 1
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">increment</span>(self):                <span style="color:#919191"># update function</span>
-        self._increments[self.replicaId()] <span style="color:#ff5600">+=</span> 1
+    def decrement(self):
+        self._decrements[self.replicaId()] += 1
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">decrement</span>(self):                <span style="color:#919191"># update function</span>
-        self._decrements[self.replicaId()] <span style="color:#ff5600">+=</span> 1
-
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">compare</span>(self, other):           <span style="color:#919191"># comparison function</span>
-        <span style="color:#ff5600">return</span> (<span style="color:#a535ae">all</span>(v1 <span style="color:#ff5600">&lt;=</span> v2 <span style="color:#ff5600">for</span> (v1, v2) <span style="color:#ff5600">in</span>
-                    <span style="color:#a535ae">zip</span>(self.increments(),
+    def compare(self, other):
+        return (all(v1 <= v2 for (v1, v2) in
+                    zip(self.increments(),
                         other.increments()))
-                <span style="color:#ff5600">and</span>
-                <span style="color:#a535ae">all</span>(v1 <span style="color:#ff5600">&lt;=</span> v2 <span style="color:#ff5600">for</span> (v1, v2) <span style="color:#ff5600">in</span>
-                    <span style="color:#a535ae">zip</span>(self.decrements(),
+                and
+                all(v1 <= v2 for (v1, v2) in
+                    zip(self.decrements(),
                         other.decrements())))
 
-    <span style="color:#ff5600">def</span> <span style="color:#21439c">merge</span>(self, other):             <span style="color:#919191"># merge function</span>
-        <span style="color:#ff5600">return</span> Counter(increments <span style="color:#ff5600">=</span> <span style="color:#a535ae">map</span>(<span style="color:#a535ae">max</span>, <span style="color:#a535ae">zip</span>(self.increments(),
-                                                 other.increments())),
-                       decrements <span style="color:#ff5600">=</span> <span style="color:#a535ae">map</span>(<span style="color:#a535ae">max</span>, <span style="color:#a535ae">zip</span>(self.decrements(),
-                                                 other.decrements())))
-
-</pre>
+    def merge(self, other):
+        return Counter(
+			increments = map(max, zip(self.increments(),
+                                      other.increments())),
+            decrements = map(max, zip(self.decrements(),
+                                      other.decrements())))
+```
 
 The figure below shows an execution trace of three replicas confirming to this specification.
 
@@ -305,7 +304,7 @@ This design converges to the correct value. This provides us an eventually consi
     <img src="{{ site.baseurl }}/chapter/6/resources/images/counters/state-based-increment-and-decrement-counter-correct-lattice.png" alt="State based increment and decrement counter(correct) lattice"/>
 </figure>
 
-## 3. References
+## References
 
 {% bibliography --file counters %}
 

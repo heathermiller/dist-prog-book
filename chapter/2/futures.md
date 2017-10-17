@@ -10,12 +10,12 @@ by: "Kisalaya Prasad, Avanti Patil, and Heather Miller"
 
 As human beings we have the ability to multitask _i.e._ we can walk, talk, and eat at the same time except when sneezing. Sneezing is a blocking activity because it forces you to stop what you’re doing for a brief moment, and then you resume where you left off. One can think of the human sense of multitasking as multithreading in the context of computers.
 
-Consider for a moment a simple computer processor; no parallelism, just the ability to complete one task or process at a time. In this scenario, sometimes the processor is blocked when some blocking operation is called. Such blocking calls can include I/O operations like reading/writing to disk, or sending or receiving packets over the network. And as programmers, we know that blocking calls like I/O can take a disproportionately more time than a typical CPU-bound task, like iterating over a list.
+Consider for a moment a simple computer processor; no parallelism, just the ability to complete one task or process at a time. In this scenario, sometimes the processor is blocked when some blocking operation is called. Such blocking calls can include I/O operations like reading/writing to disk, or sending or receiving packets over the network. And as programmers, we know that blocking calls like I/O can take disproportionately more time than a typical CPU-bound task, like iterating over a list.
 
 The processor can handle blocking calls in two ways:
 
 - **Synchronously**: the processor waits until the blocking call completes its task and returns the result. Afterwards, the processor will move on to processing the next task. _This can oftentimes be problematic because the CPU may not be utilized in an efficient manner; it may wait for long periods of time._
-- **Asynchronously**: When tasks are processed  asynchronously, CPU time spent waiting in the synchronous case is instead spent processing some other task using a preemptive time sharing algorithm. That is, rather than wait, process some other task instead. Thus, the processor is never left waiting at any time.
+- **Asynchronously**: When tasks are processed  asynchronously, CPU time spent waiting in the synchronous case is instead spent processing some other task using a preemptive time sharing algorithm. That is, rather than wait, process some other task instead. Thus, the processor is never left waiting as long as there is more work that can be done.
 
 In the world of programming, many constructs have been introduced in order to help programmers reach ideal levels of resource utilization. Arguably one of the most widely-used of which are futures and/or promises.
 
@@ -45,7 +45,7 @@ Importantly, futures/promises typically enable some degree of concurrency. That 
   <footer>{% cite Multilisp --file futures%}</footer>
 </blockquote>
 
-Some interpretations of futures/promises have a type associated with them, others not. Typically a future/promise is single-assignment; that is, you it can only be written to once. Some interpretations are blocking (synchronous), others are completely non-blocking (asynchronous). Some interpretations must be explicitly _kicked off_ (i.e., manually started), while in other interpretations, computation is started implicitly.
+Some interpretations of futures/promises have a type associated with them, others not. Typically a future/promise is single-assignment; that is, it can only be written to once. Some interpretations are blocking (synchronous), others are completely non-blocking (asynchronous). Some interpretations must be explicitly _kicked off_ (i.e. manually started), while in other interpretations, computation is started implicitly.
 
 Inspired by functional programming, one of the major distinctions between different interpretations of this construct have to do with _pipelineing_ or _composition_. Some of the more popular interpretations of futures/promises make it possible to _chain_ operations, or define a pipeline of operations to be invoked upon completion of the computation represented by the future/promise. This is in contrast to callback-heavy or more imperative direct blocking approaches.
 
@@ -53,7 +53,7 @@ Inspired by functional programming, one of the major distinctions between differ
 
 The rise of promises and futures as a topic of relevance has for the most part occurred alongside of the rise of parallel and concurrent programming and distributed systems. This follows somewhat naturally, since, as an abstraction which encodes time, futures/promises introduce a nice way to reason about state changes when latency becomes an issue; a common concern faced by programmers when a node must communicate with another node in a distributed system.
 
-However promises and futures are considered useful in a number of contexts as well, both distributed and not. Some such contexts include:
+However promises and futures are considered useful in a number of other contexts as well, both distributed and not. Some such contexts include:
 
 - **Request-Response Patterns**, such as web service calls over HTTP. A future may be used to represent the value of the response of the HTTP request.
 - **Input/Output**, such as UI dialogs requiring user input, or operations such as reading large files from disk. A future may be used to represent the IO call and the resulting value of the IO (e.g., terminal input, array of bytes of a file that was read).
@@ -64,7 +64,7 @@ However promises and futures are considered useful in a number of contexts as we
 - **Timeouts**, such as managing timeouts in a web service. A future representing a timeout could simply return no result or some kind of empty result like the `Unit` type in typed programming languages.
 
 
-Many real world services and systems today make heavy use of futures/promises in popular contexts such as these, thanks to the notion of a future or a promise having been introduced in popular languages and frameworks such as JavaScript, NodeJS, Scala, Java, C++, amongst many others. As we will see in further sections, this proliferation of futures/promises has resulted in futures/promises changing meanings and names over time and across languages.
+Many real world services and systems today make heavy use of futures/promises in popular contexts such as these, thanks to the notion of a future or a promise having been introduced in popular languages and frameworks such as JavaScript, Node.js, Scala, Java, C++, amongst many others. As we will see in further sections, this proliferation of futures/promises has resulted in futures/promises changing meanings and names over time and across languages.
 
 
 ## Diverging Terminology
@@ -76,7 +76,7 @@ Sometimes, a language may have _one_ construct named future, promise, delay, def
 However, in other cases, a language may have _two_ constructs, typically referred to as futures and promises. Languages like Scala, Java, and Dart fall into this category. In this case,
 
 - A `Future` is a read-only reference to a yet-to-be-computed value.
-- A `Promise` (or a `CompletableFuture`/`Completer`/etc) is a single-assignment variable which the `Future` refers to.
+- A `Promise` (or a `CompletableFuture`/`Completer`/etc.) is a single-assignment variable which the `Future` refers to.
 
 In other words, a future is a read-only window to a value written into a promise. You can get the `Future` associated with a `Promise` by calling the `future` method on it, but conversion in the other direction is not possible. Another way to look at it would be, if you _promise_ something to someone, you are responsible for keeping it, but if someone else makes a _promise_ to you, you expect them to honor it in the _future_.
 
@@ -91,7 +91,7 @@ In Scala, they are defined as follows:
 
 An important difference between Scala and Java (6) futures is that Scala futures are asynchronous in nature. Java's future, at least till Java 6, were blocking. Java 7 introduced asynchronous futures to great fanfare.
 
-In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. `CompletableFutures` can be thought of as something of a promise, since their value can be explicitly set. However, `CompletableFuture` also implements the `Future` interface allowing it to be used as a `Future` as well. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
+In Java 8, the `Future<T>` interface has methods to check if the computation is complete, to wait for its completion, and to retrieve the result of the computation when it is complete. `CompletableFutures` can be thought of as a promise, since their value can be explicitly set. However, `CompletableFuture` also implements the `Future` interface allowing it to be used as a `Future` as well. Promises can be thought of as a future with a public set method which the caller (or anybody else) can use to set the value of the future.
 
 In the JavaScript world, JQuery introduces a notion of `Deferred` objects which are used to represent a unit of work which is not yet finished. The `Deferred` object contains a promise object which represents the result of that unit of work. Promises are values returned by a function. The deferred object can also be canceled by its caller.
 
@@ -99,7 +99,7 @@ Like Scala and Java, C# also makes the distinction between the future and promis
 
 And confusingly, the JavaScript community has standardized on a single construct known as a `Promise` which can be used like other languages' notions of futures. The Promises specification {% cite PromisesAPlus --file futures %} defines only a single interface and leaves the details of completing (or _fulfilling_) the promise to the implementer of the spec. Promises in JavaScript are also asynchronous and able to be pipelined. JavaScript promises are enabled by default in browsers that support ECMAScript 6 (EC6), or are available in a number of libraries such as [Bluebird](http://bluebirdjs.com/docs/getting-started.html) and [Q](https://github.com/kriskowal/q).
 
-As we can see, concepts, semantics, and terminology seem to be a bit mixed up between languages and library implementations of futures/promises. These differences in terminology and semantics arise from the long history and independent language communities that have proliferated the use of futures/promises.
+As we can see, concepts, semantics, and terminology seem to differ between languages and library implementations of futures/promises. These differences in terminology and semantics arise from the long history and independent language communities that have proliferated the use of futures/promises.
 
 
 ## Brief History
@@ -107,7 +107,7 @@ As we can see, concepts, semantics, and terminology seem to be a bit mixed up be
 Here's a brief glimpse at a timeline spanning the history of futures and promises as we know them today:
 
 
-<figure style="margin-left: 0px; width: 110%;">
+<figure style="margin-left: 0px; width: 105%;">
   <img src="./images/1.png" alt="timeline" />
 </figure>
 
@@ -120,7 +120,7 @@ The first concept which eventually led to futures/promises appeared in 1961, wit
 
 Thunks were designed as a way of binding actual parameters to their formal definitions in Algol-60 procedure calls. If a procedure is called with an expression in the place of a formal parameter, the compiler generates a thunk which computes the expression and leaves the address of the result in some standard location. Think of a thunk as a continuation or a function that was intended to be evaluated in a single-threaded environment.
 
-The first mention of Futures was by Baker and Hewitt in a paper on Incremental Garbage Collection of Processes {% cite Hewitt77 --file futures %}. They coined the term, _call-by-futures_, to describe a calling convention in which each formal parameter to a method is bound to a process which evaluates the expression in the parameter in parallel with other parameters. Before this paper, Algol 68 **{% cite missingref --file futures%}** also presented a way to make this kind of concurrent parameter evaluation possible, using the collateral clauses and parallel clauses for parameter binding.
+The first mention of Futures was by Baker and Hewitt in a paper on Incremental Garbage Collection of Processes {% cite Hewitt77 --file futures %}. They coined the term, _call-by-futures_, to describe a calling convention in which each formal parameter to a method is bound to a process which evaluates the expression in the parameter in parallel with other parameters. Before this paper, Algol 68 **{% cite missingref --file futures %}** also presented a way to make this kind of concurrent parameter evaluation possible, using the collateral clauses and parallel clauses for parameter binding.
 
 In their paper, Baker and Hewitt introduced a notion of Futures as a 3-tuple representing an expression `E` consisting of:
 
@@ -142,7 +142,7 @@ Futures and promises remained primarily an academic fascination until the early 
 
 Among the mainstream programming languages, Python was perhaps the first, in 2002, to get a library which introduced a construct along the same lines as E’s promises in the Twisted library {% cite Twisted --file futures %}. Twisted introduced the notion of _Deferred_ objects, are used to receive the result of an operation not yet completed. In Twisted, deferred objects are just like normal first-class objects; they can be passed along anywhere a normal object can, the only difference is that deferred objects don't have values. Deferred objects support callbacks, which are called once the result of the operation is complete.
 
-Perhaps most famous in recent memory is that of promises in JavaScript. In 2007, inspired by Python’s Twisted library, the authors of the Dojo Toolkit came up a JavaScript implementation of Twisted's deferred objects, known as `dojo.Deferred`. This in turn inspired Kris Zyp to propose the CommonJS Promises/A spec in 2009 {% cite PromisesA --file futures %}. The same year, Ryan Dahl introduced NodeJS. In it’s early versions, Node used promises in its non-blocking API. However, when NodeJS moved away from promises to its now familiar error-first callback API (the first argument for the callback should be an error object), it left a void to fill for a promises API. [Q.js](https://github.com/kriskowal/q) is an implementation of Promises/A spec by Kris Kowal around this time {% cite Qjs --file futures %}. The [FuturesJS](https://github.com/FuturesJS/FuturesJS) library by AJ O'Neal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 introduced Promises to its wider and ever-growing audience. However, JQuery's promises API was subtly different than the Promises/A spec {% cite JQueryPromises --file futures %}. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces which added to the already infamous callback hell. The Promises/A+ spec {% cite PromisesAPlus --file futures %} aimed to solve this problem. Following the broad community acceptance of the Promises/A+ spec, promises were finally made a part of the ECMAScript® 2015 Language Specification {% cite Ecmascript15 --file futures %}. However, a lack of backward compatibility and additional features missing in the Promises/A+ spec means that libraries like [BlueBird](http://bluebirdjs.com/docs/getting-started.html) and [Q.js](https://github.com/kriskowal/q) still have a place in the JavaScript ecosystem.
+Perhaps most famous in recent memory is that of promises in JavaScript. In 2007, inspired by Python’s Twisted library, the authors of the Dojo Toolkit came up a JavaScript implementation of Twisted's deferred objects, known as `dojo.Deferred`. This in turn inspired Kris Zyp to propose the CommonJS Promises/A spec in 2009 {% cite PromisesA --file futures %}. The same year, Ryan Dahl introduced Node.js. In it’s early versions, Node.js used promises in its non-blocking API. However, when Node.js moved away from promises to its now familiar error-first callback API (the first argument for the callback should be an error object), it left a void to fill for a promises API. [Q.js](https://github.com/kriskowal/q) is an implementation of Promises/A spec by Kris Kowal around this time {% cite Qjs --file futures %}. The [FuturesJS](https://github.com/FuturesJS/FuturesJS) library by AJ O'Neal was another library which aimed to solve flow-control problems without using Promises in the strictest of senses. In 2011, JQuery v1.5 introduced Promises to its wider and ever-growing audience. However, JQuery's promises API was subtly different than the Promises/A spec {% cite JQueryPromises --file futures %}. With the rise of HTML5 and different APIs, there came a problem of different and messy interfaces which added to the already infamous callback hell. The Promises/A+ spec {% cite PromisesAPlus --file futures %} aimed to solve this problem. Following the broad community acceptance of the Promises/A+ spec, promises were finally made a part of the ECMAScript® 2015 Language Specification {% cite Ecmascript15 --file futures %}. However, a lack of backward compatibility and additional features missing in the Promises/A+ spec means that libraries like [BlueBird](http://bluebirdjs.com/docs/getting-started.html) and [Q.js](https://github.com/kriskowal/q) still have a place in the JavaScript ecosystem.
 
 ## Semantics of Execution
 
@@ -185,29 +185,26 @@ f.onComplete {
 }
 ```
 
-In this example, we first create a future `f`, and when it completes, we provide two possible expressions that can be invoked depending on whether the future was executed successfully or if there was an error. In this case, if successful, we get the result of the computation an HTTP string, and we print it. Else, if an exception was thrown, we get the message string contained within the exception and we print that.
+In this example, we first create a future `f`, and when it completes, we provide two possible expressions that can be invoked depending on whether the future was executed successfully or if there was an error. In this case, if successful, we get the result of the computation an HTTP string, and we print it. If an exception was thrown, we get the message string contained within the exception and we print that.
 
 So, how does it all work together?
 
-As we mentioned, Futures require an ExecutionContext, which is an implicit parameter to virtually all of the futures API. This ExecutionContext is used to execute the future. Scala is flexible enough to let users implement their own Execution Contexts, but let’s talk about the default ExecutionContext, which is a ForkJoinPool.
+As we mentioned, Futures require an `ExecutionContext`, which is an implicit parameter to virtually all of the futures API. This `ExecutionContext` is used to execute the future. Scala is flexible enough to let users implement their own Execution Contexts, but let’s talk about the default `ExecutionContext`, which is a `ForkJoinPool`.
 
-
-ForkJoinPool is ideal for many small computations that spawn off and then come back together. Scala’s ForkJoinPool requires the tasks submitted to it to be a ForkJoinTask. The tasks submitted to the global ExecutionContext is quietly wrapped inside a ForkJoinTask and then executed. ForkJoinPool also supports a possibly blocking task, using ManagedBlock method which creates a spare thread if required to ensure that there is sufficient parallelism if the current thread is blocked. To summarize, ForkJoinPool is an really good general purpose ExecutionContext, which works really well in most of the scenarios.
+`ForkJoinPool` is ideal for many small computations that spawn off and then come back together. Scala’s `ForkJoinPool` requires the tasks submitted to it to be a `ForkJoinTask`. The tasks submitted to the global `ExecutionContext` is quietly wrapped inside a `ForkJoinTask` and then executed. `ForkJoinPool` also supports a possibly blocking task, using the `ManagedBlock` method which creates a spare thread if required to ensure that there is sufficient parallelism if the current thread is blocked. To summarize, `ForkJoinPool` is an really good general purpose `ExecutionContext`, which works really well in most of the scenarios.
 
 
 ### Event Loops
 
-Modern platforms and runtimes typically rely on many underlying system layers to operate. For example, there’s an underlying file system, a database system, and other web services that may be relied on by a given language implementation, library, or framework. Interaction with these components typically involves a period where we’re doing nothing but waiting for the response. This is single largest waste of computing resources.
+Modern platforms and runtimes typically rely on many underlying system layers to operate. For example, there’s an underlying file system, a database system, and other web services that may be relied on by a given language implementation, library, or framework. Interaction with these components typically involves a period where we’re doing nothing but waiting for the response. This can be a very large waste of computing resources.
 
-Javascript is a single threaded asynchronous runtime. Now, conventionally async programming is generally associated with multi-threading, but we’re not allowed to create new threads in Javascript. Instead, asynchronicity in Javascript is achieved using an event-loop mechanism.
+JavaScript is a single threaded asynchronous runtime. Now, conventionally async programming is generally associated with multi-threading, but we’re not allowed to create new threads in JavaScript. Instead, asynchronicity in JavaScript is achieved using an event-loop mechanism.
 
-Javascript has historically been used to interact with the DOM and user interactions in the browser, and thus an event-driven programming model was a natural fit for the language. This has scaled up surprisingly well in high throughput scenarios in NodeJS.
+JavaScript has historically been used to interact with the DOM and user interactions in the browser, and thus an event-driven programming model was a natural fit for the language. This has scaled up surprisingly well in high throughput scenarios in Node.js.
 
+The general idea behind event-driven programming model is that the logic flow control is determined by the order in which events are processed. This is underpinned by a mechanism which is constantly listening for events and fires a callback when it is detected. This is the JavaScript’s event loop in a nutshell.
 
-The general idea behind event-driven programming model is that the logic flow control is determined by the order in which events are processed. This is underpinned by a mechanism which is constantly listening for events and fires a callback when it is detected. This is the Javascript’s event loop in a nutshell.
-
-
-A typical Javascript engine has a few basic components. They are :
+A typical JavaScript engine has a few basic components. They are :
 - **Heap**
 Used to allocate memory for objects
 - **Stack**
@@ -215,15 +212,12 @@ Function call frames go into a stack from where they’re picked up from top to 
 - **Queue**
 	A message queue holds the messages to be processed.
 
-
 Each message has a callback function which is fired when the message is processed. These messages can be generated by user actions like button clicks or scrolling, or by actions like HTTP requests, request to a database to fetch records or reading/writing to a file.
-
 
 Separating when a message is queued from when it is executed means the single thread doesn’t have to wait for an action to complete before moving on to another. We attach a callback to the action we want to do, and when the time comes, the callback is run with the result of our action. Callbacks work good in isolation, but they force us into a continuation passing style of execution, what is otherwise known as Callback hell.
 
 
 ```javascript
-
 getData = function(param, callback){
   $.get('http://example.com/get/'+param,
     function(responseText){
@@ -232,23 +226,21 @@ getData = function(param, callback){
 }
 
 getData(0, function(a){
-    getData(a, function(b){
-        getData(b, function(c){
-            getData(c, function(d){
-                getData(d, function(e){
-
-                });
-            });
+  getData(a, function(b){
+    getData(b, function(c){
+      getData(c, function(d){
+        getData(d, function(e){
+         // ...
         });
+      });
     });
+  });
 });
-
 ```
 
 <center><h4> VS </h4></center>
 
 ```javascript
-
 getData = function(param, callback){
   return new Promise(function(resolve, reject) {
     $.get('http://example.com/get/'+param,
@@ -259,30 +251,27 @@ getData = function(param, callback){
 }
 
 getData(0).then(getData)
-  .then(getData).
-    then(getData).
-      then(getData);
-
-
+  .then(getData)
+  .then(getData)
+  .then(getData);
 ```
 
 > **Programs must be written for people to read, and only incidentally for machines to execute.** - *Harold Abelson and Gerald Jay Sussman*
 
 
-Promises are an abstraction which make working with async operations in javascript much more fun. Callbacks lead to inversion of control, which is difficult to reason about at scale. Moving on from a continuation passing style, where you specify what needs to be done once the action is done, the callee simply returns a Promise object. This inverts the chain of responsibility, as now the caller is responsible for handling the result of the promise when it is settled.
+Promises are an abstraction which make working with async operations in JavaScript much more fun. Callbacks lead to inversion of control, which is difficult to reason about at scale. Moving on from a continuation passing style, where you specify what needs to be done once the action is done, the callee simply returns a Promise object. This inverts the chain of responsibility, as now the caller is responsible for handling the result of the promise when it is settled.
 
 The ES2015 spec specifies that “promises must not fire their resolution/rejection function on the same turn of the event loop that they are created on.” This is an important property because it ensures deterministic order of execution. Also, once a promise is fulfilled or failed, the promise’s value MUST not be changed. This ensures that a promise cannot be resolved more than once.
 
-Let’s take an example to understand the promise resolution workflow as it happens inside the Javascript Engine.
+Let’s take an example to understand the promise resolution workflow as it happens inside the JavaScript Engine.
 
-Suppose we execute a function, here g() which in turn, calls function f(). Function f returns a promise, which, after counting down for 1000 ms, resolves the promise with a single value, true. Once f gets resolved, a value true or false is alerted based on the value of the promise.
-
+Suppose we execute a function, here `g()` which in turn, calls another function `f()`. Function `f` returns a promise, which, after counting down for 1000 ms, resolves the promise with a single value, true. Once `f` gets resolved, a value `true` or `false` is alerted based on the value of the promise.
 
 <figure>
   <img src="./images/5.png" alt="timeline" />
 </figure>
 
-Now, javascript’s runtime is single threaded. This statement is true, and not true. The thread which executes the user code is single threaded. It executes what is on top of the stack, runs it to completion, and then moves onto what is next on the stack. But, there are also a number of helper threads which handle things like network or timer/settimeout type events. This timing thread handles the counter for setTimeout.
+Now, JavaScript’s runtime is single threaded. This statement is true, and not true. The thread which executes the user code is single threaded. It executes what is on top of the stack, runs it to completion, and then moves onto what is next on the stack. But, there are also a number of helper threads which handle things like network or timer/settimeout type events. This timing thread handles the counter for setTimeout.
 
 <figure>
   <img src="./images/6.png" alt="timeline" />
@@ -294,59 +283,50 @@ Once the timer expires, the timer thread puts a message on the message queue. Th
   <img src="./images/7.png" alt="timeline" />
 </figure>
 
-Here, since the future is resolved with a value of true, we are alerted with a value true when the callback is picked up for execution.
+Here, since the future is resolved with a value of `true`, we are alerted with a value `true` when the callback is picked up for execution.
 
 <figure>
   <img src="./images/8.png" alt="timeline" />
 </figure>
 
-Some finer details :
 We’ve ignored the heap here, but all the functions, variables and callbacks are stored on heap.
-As we’ve seen here, even though Javascript is said to be single threaded, there are number of helper threads to help main thread do things like timeout, UI, network operations, file operations etc.
-Run-to-completion helps us reason about the code in a nice way. Whenever a function starts, it needs to finish before yielding the main thread. The data it accesses cannot be modified by someone else. This also means every function needs to finish in a reasonable amount of time, otherwise the program seems hung. This makes Javascript well suited for I/O tasks which are queued up and then picked up when finished, but not for data processing intensive tasks which generally take long time to finish.
+As we’ve seen here, even though JavaScript is said to be single threaded, there are number of helper threads to help main thread do things like timeout, UI, network operations, file operations etc.
+
+Run-to-completion helps us reason about the code in a nice way. Whenever a function starts, it needs to finish before yielding the main thread. The data it accesses cannot be modified by someone else. This also means every function needs to finish in a reasonable amount of time, otherwise the program seems hung. This makes JavaScript well suited for I/O tasks which are queued up and then picked up when finished, but not for data processing intensive tasks which generally take long time to finish.
+
 We haven’t talked about error handling, but it gets handled the same exact way, with the error callback being called with the error object the promise is rejected with.
 
-
-Event loops have proven to be surprisingly performant. When network servers are designed around multithreading, as soon as you end up with a few hundred concurrent connections, the CPU spends so much of its time task switching that you start to lose overall performance. Switching from one thread to another has overhead which can add up significantly at scale. Apache used to choke even as low as a few hundred concurrent users when using a thread per connection while Node can scale up to a 100,000 concurrent connections based on event loops and asynchronous IO.
-
+Event loops have proven to be surprisingly performant. When network servers are designed around multithreading, as soon as you end up with a few hundred concurrent connections, the CPU spends so much of its time task switching that you start to lose overall performance. Switching from one thread to another has overhead which can add up significantly at scale. Apache used to choke even as low as a few hundred concurrent users when using a thread per connection while Node.js can scale up to a 100,000 concurrent connections based on event loops and asynchronous IO.
 
 ### Thread Model
 
-
-Oz programming language introduced an idea of dataflow concurrency model. In Oz, whenever the program comes across an unbound variable, it waits for it to be resolved. This dataflow property of variables helps us write threads in Oz that communicate through streams in a producer-consumer pattern. The major benefit of dataflow based concurrency model is that it’s deterministic - same operation called with same parameters always produces the same result. It makes it a lot easier to reason about concurrent programs, if the code is side-effect free.
-
+The Oz programming language introduced an idea of dataflow concurrency model. In Oz, whenever the program comes across an unbound variable, it waits for it to be resolved. This dataflow property of variables helps us write threads in Oz that communicate through streams in a producer-consumer pattern. The major benefit of dataflow based concurrency model is that it’s deterministic - same operation called with same parameters always produces the same result. It makes it a lot easier to reason about concurrent programs, if the code is side-effect free.
 
 Alice ML is a dialect of Standard ML with support for lazy evaluation, concurrent, distributed, and constraint programming. The early aim of Alice project was to reconstruct the functionalities of Oz programming language on top of a typed programming language. Building on the Standard ML dialect, Alice also provides concurrency features as part of the language through the use of a future type. Futures in Alice represent an undetermined result of a concurrent operation. Promises in Alice ML are explicit handles for futures.
 
-
 Any expression in Alice can be evaluated in it's own thread using spawn keyword. Spawn always returns a future which acts as a placeholder for the result of the operation. Futures in Alice ML can be thought of as functional threads, in a sense that threads in Alice always have a result. A thread is said to be touching a future if it performs an operation that requires the value future is a placeholder for. All threads touching a future are blocked until the future is resolved. If a thread raises an exception, the future is failed and this exception is re-raised in the threads touching it. Futures can also be passed along as values. This helps us achieve the dataflow model of concurrency in Alice.
-
 
 Alice also allows for lazy evaluation of expressions. Expressions preceded with the lazy keyword are evaluated to a lazy future. The lazy future is evaluated when it is needed. If the computation associated with a concurrent or lazy future ends with an exception, it results in a failed future. Requesting a failed future does not block, it simply raises the exception that was the cause of the failure.
 
 ## Implicit vs. Explicit Promises
 
-
-We define Implicit promises as ones where we don’t have to manually trigger the computation vs Explicit promises where we have to trigger the resolution of future manually, either by calling a start function or by requiring the value. This distinction can be understood in terms of what triggers the calculation : With Implicit promises, the creation of a promise also triggers the computation, while with Explicit futures, one needs to triggers the resolution of a promise. This trigger can in turn be explicit, like calling a start method, or implicit, like lazy evaluation where the first use of a promise’s value triggers its evaluation.
-
+We define implicit promises as ones where we don’t have to manually trigger the computation vs Explicit promises where we have to trigger the resolution of future manually, either by calling a start function or by requiring the value. This distinction can be understood in terms of what triggers the calculation: With implicit promises, the creation of a promise also triggers the computation, while with explicit futures, one needs to triggers the resolution of a promise. This trigger can in turn be explicit, like calling a start method, or implicit, like lazy evaluation where the first use of a promise’s value triggers its evaluation.
 
 The idea for explicit futures were introduced in the Baker and Hewitt paper. They’re a little trickier to implement, and require some support from the underlying language, and as such they aren’t that common. The Baker and Hewitt paper talked about using futures as placeholders for arguments to a function, which get evaluated in parallel, but when they’re needed. MultiLisp also had a mechanism to delay the evaluation of the future to the time when it's value is first used, using the defer construct. Lazy futures in Alice ML have a similar explicit invocation mechanism, the first thread touching a future triggers its evaluation.
 
-An example for Explicit Futures would be (from AliceML):
+An example of explicit futures would be (from AliceML):
 
 ```
 fun enum n = lazy n :: enum (n+1)
-
 ```
 
 This example generates an infinite stream of integers and if stated when it is created, will compete for the system resources.
 
-Implicit futures were introduced originally by Friedman and Wise in a paper in 1978. The ideas presented in that paper inspired the design of promises in MultiLisp. Futures are also implicit in Scala and Javascript, where they’re supported as libraries on top of the core languages. Implicit futures can be implemented this way as they don’t require support from language itself. Alice ML’s concurrent futures are also an example of implicit invocation.
+Implicit futures were introduced originally by Friedman and Wise in a paper in 1978. The ideas presented in that paper inspired the design of promises in MultiLisp. Futures are also implicit in Scala and JavaScript, where they’re supported as libraries on top of the core languages. Implicit futures can be implemented this way as they don’t require support from language itself. Alice ML’s concurrent futures are also an example of implicit invocation.
 
-For example
+In Scala, we can see an example of an implicit future when making an HTTP request.
 
 ```scala
-
 val f = Future {
   Http("http://api.fixer.io/latest?base=USD").asString
 }
@@ -355,29 +335,22 @@ f onComplete  {
   case Success(response) => println(response.body)
   case Failure(t) => println(t)
 }
-
 ```
-
 This sends the HTTP call as soon as it the Future is created. In Scala, although the futures are implicit, Promises can be used to have an explicit-like behavior. This is useful in a scenario where we need to stack up some computations and then resolve the Promise.
 
-An Example :
-
 ```scala
-
 val p = Promise[Foo]()
 
 p.future.map( ... ).filter( ... ) foreach println
 
 p.complete(new Foo)
-
 ```
 
-Here, we create a Promise, and complete it later. In between we stack up a set of computations which get executed once the promise is completed.
-
+Here, we create a Promise, and complete it later. Between creation and completion we stack up a set of computations which then get executed once the promise is completed.
 
 ## Promise Pipelining
 
-One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘a’ and another API ‘b’, then aggregate the results of both the calls and use that result as a parameter to another API ‘c’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call a, wait for it to finish, call b, wait, then aggregate and call c. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
+One of the criticism of traditional RPC systems would be that they’re blocking. Imagine a scenario where you need to call an API ‘A’ and another API ‘B’, then aggregate the results of both the calls and use that result as a parameter to another API ‘C’. Now, the logical way to go about doing this would be to call A and B in parallel, then once both finish, aggregate the result and call C. Unfortunately, in a blocking system, the way to go about is call A, wait for it to finish, call B, wait, then aggregate and call C. This seems like a waste of time, but in absence of asynchronicity, it is impossible. Even with asynchronicity, it gets a little difficult to manage or scale up the system linearly. Fortunately, we have promises.
 
 
 <figure>
@@ -388,32 +361,27 @@ One of the criticism of traditional RPC systems would be that they’re blocking
   <img src="./images/p-2.png" alt="timeline" />
 </figure>
 
-Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason.
+Futures/Promises can be passed along, waited upon, or chained and joined together. These properties helps make life easier for the programmers working with them. This also reduces the latency associated with distributed computing. Promises enable dataflow concurrency, which is also deterministic, and easier to reason about.
 
-The history of promise pipelining can be traced back to the call-streams in Argus. In Argus, Call streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated Promises into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
+The history of promise pipelining can be traced back to the call-streams in Argus. In Argus, call-streams are a mechanism for communication between distributed components. The communicating entities, a sender and a receiver are connected by a stream, and sender can make calls to receiver over it. Streams can be thought of as RPC, except that these allow callers to run in parallel with the receiver while processing the call. When making a call in Argus, the caller receives a promise for the result. In the paper on Promises by Liskov and Shrira, they mention that having integrated Promises into call streams, next logical step would be to talk about stream composition. This means arranging streams into pipelines where output of one stream can be used as input of the next stream. They talk about composing streams using fork and coenter.
 
 Channels in Joule were a similar idea, providing a channel which connects an acceptor and a distributor. Joule was a direct ancestor to E language, and talked about it in more detail.
 
 ```
-
 t3 := (x <- a()) <- c(y <- b())
 
 t1 := x <- a()
 t2 := y <- b()
 t3 := t1 <- c(t2)
-
 ```
 
-Without pipelining in E, this call will require three round trips. First to send a() to x, then b() to y then finally c to the result t1 with t2 as an argument. But with pipelining, the later messages can be sent with promises as result of earlier messages as argument. This allowed sending all the messages together, thereby saving the costly round trips. This is assuming x and y are on the same remote machine, otherwise we can still evaluate t1 and t2 parallely.
+Without pipelining in E, this call will require three round trips. First to send `a()` to `x`, then `b()` to `y` then finally `c` to the result `t1` with `t2` as an argument. But with pipelining, the later messages can be sent with promises as result of earlier messages as argument. This allowed sending all the messages together, thereby saving the costly round trips. This is assuming `x` and `y` are on the same remote machine, otherwise we can still evaluate `t1` and `t2` parallely.
 
+Notice that this pipelining mechanism is different from asynchronous message passing, as in asynchronous message passing, even if `t1` and `t2` get evaluated in parallel, to resolve `t3` we still wait for `t1` and `t2` to be resolved, and send it again in another call to the remote machine.
 
-Notice that this pipelining mechanism is different from asynchronous message passing, as in asynchronous message passing, even if t1 and t2 get evaluated in parallel, to resolve t3 we still wait for t1 and t2 to be resolved, and send it again in another call to the remote machine.
-
-
-Modern promise specifications, like one in Javascript comes with methods which help working with promise pipelining easier. In javascript, a Promises.all method is provided, which takes in an iterable and returns a new Promise which gets resolved when all the promises in the iterable get resolved. There’s also a race method, which returns a promise which is resolved when the first promise in the iterable gets resolved.
+Modern promise specifications, like one in JavaScript comes with methods which help working with promise pipelining easier. In JavaScript, a `Promise.all` method is provided, which takes in an iterable and returns a new `Promise` which gets resolved when all the promises in the iterable get resolved. There’s also a `Promise.race` method, which returns a promise which is resolved when the first promise in the iterable gets resolved. Examples using these methods are shown below.
 
 ```javascript
-
 var a = Promise.resolve(1);
 var b = new Promise(function (resolve, reject) {
   setTimeout(resolve, 100, 2);
@@ -426,49 +394,39 @@ Promise.all([p1, p2]).then(values => {
 Promise.race([p1, p2]).then(function(value) {
   console.log(value); // 1
 });
-
 ```
 
-In Scala, futures have a onSuccess method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, Scala api comes with combinators which allow for easier combination of results from futures. Examples of combinators are map, flatmap, filter, withFilter.
-
+In Scala, futures have an `onSuccess` method which acts as a callback to when the future is complete. This callback itself can be used to sequentially chain futures together. But this results in bulkier code. Fortunately, the Scala API has combinators which allow for easier combination of results from futures. Examples of combinators are `map`, `flatMap`, `filter`, `withFilter`.
 
 ## Handling Errors
 
-If world would have run without errors we would rejoice in unison, but it is not the case in programming world as well. When you run a program you either receive an expected output or an error. Error can be defined as wrong output or an exception. In a synchronous programming model, the most logical way of handling errors is a try...catch block.
+If the world ran without errors we would rejoice in unison, but this is not the case in the programming world. When you run a program you either receive an expected output or an error. Error can be defined as wrong output or an exception. In a synchronous programming model, the most logical way of handling errors is a `try...catch` block.
 
 ```javascript
-
-try{
-    do something1;
-    do something2;
-    do something3;
-    ...
-} catch ( exception ){
-    HandleException;
+try {
+  do something1;
+  do something2;
+  do something3;
+  // ...
+} catch (exception) {
+  HandleException;
 }
-
 ```
 
 Unfortunately, the same thing doesn’t directly translate to asynchronous code.
 
-
 ```javascript
-
 foo = doSomethingAsync();
 
-try{
-    foo();
-    // This doesn’t work as the error might not have been thrown yet
-} catch ( exception ){
-    handleException;
+try {
+  foo();
+  // This doesn’t work as the error might not have been thrown yet
+} catch (exception) {
+  handleException;
 }
-
-
 ```
 
-
-
-Although most of the earlier papers did not talk about error handling, the Promises paper by Liskov and Shrira did acknowledge the possibility of failure in a distributed environment. To put this in Argus's perspective, the 'claim' operation waits until the promise is ready. Then it returns normally if the call terminated normally, and otherwise it signals the appropriate 'exception', e.g.,
+Although most of the earlier papers did not talk about error handling, the Promises paper by Liskov and Shrira did acknowledge the possibility of failure in a distributed environment. To put this in Argus's perspective, the 'claim' operation waits until the promise is ready. Then it returns normally if the call terminated normally, and otherwise it signals the appropriate 'exception', e.g.
 
 ```
 y: real := pt$claim(x)
@@ -476,27 +434,29 @@ y: real := pt$claim(x)
            when unavailable(s: string): .
            when failure(s: string): . .
     end
-
 ```
+
 Here x is a promise object of type pt; the form pi$claim illustrates the way Argus identifies an operation of a type by concatenating the type name with the operation name. When there are communication problems, RPCs in Argus terminate either with the 'unavailable' exception or the 'failure' exception.
-'Unavailable' -  means that the problem is temporary, e.g., communication is impossible right now.
-'Failure' -  means that the problem is permanent, e.g., the handler’s guardian does not exist.
-Thus stream calls (and sends) whose replies are lost because of broken streams will terminate with one of these exceptions. Both exceptions have a string argument that explains the reason for the failure, e.g., future(“handler does not exist”), or unavailable(“cannot communicate”). Since any call can fail, every handler can raise the exceptions failure and unavailable. In this paper they also talked about propagation of exceptions from the called procedure to the caller. In paper about E language they talk about broken promises and setting a promise to the exception of broken references.
+
+* **Unavailable** means that the problem is temporary e.g. communication is impossible right now.
+* **Failure** means that the problem is permanent e.g. the handler’s guardian does not exist.
+
+Thus stream calls (and sends) whose replies are lost because of broken streams will terminate with one of these exceptions. Both exceptions have a string argument that explains the reason for the failure, e.g., `future("handler does not exist")` or `unavailable("cannot communicate")`. Since any call can fail, every handler can raise the exceptions failure and unavailable. In this paper they also talked about propagation of exceptions from the called procedure to the caller. In the paper about the E language they talk about broken promises and setting a promise to the exception of broken references.
+
+### Modern Languages
 
 In modern languages like Scala, Promises generally come with two callbacks. One to handle the success case and other to handle the failure. e.g.
 
 ```scala
-
 f onComplete {
-   case Success(data) => handleSuccess(data)
-   case Failure(e) => handleFailure(e)
+  case Success(data) => handleSuccess(data)
+  case Failure(e) => handleFailure(e)
 }
 ```
 
-In Scala, the Try type represents a computation that may either result in an exception, or return a successfully computed value. For example, Try[Int] represents a computation which can either result in Int if it's successful, or return a Throwable if something is wrong.
+In Scala, the `Try` type represents a computation that may either result in an exception, or return a successfully computed value. For example, `Try[Int]` represents a computation which can either result in `Int` if it's successful, or return a `Throwable` if something is wrong.
 
 ```scala
-
 val a: Int = 100
 val b: Int = 0
 def divide: Try[Int] = Try(a/b)
@@ -507,128 +467,115 @@ divide match {
   case Failure(e) =>
     println(e) // java.lang.ArithmeticException: / by zero
 }
-
 ```
 
-Try type can be pipelined, allowing for catching exceptions and recovering from them along the way.
+The `Try` type can be pipelined, allowing for catching exceptions and recovering from them along the way.
 
-#### In Javascript
+A similar pattern for handling exceptions can be seen in JavaScript.
+
 ```javascript
-
 promise.then(function (data) {
-    // success callback
-    console.log(data);
+  // success callback
+  console.log(data);
 }, function (error) {
-   // failure callback
-   console.error(error);
+  // failure callback
+  console.error(error);
 });
-
 ```
+
 Scala futures exception handling:
 
-When asynchronous computations throw unhandled exceptions, futures associated with those computations fail. Failed futures store an instance of Throwable instead of the result value. Futures provide the onFailure callback method, which accepts a PartialFunction to be applied to a Throwable. TimeoutException, scala.runtime.NonLocalReturnControl[] and ExecutionException  exceptions are treated differently
+When asynchronous computations throw unhandled exceptions, futures associated with those computations fail. Failed futures store an instance of `Throwable` instead of the result value. Futures provide the onFailure callback method, which accepts a PartialFunction to be applied to a `Throwable`. `TimeoutException`, `scala.runtime.NonLocalReturnControl[]` and `ExecutionException` exceptions are treated differently
 
 Scala promises exception handling:
 
-When failing a promise with an exception, three subtypes of Throwables are handled specially. If the Throwable used to break the promise is a scala.runtime.NonLocalReturnControl, then the promise is completed with the corresponding value. If the Throwable used to break the promise is an instance of Error, InterruptedException, or scala.util.control.ControlThrowable, the Throwable is wrapped as the cause of a new ExecutionException which, in turn, is failing the promise.
+When failing a promise with an exception, three subtypes of `Throwable` are handled specially. If the `Throwable` used to break the promise is a `scala.runtime.NonLocalReturnControl`, then the promise is completed with the corresponding value. If the `Throwable` used to break the promise is an instance of `Error`, `InterruptedException`, or `scala.util.control.ControlThrowable`, the `Throwable` is wrapped as the cause of a new `ExecutionException` which, in turn, is failing the promise.
 
-
-To handle errors with asynchronous methods and callbacks, the error-first callback style ( which we've seen before, also adopted by Node) is the most common convention. Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises allow asynchronous code to apply structured error handling. Promises .then method takes in two callbacks, a onFulfilled to handle when a promise is resolved successfully and a onRejected to handle if the promise is rejected.
+To handle errors with asynchronous methods and callbacks, the error-first callback style (which we've seen before, and has also been adopted by Node.js) is the most common convention. Although this works, but it is not very composable, and eventually takes us back to what is called callback hell. Fortunately, Promises allow asynchronous code to apply structured error handling. The `Promises.then` method takes in two callbacks, a `onFulfilled` to handle when a promise is resolved successfully and a onRejected to handle if the promise is rejected.
 
 ```javascript
-
-var p = new Promise(function(resolve, reject){
+var p = new Promise(function(resolve, reject) {
   resolve(100);
 });
 
-p.then(function(data){
+p.then(function(data) {
   console.log(data); // 100
-},function(error){
+}, function(error) {
   console.err(error);
 });
 
-var q = new Promise(function(resolve, reject){
+var q = new Promise(function(resolve, reject) {
   reject(new Error(
     {'message':'Divide by zero'}
   ));
 });
 
-q.then(function(data){
+q.then(function(data) {
   console.log(data);
-},function(error){
-  console.err(error);// {'message':'Divide by zero'}
+}, function(error) {
+  console.err(error); // {'message':'Divide by zero'}
 });
 
 ```
-
 
 Promises also have a catch method, which work the same way as onFailure callback, but also help deal with errors in a composition. Exceptions in promises behave the same way as they do in a synchronous block of code : they jump to the nearest exception handler.
 
 
 ```javascript
 function work(data) {
-    return Promise.resolve(data+"1");
+  return Promise.resolve(data + "1");
 }
 
 function error(data) {
-    return Promise.reject(data+"2");
+  return Promise.reject(data + "2");
 }
 
 function handleError(error) {
-    return error +"3";
+  return error + "3";
 }
-
 
 work("")
-.then(work)
-.then(error)
-.then(work) // this will be skipped
-.then(work, handleError)
-.then(check);
+  .then(work)
+  .then(error)
+  .then(work) // this will be skipped
+  .then(work, handleError)
+  .then(check);
 
 function check(data) {
-    console.log(data == "1123");
-    return Promise.resolve();
+  console.log(data == "1123");
+  return Promise.resolve();
 }
-
 ```
 
 The same behavior can be written using catch block.
 
 ```javascript
-
 work("")
-.then(work)
-.then(error)
-.then(work)
-.catch(handleError)
-.then(check);
+  .then(work)
+  .then(error)
+  .then(work)
+  .catch(handleError)
+  .then(check);
 
 function check(data) {
-    console.log(data == "1123");
-    return Promise.resolve();
+  console.log(data == "1123");
+  return Promise.resolve();
 }
-
 ```
-
 
 ## Futures and Promises in Action
 
-
 ### Twitter Finagle
 
+Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any other JVM language. It uses Futures to encapsulate concurrent tasks. Finagle introduces two other abstractions built on top of Futures to reason about distributed software:
 
-Finagle is a protocol-agnostic, asynchronous RPC system for the JVM that makes it easy to build robust clients and servers in Java, Scala, or any JVM-hosted language. It uses Futures to encapsulate concurrent tasks. Finagle
-introduces two other abstractions built on top of Futures to reason about distributed software :
-
-- **Services**  are asynchronous functions which represent system boundaries.
+- **Services** are asynchronous functions which represent system boundaries.
 
 - **Filters** are application-independent blocks of logic like handling timeouts and authentication.
 
 In Finagle, operations describe what needs to be done, while the actual execution is left to be handled by the runtime. The runtime comes with a robust implementation of connection pooling, failure detection and recovery and load balancers.
 
-Example of a Service:
-
+An example of a `Service`:
 
 ```scala
 
@@ -636,20 +583,19 @@ val service = new Service[HttpRequest, HttpResponse] {
   def apply(request: HttpRequest) =
     Future(new DefaultHttpResponse(HTTP_1_1, OK))
 }
-
 ```
-A timeout filter can be implemented as :
+
+A timeout filter can be implemented as:
 
 ```scala
-
-def timeoutFilter(d: Duration) =
-  { (req, service) => service(req).within(d) }
-
+def timeoutFilter(d: Duration) = { 
+  (req, service) => service(req).within(d)
+}
 ```
 
-
 ### Correctables
-Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adrian Seredinschi at OSDI ‘16, in a paper titled Incremental Consistency Guarantees for Replicated Objects. As the title suggests, Correctables aim to solve the problems with consistency in  replicated objects. They provide incremental consistency guarantees by capturing successive changes to the value of a replicated object. Applications can opt to receive a fast but possibly inconsistent result if eventual consistency is acceptable, or to wait for a strongly consistent result. Correctables API draws inspiration from, and builds on the API of Promises.  Promises have a two state model to represent an asynchronous task, it starts in blocked state and proceeds to a ready state when the value is available. This cannot represent the incremental nature of correctables. Instead, Correctables have a updating state when it starts. From there on, it remains in updating state during intermediate updates, and when the final result is available, it transitions to final state. If an error occurs in between, it moves into an error state. Each state change triggers a callback.
+
+Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adrian Seredinschi at OSDI ‘16, in a paper titled Incremental Consistency Guarantees for Replicated Objects. As the title suggests, Correctables aim to solve the problems with consistency in replicated objects. They provide incremental consistency guarantees by capturing successive changes to the value of a replicated object. Applications can opt to receive a fast but possibly inconsistent result if eventual consistency is acceptable, or to wait for a strongly consistent result. Correctables API draws inspiration from, and builds on the API of Promises. Promises have a two state model to represent an asynchronous task, it starts in blocked state and proceeds to a ready state when the value is available. This cannot represent the incremental nature of correctables. Instead, Correctables have a updating state when they start. From there on, they remain in an updating state during intermediate updates, and when the final result is available, they transition to final state. If an error occurs in between, they move into an error state. Each state change triggers a callback.
 
 <figure>
   <img src="./images/15.png" alt="timeline" />
@@ -657,12 +603,12 @@ Correctables were introduced by Rachid Guerraoui, Matej Pavlovic, and Dragos-Adr
 
 
 ### Folly Futures
+
 Folly is a library by Facebook for asynchronous C++ inspired by the implementation of Futures by Twitter for Scala. It builds upon the Futures in the C++11 Standard. Like Scala’s futures, they also allow for implementing a custom executor which provides different ways of running a Future (thread pool, event loop etc).
 
+### Node.js Fibers
 
-### NodeJS Fiber
-Fibers provide coroutine support for v8 and node. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for NodeJs where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
-
+Fibers provide coroutine support for V8 and Node.js. Applications can use Fibers to allow users to write code without using a ton of callbacks, without sacrificing the performance benefits of asynchronous IO.  Think of fibers as light-weight threads for Node.js where the scheduling is in the hands of the programmer. The node-fibers library doesn’t recommend using raw API and code together without any abstractions, and provides a Futures implementation which is ‘fiber-aware’.
 
 ## References
 
