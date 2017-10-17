@@ -3,7 +3,6 @@ layout: page
 title:  "Formal, Yet Relaxed: Models for Consistency"
 by: "James Larisch"
 ---
-# Formal, Yet Relaxed: Models for Consistency
 
 ## What's the problem?
 In many ways, web developers deal with distributed systems problems every day: your client and your server are in two different geographical locations, and thus, some coordination between computers is required.
