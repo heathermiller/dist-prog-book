@@ -265,7 +265,7 @@ In a general RPC mechanism, the client initiates a connection to the server and 
 gRPC multiplexes the requests over a single connection using header compression. This makes it possible for gRPC to be used for mobile clients where battery life and data usage are important.
 The core library is in C -- except for Java and Go -- and surface APIs are implemented for all the other languages connecting through it {% cite CoreSurfaceAPIs --file rpc %}.
 
-Since Protocol Buffers have been utilized by many individuals and companies, gRPC makes it natural to extend their RPC ecosystems via gRPC. Companies like Cisco, Juniper, and Netflix {% cite gRPCCompanies --file rpc %} have found it practical to adopt it. A majority of the Google Public APIs, like their places and maps APIs, have been ported to gRPC ProtoBuf {% cite gRPCProtos --file rpc %} as well.
+Since Protocol Buffers have been utilized by many individuals and companies, gRPC makes it natural to extend their RPC ecosystems via gRPC. Companies like Cisco, Juniper, and Netflix {% cite gRPCCompanies --file rpc %} have found it practical to adopt. A majority of the Google Public APIs, like their places and maps APIs, have been ported to gRPC ProtoBuf {% cite gRPCProtos --file rpc %} as well.
 
 More details about gRPC and bi-directional streaming can be found in our gRPC chapter {% cite grpcchapter --file rpc %}
 
