@@ -356,7 +356,7 @@ An example of a microservices ecosystem that uses futures/promises is Finagle {%
 
 ## Security in RPC
 
-The initial RPC implementation {% cite implementingrpc --file rpc %} was developed for an isolated LAN network and didn't focus much on security. There're various attack surfaces in that model, from the malicious registry to a malicious server, to a client targeting for Denial-of-Service to Man-in-the-Middle attack between client and server.
+The initial RPC implementation {% cite implementingrpc --file rpc %} was developed for an isolated LAN network and didn't focus much on security. There are various attack surfaces in that model, from the malicious registry to a malicious server, to a client targeting for Denial-of-Service to Man-in-the-Middle attack between client and server.
 
 As time progressed and internet evolved, new standards came along, and RPC implementations became much more secure. Security, in RPC, is generally added as a *module* or a *package*. These modules have libraries for authentication and authorization of the communication services (caller and callee). These modules are not always bug-free and it's possible to gain unauthorized access to the system. Efforts are being made to rectify these situations by the security in general, using code inspection and bug bounty programs to catch these bugs beforehand. However, with time new bugs arise and this cycle continues. It's a vicious cycle between attackers and security experts, both of whom tries to outdo their opponent.
 
