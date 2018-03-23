@@ -256,7 +256,7 @@ The MAUI project {% cite maui --file rpc %}, developed by Microsoft is a computa
 
 #### gRPC
 
-gRPC is a multiplexed, bi-directional streaming RPC protocol developed Google and Square. The IDL for gRPC is Protocol Buffers (also referred as ProtoBuf) and is meant as a public replacement fro Stubby, ARCWire, and Sake {% cite Apigee --file rpc %}. More details on Protocol Buffers, Stubby, ARCWire, and Sake are available in our gRPC chapter {% cite grpcchapter --file rpc %}.
+gRPC is a multiplexed, bi-directional streaming RPC protocol developed by Google and Square. The IDL for gRPC is Protocol Buffers (also referred as ProtoBuf) and is meant as a public replacement fro Stubby, ARCWire, and Sake {% cite Apigee --file rpc %}. More details on Protocol Buffers, Stubby, ARCWire, and Sake are available in our gRPC chapter {% cite grpcchapter --file rpc %}.
 
 gRPC provides a platform for scalable, bi-directional streaming using both synchronized and asynchronous communication.
 
