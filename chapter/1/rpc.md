@@ -340,7 +340,7 @@ The Microsoft's MAUI Project {% cite maui --file rpc %} uses RPC communication a
 
 #### Async RPC, Futures and Promises
 
-Remote Procedure Calls can be asynchronous. Not only that but these async RPCs play in integral role in the *futures* and *promises*. *Futures* and *promises* are programming constructs that where a *future* is seen as variable/data/return type/error while a *promise* is seen as a *future* that doesn't have a value, yet. We follow Finagle's {% cite finagle --file rpc %} definition of *futures* and *promises*, where the *promise* of a *future* (an empty *future*) is considered as a *request* while the async fulfillment of this *promise* by a *future* is seen as the *response*. This construct is primarily used for asynchronous programming.
+Remote Procedure Calls can be asynchronous. Not only that but these async RPCs play an integral role in the *futures* and *promises*. *Futures* and *promises* are programming constructs that where a *future* is seen as variable/data/return type/error while a *promise* is seen as a *future* that doesn't have a value, yet. We follow Finagle's {% cite finagle --file rpc %} definition of *futures* and *promises*, where the *promise* of a *future* (an empty *future*) is considered as a *request* while the async fulfillment of this *promise* by a *future* is seen as the *response*. This construct is primarily used for asynchronous programming.
 
 Perhaps the most renowned systems using this type of RPC model are Twitter's Finagle {% cite finagle --file rpc %} and Cap'n Proto {% cite capnprotosecure --file rpc %}.
 
