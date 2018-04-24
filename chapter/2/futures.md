@@ -38,7 +38,7 @@ Or said another way, it is an abstraction which encodes a notion of time. By cho
 
 As we'll later see, other states have been introduced in some variations of futures/promises to better support needs like error-handling and cancellation.
 
-Importantly, futures/promises typically enable some degree of concurrency. That is, in one of first defitions of futures:
+Importantly, futures/promises typically enable some degree of concurrency. That is, in one of first definitions of futures:
 
 <blockquote>
   <p>The construct <code>( future X )</code> immediately returns a future for the value of the expression <code>X</code> and <strong>concurrently</strong> begins evaluating <code>X</code>. When the evaluation of <code>X</code> yields a value, that value replaces the future.</p>
