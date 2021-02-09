@@ -12,7 +12,7 @@ the programmer uses to build these systems.
 
 _**Please note that this is a work in progress, the book contents are in this repo, but we have not yet polished everything and published the final book online. Expected release: end of December**_
 
-_Note: the chapters can be viewed by manually going to `http://dist-prog-book.com/chapter/x/article-name.html`, e.g., http://dist-prog-book.com/chapter/2/futures.html. One we finish off the chapters that need the most work, we will "release" the book by putting a proper index page in place._
+_Note: the chapters can be viewed by manually going to `http://dist-prog-book.com/chapter/x/article-name.html`, e.g., http://dist-prog-book.com/chapter/2/futures.html. Once we finish off the chapters that need the most work, we will "release" the book by putting a proper index page in place._
 
 _Note: we are currently in talks with a major publisher to publish this book as open-access textbook! Keep your fingers crossed!🤞_
 
